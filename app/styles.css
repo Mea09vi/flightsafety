@@ -689,3 +689,213 @@ body.briefing main { max-width: none; padding: 0; }
 
 /* จอแคบมาก: ซ่อนเวอร์ชันข้อมูลในหัวแอป (ยังดูได้ที่หน้า ข้อมูล) */
 @media (max-width: 400px) { .net .ver { display: none; } }
+
+/* ── หน้าเข้าสู่ระบบ (login.js) ─────────────────────────────────
+   DECISIONS.md หัวข้อ "หน้าเข้าสู่ระบบ": ธีมกลางคืนเสมอ ฉากนี้ยกเว้นกฎห้ามแสงเรือง
+   ทุก class ขึ้นต้น g- และอยู่ใต้ .gate จะได้ไม่ชนกับหน้าอื่นของแอป */
+:root { --app-bg: var(--bg); } /* พื้นของแอปตามธีมที่เลือก ให้วาบตอนปลดล็อกจบที่สีเดียวกับแอป */
+body.gated { overflow: hidden; background: #060a13; }
+/* ซ่อนแอปข้างหลังทั้งจากสายตา การกด Tab และโปรแกรมอ่านหน้าจอ */
+body.gated > :not(.gate) { visibility: hidden; }
+.gate {
+  --bg: #060a13;
+  --surface: #0d1528;
+  --line: rgb(150 180 230 / .12);
+  --line2: rgb(150 180 230 / .22);
+  --text: #e9eef8;
+  --text2: #b5c1d6;
+  --muted: #8794ad; /* สว่างกว่าของแอปเล็กน้อย ตัวอักษรเล็กบนการ์ดกระจกยังผ่าน 4.5:1 */
+  --sky: #6cc9ff;
+  --gold: #f2c66d;
+  --ok: #5fd39a;
+  --bad: #ff7a85;
+  --on-pri: #1b1300;
+  --g-bar: 32px; /* ต้องตรงกับ BAR_H ใน login.js */
+  color-scheme: dark;
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--bg); color: var(--text);
+  font: 400 15px/1.6 var(--f-b);
+  -webkit-font-smoothing: antialiased;
+  transition: opacity .45s var(--ease);
+}
+.gate.out { opacity: 0; pointer-events: none; }
+.g-scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* แถบชั้นความลับ */
+.g-cls {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  height: var(--g-bar);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 0 16px;
+  background: rgb(6 10 19 / .82);
+  border-bottom: 1px solid rgb(242 198 109 / .35);
+  color: var(--gold);
+  font-size: 12.5px; letter-spacing: .01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.g-cls b { font-weight: 600; }
+.g-cls span { color: var(--text2); overflow: hidden; text-overflow: ellipsis; }
+
+/* การ์ดกระจก */
+.g-stage {
+  position: absolute; inset: var(--g-bar) 0 0 0; z-index: 4;
+  display: flex; align-items: center;
+  padding: 24px 24px 24px max(6vw, 40px);
+  pointer-events: none;
+}
+.g-box {
+  pointer-events: auto;
+  position: relative;
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 28px 28px 22px;
+  background: rgb(13 21 40 / .86);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgb(150 180 230 / .26);
+  border-radius: var(--r-l);
+  /* เส้นสว่างบาง ๆ ที่ขอบบนด้านใน ให้การ์ดดูเป็นกระจกมีความหนา */
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .07), 0 1px 0 rgb(0 0 0 / .4), 0 30px 70px -28px rgb(0 0 0 / .8);
+  animation: g-rise .7s var(--ease) both;
+}
+@keyframes g-rise { from { opacity: 0; transform: translateY(14px); } }
+
+.g-cover { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.g-cover img { width: 40px; height: 40px; border-radius: 9px; display: block; }
+.g-who { line-height: 1.3; }
+.g-who b { display: block; font: 600 15px/1.3 var(--f-d); color: var(--text); }
+.g-who small { color: var(--muted); font-size: 12.5px; }
+
+.g-kick { margin: 0 0 6px; color: var(--sky); font-size: 13px; font-weight: 500; }
+.gate h1 { margin: 0; font: 600 34px/1.22 var(--f-d); letter-spacing: -.005em; }
+.gate h1 span { color: var(--gold); display: block; }
+.g-sub {
+  margin: 10px 0 20px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text2); font-size: 14.5px; line-height: 1.65;
+}
+
+.g-lbl { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: var(--text2); }
+.g-lbl small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+.g-pw { position: relative; }
+.g-pw input {
+  width: 100%; height: 54px;
+  padding: 0 56px 0 16px;
+  background: rgb(6 10 19 / .7);
+  border: 1px solid var(--line2); border-radius: var(--r);
+  font-size: 17px; letter-spacing: .04em;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.g-pw input::placeholder { color: var(--muted); letter-spacing: 0; font-size: 15px; }
+.g-pw input:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgb(108 201 255 / .18); }
+.g-pw input:disabled { opacity: .7; }
+.gate.err .g-pw input { border-color: var(--bad); box-shadow: 0 0 0 3px rgb(255 122 133 / .18); }
+.g-eye {
+  position: absolute; right: 3px; top: 3px;
+  width: 48px; height: 48px;
+  display: grid; place-items: center;
+  background: none; border: 0; border-radius: 6px; color: var(--muted);
+}
+.g-eye:hover, .g-eye:focus-visible { color: var(--text); background: rgb(150 180 230 / .08); outline: none; }
+.g-eye svg { width: 20px; height: 20px; }
+
+.g-rem {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 48px; margin: 4px 0 6px;
+  font-size: 14px; color: var(--text2); cursor: pointer;
+}
+.g-rem input { width: 20px; height: 20px; margin: 0; accent-color: var(--sky); }
+.g-rem small { color: var(--muted); font-size: 12.5px; }
+
+.g-go {
+  width: 100%; min-height: 56px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--gold); color: var(--on-pri);
+  border: 0; border-radius: var(--r);
+  font: 600 17px/1 var(--f-d);
+  transition: transform .15s var(--ease), filter .15s;
+}
+.g-go:hover { filter: brightness(1.06); }
+.g-go:active { transform: translateY(1px); }
+.g-go:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.g-go[disabled] { cursor: progress; filter: saturate(.7) brightness(.92); }
+.g-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgb(27 19 0 / .25); border-top-color: var(--on-pri); animation: g-sp .7s linear infinite; display: none; }
+.g-go.busy .g-spin { display: block; }
+@keyframes g-sp { to { transform: rotate(360deg); } }
+
+.g-msg { min-height: 24px; margin: 8px 0 0; font-size: 14px; color: var(--muted); }
+.g-msg.bad { color: var(--bad); }
+.g-msg.ok { color: var(--ok); }
+
+.g-skip {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 48px; margin-top: 2px;
+  color: var(--sky); text-decoration: none; font-size: 14.5px; font-weight: 500;
+  border-radius: var(--r);
+}
+.g-skip:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.g-foot {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 14px;
+  margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.g-foot dt { color: var(--muted); }
+.g-foot dd { margin: 0; color: var(--text2); }
+.g-m { font-family: var(--f-m); font-size: 12px; }
+
+/* รหัสผิด: การ์ดสั่น + ขอบจอแดง 900ms */
+.g-box.shake { animation: g-shake .5s cubic-bezier(.36, .07, .19, .97) both; }
+@keyframes g-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+.g-edge { position: absolute; inset: 0; z-index: 6; pointer-events: none; border: 2px solid var(--bad); opacity: 0; transition: opacity .25s; }
+.gate.err .g-edge { opacity: 1; }
+
+/* ปลดล็อกสำเร็จ: แสงฟ้าอ่อนแทนวาบขาว ไม่แสบตาตอนบรีฟกลางคืน แล้วจางเป็นพื้นของแอป */
+.g-flash { position: absolute; inset: 0; z-index: 7; pointer-events: none; opacity: 0; }
+.gate.flash .g-flash { animation: g-flash .95s var(--ease) forwards; }
+@keyframes g-flash {
+  0% { opacity: 0; background: #9fd8ff; }
+  20% { opacity: .28; background: #9fd8ff; }
+  100% { opacity: 1; background: var(--app-bg); }
+}
+
+/* จอแคบ: ฉากอยู่บน การ์ดอยู่ล่าง */
+@media (max-width: 899px) {
+  .g-stage { align-items: flex-end; justify-content: center; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); }
+  .g-box { width: min(480px, 100%); padding: 22px 20px 16px; }
+  .gate h1 { font-size: 28px; }
+  .gate h1 span { display: inline; }
+}
+@media (max-width: 899px) and (max-height: 860px) {
+  .g-cover { margin-bottom: 12px; }
+  .g-cover img { width: 32px; height: 32px; border-radius: 7px; }
+  .g-sub { display: none; }
+  .gate h1 { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .g-msg { margin-top: 4px; min-height: 22px; }
+  .g-foot { grid-template-columns: 1fr; }
+  .g-foot dt, .g-foot dd:nth-of-type(2) { display: none; }
+}
+@media (max-width: 899px) and (max-height: 700px) {
+  .g-who small, .g-kick { display: none; }
+}
+/* โน้ตบุ๊ก 1366×768 ที่ใช้กันในหน่วย: ตัดคำอธิบายออก ให้การ์ดพอดีจอไม่ต้องเลื่อน */
+@media (min-width: 900px) and (max-height: 820px) {
+  .g-stage { padding-top: 16px; padding-bottom: 16px; }
+  .g-cover { margin-bottom: 14px; }
+  .g-sub { display: none; }
+  .gate h1 { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 420px) {
+  .g-cls span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .g-box, .g-box.shake { animation: none; }
+  .gate.flash .g-flash { animation: none; opacity: 1; background: var(--app-bg); }
+}

@@ -13,6 +13,12 @@ const LS = {
   set(k, v) { try { localStorage.setItem('w2sb.' + k, JSON.stringify(v)); } catch { /* private mode */ } },
   del(k) { try { localStorage.removeItem('w2sb.' + k); } catch { /* private mode */ } },
 };
+// อยู่แค่ในแท็บนี้ ปิดแท็บแล้วหาย: กุญแจตอนไม่ติ๊ก "จำไว้ในเครื่องนี้" และการเลือกดูเฉพาะเคสสากล
+const SS = {
+  get(k, d) { try { const v = sessionStorage.getItem('w2sb.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { sessionStorage.setItem('w2sb.' + k, JSON.stringify(v)); } catch { /* private mode */ } },
+  del(k) { try { sessionStorage.removeItem('w2sb.' + k); } catch { /* private mode */ } },
+};
 
 // ป้ายประเภท [คำ, สีจุด] — อุบัติเหตุ = แดง, อุบัติการณ์ = ส้ม (DECISIONS.md หัวข้อ "หน้าตาแอป")
 const TYPE = {
@@ -82,13 +88,13 @@ async function loadUnit() {
     if (!r.ok) { state.unitStatus = 'missing'; return; }
     unitEnc = await r.json();
   } catch { state.unitStatus = 'missing'; return; }
-  const raw = LS.get('key', null);
+  const raw = LS.get('key', null) || SS.get('key', null);
   if (raw) {
     try {
       const key = await crypto.subtle.importKey('raw', b64.dec(raw), 'AES-GCM', false, ['decrypt']);
       await decryptUnit(key);
       return;
-    } catch { LS.del('key'); }
+    } catch { LS.del('key'); SS.del('key'); }
   }
   state.unitStatus = 'locked';
 }
@@ -108,11 +114,33 @@ async function decryptUnit(key) {
   state.unitStatus = 'unlocked';
 }
 
-// เก็บกุญแจที่ derive แล้ว ไม่เก็บรหัสผ่าน
-async function unlock(pass) {
+// เก็บกุญแจที่ derive แล้ว ไม่เก็บรหัสผ่าน · remember = false เก็บไว้แค่ในแท็บนี้
+async function unlock(pass, remember = true) {
   const key = await deriveKey(pass);
   await decryptUnit(key);
-  LS.set('key', b64.enc(await crypto.subtle.exportKey('raw', key)));
+  const raw = b64.enc(await crypto.subtle.exportKey('raw', key));
+  if (remember) { LS.set('key', raw); SS.del('key'); } else { SS.set('key', raw); LS.del('key'); }
+}
+
+// หน้าเข้าสู่ระบบเต็มจอ (login.js โหลดเฉพาะตอนต้องใช้) — DECISIONS.md หัวข้อ "หน้าเข้าสู่ระบบ"
+async function showGate() {
+  document.body.classList.add('gated');
+  $('meta[name="theme-color"]').content = '#060a13';
+  try {
+    const { openGate } = await import('./login.js');
+    openGate({
+      iter: unitEnc.iter,
+      unlock: async (pass, remember) => { try { await unlock(pass, remember); return true; } catch { return false; } },
+      onEnter: route,
+      onSkip: () => SS.set('gateSkip', true),
+      onClose: () => { applyTheme(LS.get('theme', 'night')); main.focus({ preventScroll: true }); },
+    });
+  } catch (err) {
+    // โหลดหน้าเข้าสู่ระบบไม่ได้ ยังปลดล็อกได้ที่หน้า ข้อมูล เหมือนเดิม
+    console.warn('gate', err);
+    document.body.classList.remove('gated');
+    applyTheme(LS.get('theme', 'night'));
+  }
 }
 
 const allCases = () => [...state.unit, ...state.intl];
@@ -1081,6 +1109,7 @@ main.addEventListener('click', (e) => {
     }
     case 'forget':
       LS.del('key');
+      SS.del('key');
       state.unit = [];
       state.unitStatus = unitEnc ? 'locked' : 'missing';
       viewAbout();
@@ -1114,6 +1143,7 @@ async function boot() {
   await loadUnit();
   updateNet();
   route();
+  if (state.unitStatus === 'locked' && !SS.get('gateSkip', false)) await showGate();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err));
