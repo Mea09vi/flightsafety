@@ -1,0 +1,11 @@
+﻿code,label
+PREFLIGHT,ตรวจก่อนบิน / start-up
+TAXI,Taxi / hover taxi
+TAKEOFF,วิ่งขึ้น
+ENROUTE,บินเดินทาง
+APPROACH,Approach
+LANDING,ลงสนาม
+HOVER,Hover / hoist / sling ops
+AUTOROTATION,Autorotation / emergency procedure training
+SHUTDOWN,ดับเครื่อง / หลังบิน
+GROUND,ภาคพื้น / ซ่อมบำรุง

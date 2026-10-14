@@ -1,0 +1,19 @@
+# เอกสารต้นฉบับ (เก็บไว้อ้างอิงในเครื่อง ไม่ขึ้น GitHub)
+*.pdf
+
+# ข้อมูลหน่วยแบบไม่เข้ารหัส — ห้ามเข้า repo (dev server เสิร์ฟจากนอก repo อยู่แล้ว กันไว้อีกชั้น)
+app/data/unit.dev.json
+unit_cases*.json
+
+# ไฟล์ตรวจเคสของ FSO (หมายเหตุอาจอ้างถึงหน่วย) และสำเนาสำรอง seed
+review/
+
+# ค่าตั้งของเครื่อง FSO (มี path ไปยังข้อมูลดิบนอก repo)
+.claude/
+
+# ไฟล์ชั่วคราวของ Python / ระบบ
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- ADI: ท้องฟ้า/พื้นดินเอียงเล็กน้อย, สัญลักษณ์เครื่องบินสีเหลืองอำพัน — อยู่ใน safe zone 80% สำหรับ maskable -->
+  <rect width="512" height="512" fill="#05080b"/>
+  <defs>
+    <clipPath id="c"><circle cx="256" cy="256" r="168"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)" transform="rotate(-8 256 256)">
+    <rect x="40" y="40" width="432" height="216" fill="#0d3a4f"/>
+    <rect x="40" y="256" width="432" height="216" fill="#3a2a17"/>
+    <path d="M40 256h432" stroke="#e8eef3" stroke-width="6"/>
+    <g stroke="#e8eef3" stroke-width="4" stroke-linecap="round" opacity=".7">
+      <path d="M226 216h60M236 176h40M226 296h60M236 336h40"/>
+    </g>
+  </g>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#22d3ee" stroke-width="10"/>
+  <path d="M150 262h62l44 34 44-34h62" fill="none" stroke="#fbbf24" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="262" r="9" fill="#fbbf24"/>
+</svg>

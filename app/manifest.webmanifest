@@ -1,0 +1,16 @@
+{
+  "name": "W2 Safety Brief — บทเรียนนิรภัย บน.2",
+  "short_name": "W2 Brief",
+  "description": "บทเรียนจากอุบัติเหตุ อุบัติการณ์ และ hazard สำหรับ preflight brief",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05080b",
+  "theme_color": "#05080b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,12 @@
+﻿code,label
+DAY_VMC,กลางวัน อากาศดี
+NIGHT,กลางคืน (ไม่ใช้ NVG)
+NVG,กลางคืน ใช้ NVG
+RAIN_TS,ฝน / พายุฝนฟ้าคะนอง
+LOW_VIS,หมอก / ทัศนวิสัยต่ำ / เมฆต่ำ
+HAZE,หมอกควัน / ฝุ่น PM (ฤดูไฟป่า)
+BROWNOUT,Brownout / ฝุ่นจากลงพื้น
+WIND,ลมแรง / ลมกระโชก / turbulence
+HOT_HIGH,ร้อนจัด / high DA
+OVERWATER,บินเหนือน้ำ
+MOUNTAIN,ภูเขา / ภูมิประเทศสูง

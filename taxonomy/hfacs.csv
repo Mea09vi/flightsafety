@@ -1,0 +1,120 @@
+﻿code,label,level,category,tier
+AD000,Known Deviations,category,AD000,Unsafe Acts
+AD001,Performed Known Deviation (Work-Around),nanocode,AD000,Unsafe Acts
+AD002,Commits Routine/Widespread Known Deviation (Normalization of Deviance),nanocode,AD000,Unsafe Acts
+AD003,Extreme Lack of Discipline (Indiscipline),nanocode,AD000,Unsafe Acts
+AE100,Performance/Skill Based Errors,category,AE100,Unsafe Acts
+AE101,Unintended Activation or Deactivation,nanocode,AE100,Unsafe Acts
+AE102,Procedure or Checklist Not Followed Correctly,nanocode,AE100,Unsafe Acts
+AE104,Over-Controlled/Under-Controlled Aircraft/Vehicle/Vessel or System,nanocode,AE100,Unsafe Acts
+AE105,Breakdown in Visual Scan or Instrument Cross-check,nanocode,AE100,Unsafe Acts
+AE107,Rushed or Delayed a Necessary Action,nanocode,AE100,Unsafe Acts
+AE108,Misinterpreted/Misread Instrument,nanocode,AE100,Unsafe Acts
+AE200,Judgment and Decision-Making Errors,category,AE200,Unsafe Acts
+AE201,Inadequate Real-Time Risk Assessment/Action,nanocode,AE200,Unsafe Acts
+AE202,Ineffective Task Prioritization,nanocode,AE200,Unsafe Acts
+AE205,Ignored a Caution/Warning,nanocode,AE200,Unsafe Acts
+AE207,Misjudged/Misperceived Changing Environment,nanocode,AE200,Unsafe Acts
+PC100,Mental Awareness Conditions,category,PC100,Preconditions
+PC101,Inattention,nanocode,PC100,Preconditions
+PC102,Fixation (Channelized Attention),nanocode,PC100,Preconditions
+PC103,Task Saturation,nanocode,PC100,Preconditions
+PC104,Confusion,nanocode,PC100,Preconditions
+PC105,Negative Habit Transfer,nanocode,PC100,Preconditions
+PC106,Distraction/Interruption,nanocode,PC100,Preconditions
+PC107,Geographically Lost,nanocode,PC100,Preconditions
+PC110,Change Blindness/Inaccurate Expectation,nanocode,PC100,Preconditions
+PC200,State of Mind Conditions,category,PC200,Preconditions
+PC202,Psychological Disorder,nanocode,PC200,Preconditions
+PC203,Life Stressors/Emotional State,nanocode,PC200,Preconditions
+PC205,Personality Style,nanocode,PC200,Preconditions
+PC206,Overconfidence,nanocode,PC200,Preconditions
+PC209,"Pressing, Haste, Motivation",nanocode,PC200,Preconditions
+PC300,Adverse Physiological Conditions,category,PC300,Preconditions
+PC301,Effects of Gravitational Forces (G-LOC),nanocode,PC300,Preconditions
+PC302,"Substance Effects (supplements, medications, drugs, alcohol)",nanocode,PC300,Preconditions
+PC304,Loss of Consciousness (sudden or prolonged onset),nanocode,PC300,Preconditions
+PC305,Physical Illness/Injury,nanocode,PC300,Preconditions
+PC306,Physical Overexertion,nanocode,PC300,Preconditions
+PC307,Fatigue,nanocode,PC300,Preconditions
+PC310,Acute Trapped Gas Disorders,nanocode,PC300,Preconditions
+PC311,Decompression Sickness (Evolved Gas Disorder),nanocode,PC300,Preconditions
+PC312,Respiratory Physiological Event,nanocode,PC300,Preconditions
+PC314,Inadequate Adaptation to Darkness,nanocode,PC300,Preconditions
+PC317,Anthropometric/Biomechanical Limitations,nanocode,PC300,Preconditions
+PC319,Nutrition/Diet,nanocode,PC300,Preconditions
+PC320,Loss of Capacity (Surprise/Startle Response),nanocode,PC300,Preconditions
+PC321,Spatial Disorientation,nanocode,PC300,Preconditions
+PE100,Physical Environment,category,PE100,Preconditions
+PE101,Environmental Conditions Affected Vision,nanocode,PE100,Preconditions
+PE103,Vibration Affected Performance,nanocode,PE100,Preconditions
+PE106,Temperature Affected Performance,nanocode,PE100,Preconditions
+PE108,External Force or Object Impeded Performance,nanocode,PE100,Preconditions
+PE109,External Lighting of Vehicle/Aircraft/Vessel/Object Affected Vision,nanocode,PE100,Preconditions
+PE110,Noise Interference,nanocode,PE100,Preconditions
+PE112,Terrain Feature Affected Performance,nanocode,PE100,Preconditions
+PE113,Animal or Non-DoD affiliated Human,nanocode,PE100,Preconditions
+PE200,Technological Environment,category,PE200,Preconditions
+PE201,Restraint System and/or Seat Problems,nanocode,PE200,Preconditions
+PE202,Instrumentation and Warning System Issues,nanocode,PE200,Preconditions
+PE203,Workspace Visibility Restrictions (not weather related),nanocode,PE200,Preconditions
+PE204,Controls and/or Switches,nanocode,PE200,Preconditions
+PE205,Automated System Created a Hazardous Condition,nanocode,PE200,Preconditions
+PE206,Workspace Limitations Affected Performance,nanocode,PE200,Preconditions
+PE207,Personal Equipment Interference,nanocode,PE200,Preconditions
+PE208,Communication Equipment Ineffective,nanocode,PE200,Preconditions
+PP100,Team Coordination/Communication Condition,category,PP100,Preconditions
+PP101,"Ineffective Team Resource Management (Crew, Bridge, Fighter, Maintenance, etc.)",nanocode,PP100,Preconditions
+PP109,Task/Mission Planning and/or Briefing Inadequate,nanocode,PP100,Preconditions
+PP111,Task/Mission-In-Progress Re-Planning,nanocode,PP100,Preconditions
+PT100,Training Conditions,category,PT100,Preconditions
+PT101,Untrained Operator/Worker,nanocode,PT100,Preconditions
+PT102,Knowledge Retention,nanocode,PT100,Preconditions
+PT103,Lack of Currency,nanocode,PT100,Preconditions
+PT104,Lack of Proficiency/Experience,nanocode,PT100,Preconditions
+PT105,Lack of Job/Work Related Safety Training,nanocode,PT100,Preconditions
+SC100,Ineffective Unit Safety Culture,category,SC100,Supervision/Leadership
+SC101,Unit Safety Culture,nanocode,SC100,Supervision/Leadership
+SC102,Pace of OPTEMPO/Workload,nanocode,SC100,Supervision/Leadership
+SD000,Supervisory Known Deviation,category,SD000,Supervision/Leadership
+SD001,Failure to Enforce Published Rules/Guidance,nanocode,SD000,Supervision/Leadership
+SD002,Allowed Unwritten Practices to Become Standard (Normalization of Deviance),nanocode,SD000,Supervision/Leadership
+SD003,"Directed Individual to Circumvent Existing Regulations, Rules, or Procedures",nanocode,SD000,Supervision/Leadership
+SI000,Ineffective Supervision,category,SI000,Supervision/Leadership
+SI001,Ineffective Supervisory or Command Oversight,nanocode,SI000,Supervision/Leadership
+SI003,Failed to Provide Effective Training,nanocode,SI000,Supervision/Leadership
+SI004,Failed to Provide Clear Written Procedure/Guidance/Policy,nanocode,SI000,Supervision/Leadership
+SI006,Lack of Supervisory Responses to Critical Information,nanocode,SI000,Supervision/Leadership
+SI007,"Failed to Identify or Correct Hazardous Practices, Conditions or Guidance",nanocode,SI000,Supervision/Leadership
+SI008,"Tasked Individual(s) with Lack of Experience, Currency or Proficiency",nanocode,SI000,Supervision/Leadership
+SI009,Rank/Position Intimidation,nanocode,SI000,Supervision/Leadership
+SP000,Ineffective Planning and Coordination,category,SP000,Supervision/Leadership
+SP006,Ineffective Deliberate Risk Assessment,nanocode,SP000,Supervision/Leadership
+SP007,Authorized Unnecessary Risk,nanocode,SP000,Supervision/Leadership
+SP008,Ineffective Pre-Mission Planning,nanocode,SP000,Supervision/Leadership
+SP009,Unit Failure to Provide Sufficient Operational Information Resources,nanocode,SP000,Supervision/Leadership
+SP010,Unit Failure to Provide Sufficient Manning/Staffing,nanocode,SP000,Supervision/Leadership
+SP011,Unit Failure to Provide Sufficient Equipment or Supplies,nanocode,SP000,Supervision/Leadership
+OC000,Organizational Climate/Culture,category,OC000,Organizational Influences
+OC001,Organizational Culture (attitude/actions) Created Increased Risk,nanocode,OC000,Organizational Influences
+OC003,Organizational Perceptions of Materiel Resources (Equipment),nanocode,OC000,Organizational Influences
+OC004,Mission/Aircraft/Vehicle/Ship/Equipment Change or Unit Deactivation,nanocode,OC000,Organizational Influences
+OC005,Organizational Structure is Unclear or Inadequate,nanocode,OC000,Organizational Influences
+OP000,"Organizational Policy, Procedures, or Process Issues",category,OP000,Organizational Influences
+OP001,OPTEMPO/Workload,nanocode,OP000,Organizational Influences
+OP002,Organizational Program or Operation not Adequately Assessed,nanocode,OP000,Organizational Influences
+OP003,"Provided Unclear, Impractical, or Inadequate Policy, Procedural Guidance or Publications",nanocode,OP000,Organizational Influences
+OP005,Flawed Doctrine/Philosophy,nanocode,OP000,Organizational Influences
+OP006,Inadequate Program Management/Governance,nanocode,OP000,Organizational Influences
+OR000,Resource Support Problems,category,OR000,Organizational Influences
+OR001,Command and Control (C2) Resources are Deficient,nanocode,OR000,Organizational Influences
+OR003,Inadequate Infrastructure,nanocode,OR000,Organizational Influences
+OR004,Purchasing or Providing Poorly Designed or Unsuitable Equipment,nanocode,OR000,Organizational Influences
+OR005,Failure to Remove Inadequate/Worn-Out Equipment in a Timely Manner,nanocode,OR000,Organizational Influences
+OR006,Personnel Accession/Selection Policies or Processes,nanocode,OR000,Organizational Influences
+OR007,Failure to Provide Adequate Personnel/Staffing Resources,nanocode,OR000,Organizational Influences
+OR008,Failure to Provide Adequate Information Resources,nanocode,OR000,Organizational Influences
+OR009,Failure to Provide Adequate Funding,nanocode,OR000,Organizational Influences
+OT000,Training Programs,category,OT000,Organizational Influences
+OT001,Resident Formal School Training Program is Ineffective or Unavailable,nanocode,OT000,Organizational Influences
+OT002,Distance Learning Training is Ineffective or Unavailable,nanocode,OT000,Organizational Influences

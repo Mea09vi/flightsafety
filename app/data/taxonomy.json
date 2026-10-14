@@ -1,0 +1,1026 @@
+{
+ "version": "2026-10-14",
+ "aircraft": [
+  {
+   "code": "S-70I",
+   "label": "S-70i Black Hawk",
+   "squadron": "201",
+   "active": "1"
+  },
+  {
+   "code": "S-92",
+   "label": "S-92",
+   "squadron": "201",
+   "active": "1"
+  },
+  {
+   "code": "H135",
+   "label": "H135 (บ.ฮ.13)",
+   "squadron": "202",
+   "active": "1"
+  },
+  {
+   "code": "B412EP",
+   "label": "Bell 412EP",
+   "squadron": "202",
+   "active": "1"
+  },
+  {
+   "code": "H225M",
+   "label": "H225M Caracal",
+   "squadron": "203",
+   "active": "1"
+  },
+  {
+   "code": "UH-1H",
+   "label": "UH-1H (บ.ฮ.6)",
+   "squadron": "203",
+   "active": "0"
+  },
+  {
+   "code": "B412",
+   "label": "Bell 412 (บ.ฮ.6ข)",
+   "squadron": "201/202",
+   "active": "0"
+  },
+  {
+   "code": "B412SP",
+   "label": "Bell 412SP (บ.ฮ.6ค)",
+   "squadron": "201/202",
+   "active": "0"
+  }
+ ],
+ "mission": [
+  {
+   "code": "SAR",
+   "label": "ค้นหาและช่วยชีวิต (SAR)"
+  },
+  {
+   "code": "HOIST",
+   "label": "Hoist / รอก"
+  },
+  {
+   "code": "VIP",
+   "label": "ถวายความปลอดภัย / VIP"
+  },
+  {
+   "code": "STUDENT",
+   "label": "ฝึกศิษย์การบิน"
+  },
+  {
+   "code": "PROFICIENCY",
+   "label": "ฝึกบินทบทวน / check ride"
+  },
+  {
+   "code": "TRANSPORT",
+   "label": "ลำเลียงบุคคลและสิ่งของ"
+  },
+  {
+   "code": "SLING",
+   "label": "External load / สลิง"
+  },
+  {
+   "code": "FIREFIGHT",
+   "label": "ดับไฟป่า (bambi bucket)"
+  },
+  {
+   "code": "CONFINED",
+   "label": "ลงพื้นที่จำกัด / ไม่เตรียมการ"
+  },
+  {
+   "code": "FORMATION",
+   "label": "บินหมู่"
+  },
+  {
+   "code": "FCF",
+   "label": "ทดสอบหลังซ่อม (FCF)"
+  },
+  {
+   "code": "FERRY",
+   "label": "บินเดินทาง / ferry"
+  }
+ ],
+ "environment": [
+  {
+   "code": "DAY_VMC",
+   "label": "กลางวัน อากาศดี"
+  },
+  {
+   "code": "NIGHT",
+   "label": "กลางคืน (ไม่ใช้ NVG)"
+  },
+  {
+   "code": "NVG",
+   "label": "กลางคืน ใช้ NVG"
+  },
+  {
+   "code": "RAIN_TS",
+   "label": "ฝน / พายุฝนฟ้าคะนอง"
+  },
+  {
+   "code": "LOW_VIS",
+   "label": "หมอก / ทัศนวิสัยต่ำ / เมฆต่ำ"
+  },
+  {
+   "code": "HAZE",
+   "label": "หมอกควัน / ฝุ่น PM (ฤดูไฟป่า)"
+  },
+  {
+   "code": "BROWNOUT",
+   "label": "Brownout / ฝุ่นจากลงพื้น"
+  },
+  {
+   "code": "WIND",
+   "label": "ลมแรง / ลมกระโชก / turbulence"
+  },
+  {
+   "code": "HOT_HIGH",
+   "label": "ร้อนจัด / high DA"
+  },
+  {
+   "code": "OVERWATER",
+   "label": "บินเหนือน้ำ"
+  },
+  {
+   "code": "MOUNTAIN",
+   "label": "ภูเขา / ภูมิประเทศสูง"
+  }
+ ],
+ "phase": [
+  {
+   "code": "PREFLIGHT",
+   "label": "ตรวจก่อนบิน / start-up"
+  },
+  {
+   "code": "TAXI",
+   "label": "Taxi / hover taxi"
+  },
+  {
+   "code": "TAKEOFF",
+   "label": "วิ่งขึ้น"
+  },
+  {
+   "code": "ENROUTE",
+   "label": "บินเดินทาง"
+  },
+  {
+   "code": "APPROACH",
+   "label": "Approach"
+  },
+  {
+   "code": "LANDING",
+   "label": "ลงสนาม"
+  },
+  {
+   "code": "HOVER",
+   "label": "Hover / hoist / sling ops"
+  },
+  {
+   "code": "AUTOROTATION",
+   "label": "Autorotation / emergency procedure training"
+  },
+  {
+   "code": "SHUTDOWN",
+   "label": "ดับเครื่อง / หลังบิน"
+  },
+  {
+   "code": "GROUND",
+   "label": "ภาคพื้น / ซ่อมบำรุง"
+  }
+ ],
+ "hfacs": [
+  {
+   "code": "AD000",
+   "label": "Known Deviations",
+   "level": "category",
+   "category": "AD000",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AD001",
+   "label": "Performed Known Deviation (Work-Around)",
+   "level": "nanocode",
+   "category": "AD000",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AD002",
+   "label": "Commits Routine/Widespread Known Deviation (Normalization of Deviance)",
+   "level": "nanocode",
+   "category": "AD000",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AD003",
+   "label": "Extreme Lack of Discipline (Indiscipline)",
+   "level": "nanocode",
+   "category": "AD000",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE100",
+   "label": "Performance/Skill Based Errors",
+   "level": "category",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE101",
+   "label": "Unintended Activation or Deactivation",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE102",
+   "label": "Procedure or Checklist Not Followed Correctly",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE104",
+   "label": "Over-Controlled/Under-Controlled Aircraft/Vehicle/Vessel or System",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE105",
+   "label": "Breakdown in Visual Scan or Instrument Cross-check",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE107",
+   "label": "Rushed or Delayed a Necessary Action",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE108",
+   "label": "Misinterpreted/Misread Instrument",
+   "level": "nanocode",
+   "category": "AE100",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE200",
+   "label": "Judgment and Decision-Making Errors",
+   "level": "category",
+   "category": "AE200",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE201",
+   "label": "Inadequate Real-Time Risk Assessment/Action",
+   "level": "nanocode",
+   "category": "AE200",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE202",
+   "label": "Ineffective Task Prioritization",
+   "level": "nanocode",
+   "category": "AE200",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE205",
+   "label": "Ignored a Caution/Warning",
+   "level": "nanocode",
+   "category": "AE200",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "AE207",
+   "label": "Misjudged/Misperceived Changing Environment",
+   "level": "nanocode",
+   "category": "AE200",
+   "tier": "Unsafe Acts"
+  },
+  {
+   "code": "PC100",
+   "label": "Mental Awareness Conditions",
+   "level": "category",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC101",
+   "label": "Inattention",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC102",
+   "label": "Fixation (Channelized Attention)",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC103",
+   "label": "Task Saturation",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC104",
+   "label": "Confusion",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC105",
+   "label": "Negative Habit Transfer",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC106",
+   "label": "Distraction/Interruption",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC107",
+   "label": "Geographically Lost",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC110",
+   "label": "Change Blindness/Inaccurate Expectation",
+   "level": "nanocode",
+   "category": "PC100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC200",
+   "label": "State of Mind Conditions",
+   "level": "category",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC202",
+   "label": "Psychological Disorder",
+   "level": "nanocode",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC203",
+   "label": "Life Stressors/Emotional State",
+   "level": "nanocode",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC205",
+   "label": "Personality Style",
+   "level": "nanocode",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC206",
+   "label": "Overconfidence",
+   "level": "nanocode",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC209",
+   "label": "Pressing, Haste, Motivation",
+   "level": "nanocode",
+   "category": "PC200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC300",
+   "label": "Adverse Physiological Conditions",
+   "level": "category",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC301",
+   "label": "Effects of Gravitational Forces (G-LOC)",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC302",
+   "label": "Substance Effects (supplements, medications, drugs, alcohol)",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC304",
+   "label": "Loss of Consciousness (sudden or prolonged onset)",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC305",
+   "label": "Physical Illness/Injury",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC306",
+   "label": "Physical Overexertion",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC307",
+   "label": "Fatigue",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC310",
+   "label": "Acute Trapped Gas Disorders",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC311",
+   "label": "Decompression Sickness (Evolved Gas Disorder)",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC312",
+   "label": "Respiratory Physiological Event",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC314",
+   "label": "Inadequate Adaptation to Darkness",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC317",
+   "label": "Anthropometric/Biomechanical Limitations",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC319",
+   "label": "Nutrition/Diet",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC320",
+   "label": "Loss of Capacity (Surprise/Startle Response)",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PC321",
+   "label": "Spatial Disorientation",
+   "level": "nanocode",
+   "category": "PC300",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE100",
+   "label": "Physical Environment",
+   "level": "category",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE101",
+   "label": "Environmental Conditions Affected Vision",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE103",
+   "label": "Vibration Affected Performance",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE106",
+   "label": "Temperature Affected Performance",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE108",
+   "label": "External Force or Object Impeded Performance",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE109",
+   "label": "External Lighting of Vehicle/Aircraft/Vessel/Object Affected Vision",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE110",
+   "label": "Noise Interference",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE112",
+   "label": "Terrain Feature Affected Performance",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE113",
+   "label": "Animal or Non-DoD affiliated Human",
+   "level": "nanocode",
+   "category": "PE100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE200",
+   "label": "Technological Environment",
+   "level": "category",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE201",
+   "label": "Restraint System and/or Seat Problems",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE202",
+   "label": "Instrumentation and Warning System Issues",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE203",
+   "label": "Workspace Visibility Restrictions (not weather related)",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE204",
+   "label": "Controls and/or Switches",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE205",
+   "label": "Automated System Created a Hazardous Condition",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE206",
+   "label": "Workspace Limitations Affected Performance",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE207",
+   "label": "Personal Equipment Interference",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PE208",
+   "label": "Communication Equipment Ineffective",
+   "level": "nanocode",
+   "category": "PE200",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PP100",
+   "label": "Team Coordination/Communication Condition",
+   "level": "category",
+   "category": "PP100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PP101",
+   "label": "Ineffective Team Resource Management (Crew, Bridge, Fighter, Maintenance, etc.)",
+   "level": "nanocode",
+   "category": "PP100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PP109",
+   "label": "Task/Mission Planning and/or Briefing Inadequate",
+   "level": "nanocode",
+   "category": "PP100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PP111",
+   "label": "Task/Mission-In-Progress Re-Planning",
+   "level": "nanocode",
+   "category": "PP100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT100",
+   "label": "Training Conditions",
+   "level": "category",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT101",
+   "label": "Untrained Operator/Worker",
+   "level": "nanocode",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT102",
+   "label": "Knowledge Retention",
+   "level": "nanocode",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT103",
+   "label": "Lack of Currency",
+   "level": "nanocode",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT104",
+   "label": "Lack of Proficiency/Experience",
+   "level": "nanocode",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "PT105",
+   "label": "Lack of Job/Work Related Safety Training",
+   "level": "nanocode",
+   "category": "PT100",
+   "tier": "Preconditions"
+  },
+  {
+   "code": "SC100",
+   "label": "Ineffective Unit Safety Culture",
+   "level": "category",
+   "category": "SC100",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SC101",
+   "label": "Unit Safety Culture",
+   "level": "nanocode",
+   "category": "SC100",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SC102",
+   "label": "Pace of OPTEMPO/Workload",
+   "level": "nanocode",
+   "category": "SC100",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SD000",
+   "label": "Supervisory Known Deviation",
+   "level": "category",
+   "category": "SD000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SD001",
+   "label": "Failure to Enforce Published Rules/Guidance",
+   "level": "nanocode",
+   "category": "SD000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SD002",
+   "label": "Allowed Unwritten Practices to Become Standard (Normalization of Deviance)",
+   "level": "nanocode",
+   "category": "SD000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SD003",
+   "label": "Directed Individual to Circumvent Existing Regulations, Rules, or Procedures",
+   "level": "nanocode",
+   "category": "SD000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI000",
+   "label": "Ineffective Supervision",
+   "level": "category",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI001",
+   "label": "Ineffective Supervisory or Command Oversight",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI003",
+   "label": "Failed to Provide Effective Training",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI004",
+   "label": "Failed to Provide Clear Written Procedure/Guidance/Policy",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI006",
+   "label": "Lack of Supervisory Responses to Critical Information",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI007",
+   "label": "Failed to Identify or Correct Hazardous Practices, Conditions or Guidance",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI008",
+   "label": "Tasked Individual(s) with Lack of Experience, Currency or Proficiency",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SI009",
+   "label": "Rank/Position Intimidation",
+   "level": "nanocode",
+   "category": "SI000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP000",
+   "label": "Ineffective Planning and Coordination",
+   "level": "category",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP006",
+   "label": "Ineffective Deliberate Risk Assessment",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP007",
+   "label": "Authorized Unnecessary Risk",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP008",
+   "label": "Ineffective Pre-Mission Planning",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP009",
+   "label": "Unit Failure to Provide Sufficient Operational Information Resources",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP010",
+   "label": "Unit Failure to Provide Sufficient Manning/Staffing",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "SP011",
+   "label": "Unit Failure to Provide Sufficient Equipment or Supplies",
+   "level": "nanocode",
+   "category": "SP000",
+   "tier": "Supervision/Leadership"
+  },
+  {
+   "code": "OC000",
+   "label": "Organizational Climate/Culture",
+   "level": "category",
+   "category": "OC000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OC001",
+   "label": "Organizational Culture (attitude/actions) Created Increased Risk",
+   "level": "nanocode",
+   "category": "OC000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OC003",
+   "label": "Organizational Perceptions of Materiel Resources (Equipment)",
+   "level": "nanocode",
+   "category": "OC000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OC004",
+   "label": "Mission/Aircraft/Vehicle/Ship/Equipment Change or Unit Deactivation",
+   "level": "nanocode",
+   "category": "OC000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OC005",
+   "label": "Organizational Structure is Unclear or Inadequate",
+   "level": "nanocode",
+   "category": "OC000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP000",
+   "label": "Organizational Policy, Procedures, or Process Issues",
+   "level": "category",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP001",
+   "label": "OPTEMPO/Workload",
+   "level": "nanocode",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP002",
+   "label": "Organizational Program or Operation not Adequately Assessed",
+   "level": "nanocode",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP003",
+   "label": "Provided Unclear, Impractical, or Inadequate Policy, Procedural Guidance or Publications",
+   "level": "nanocode",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP005",
+   "label": "Flawed Doctrine/Philosophy",
+   "level": "nanocode",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OP006",
+   "label": "Inadequate Program Management/Governance",
+   "level": "nanocode",
+   "category": "OP000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR000",
+   "label": "Resource Support Problems",
+   "level": "category",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR001",
+   "label": "Command and Control (C2) Resources are Deficient",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR003",
+   "label": "Inadequate Infrastructure",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR004",
+   "label": "Purchasing or Providing Poorly Designed or Unsuitable Equipment",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR005",
+   "label": "Failure to Remove Inadequate/Worn-Out Equipment in a Timely Manner",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR006",
+   "label": "Personnel Accession/Selection Policies or Processes",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR007",
+   "label": "Failure to Provide Adequate Personnel/Staffing Resources",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR008",
+   "label": "Failure to Provide Adequate Information Resources",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OR009",
+   "label": "Failure to Provide Adequate Funding",
+   "level": "nanocode",
+   "category": "OR000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OT000",
+   "label": "Training Programs",
+   "level": "category",
+   "category": "OT000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OT001",
+   "label": "Resident Formal School Training Program is Ineffective or Unavailable",
+   "level": "nanocode",
+   "category": "OT000",
+   "tier": "Organizational Influences"
+  },
+  {
+   "code": "OT002",
+   "label": "Distance Learning Training is Ineffective or Unavailable",
+   "level": "nanocode",
+   "category": "OT000",
+   "tier": "Organizational Influences"
+  }
+ ]
+}
