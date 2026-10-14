@@ -909,7 +909,7 @@ function viewAbout() {
     locked: `<div class="status-line" style="margin-bottom:14px"><span class="tag">${dot('warn')}ล็อกอยู่</span>มีข้อมูลหน่วย รอปลดล็อก</div>
       <form class="field" id="unlock" autocomplete="off">
         <label for="pass">รหัสผ่านหน่วย</label>
-        <div class="row"><input id="pass" type="password" autocomplete="current-password" required>
+        <div class="row"><input id="pass" type="password" maxlength="4" placeholder="4 ตัวอักษร" autocomplete="current-password" autocapitalize="off" spellcheck="false" required>
         <button class="btn btn-primary" style="flex:none" id="unlock-btn">ปลดล็อก</button></div>
         <p class="msg" id="msg" role="status" aria-live="polite"></p>
       </form>`,

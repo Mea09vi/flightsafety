@@ -438,7 +438,7 @@ export function openGate({ iter, unlock, onEnter, onSkip, onClose }) {
         <p class="g-sub">เลือกแบบ ภารกิจ และสภาพการบิน แอปจะดึงอุบัติเหตุ อุบัติการณ์ และ hazard ที่ตรงกับเที่ยวบินมาให้บรีฟ ใส่รหัสผ่านหน่วยเพื่อเปิดเคสของ บน.2</p>
         <label class="g-lbl" for="g-pw">รหัสผ่านหน่วย <small>ถามได้จาก FSO</small></label>
         <div class="g-pw">
-          <input id="g-pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="อย่างน้อย 10 ตัวอักษร" aria-describedby="g-msg">
+          <input id="g-pw" type="password" maxlength="4" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="4 ตัวอักษร" aria-describedby="g-msg">
           <button type="button" class="g-eye" aria-label="แสดงรหัสผ่าน" aria-pressed="false">${EYE}</button>
         </div>
         <label class="g-rem"><input type="checkbox" id="g-rem" checked> จำไว้ในเครื่องนี้ <small>· เครื่องส่วนกลางให้เอาออก</small></label>
