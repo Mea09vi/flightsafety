@@ -1,0 +1,792 @@
+// แอปทฤษฎีนิรภัย — สไลด์บทเรียนแบบโต้ตอบ (DECISIONS.md หัวข้อ "ทฤษฎีนิรภัย")
+// app.js เรียก render() ทุกครั้งที่ URL เปลี่ยน: #/theory = รายการบท · #/theory/<id>/<n> = สไลด์ที่ n (เริ่ม 1)
+// ปุ่มในไฟล์นี้ใช้ data-l* ทั้งหมด ไม่ชนกับ data-go / data-act ของโหมดบรีฟใน app.js
+import { LESSONS } from './lessons.js';
+
+let H = null;          // ตัวช่วยจาก app.js: esc icon keepAwake main tax
+let L = null;          // บทที่เปิดอยู่
+let idx = 0;           // สไลด์ปัจจุบัน (เริ่ม 0)
+let from = null;       // หน้าที่เปิดบทเรียนเข้ามา — ออกด้วย history.back() ไม่ให้สไลด์ซ้อนในประวัติ
+const ws = {};         // สถานะภาพโต้ตอบและคำตอบ ต่อบท·สไลด์ (จำเฉพาะรอบนี้ ไม่บันทึกลงเครื่อง)
+
+let sel = 0;           // บทที่เลือกบนแผนที่เส้นทาง
+let fresh = false;     // เพิ่งเรียนจบบทนี้รอบนี้ → หน้าจบบทเล่นภาพปิดรู
+
+const deckOf = (l) => [...l.slides, { t: 'end' }];
+const url = (id, n) => `#/theory/${id}/${n + 1}`;
+const tile = (c) => `style="--c:var(--tile-${c})"`;
+const two = (n) => String(n).padStart(2, '0');
+
+// บทที่เรียนจบแล้ว (ถึงหน้าจบบท) เก็บในเครื่องนี้เท่านั้น — w2sb.theoryDone = [id, ...]
+const doneSet = () => { const v = H.store?.get('theoryDone', []); return new Set(Array.isArray(v) ? v : []); };
+function markDone(id) {
+  const d = doneSet();
+  if (d.has(id)) return false;
+  H.store?.set('theoryDone', [...d, id]);
+  return true;
+}
+// สถานะบอกด้วยคำและสัญลักษณ์เสมอ สีเป็นแค่ตัวเสริม
+const ST_TXT = { done: '✓ เรียนแล้ว', next: '▶ ถัดไป', fut: '○ ยังไม่เรียน' };
+function statusOf(done) {
+  const next = LESSONS.findIndex((l) => !done.has(l.id));
+  return { next, st: (i) => (done.has(LESSONS[i].id) ? 'done' : i === next ? 'next' : 'fut') };
+}
+
+export function render(h) {
+  H = h;
+  wire();
+  if (!h.arg) { L = null; list(); return; }
+  const l = LESSONS.find((x) => x.id === h.arg);
+  if (!l) { document.body.classList.remove('lesson'); notFound(); return; }
+  // เข้าจากหน้าอื่น (ไม่ใช่สไลด์ด้วยกัน) → จำไว้ว่าออกแล้วกลับไปไหน
+  if (!h.prev || !h.prev.startsWith('/theory/')) from = h.prev;
+  L = l;
+  const N = deckOf(l).length;
+  idx = Math.min(Math.max((parseInt(h.n, 10) || 1) - 1, 0), N - 1);
+  draw();
+  h.keepAwake();
+}
+
+/* ── หน้ารายการบท ─────────────────────────────────────────── */
+
+// แผนที่เส้นทางบิน (DECISIONS.md "ทิศทางดีไซน์ของแอปทฤษฎี"): บทละหนึ่งจุด ไต่ขึ้นจากซ้ายไปขวา แบ่งเป็น 4 ช่วง
+// พิกัดอยู่ในกรอบ MW×MH · จุดคี่ยกสูงกว่าจุดคู่ ป้ายชื่อจึงสลับบน/ล่างได้ไม่ชนกัน
+// (จุดแรกป้ายอยู่บน ไม่ให้ทับเครื่องบินที่กำลังบินขาแรกจากทางวิ่ง)
+const PHASES = [['พื้นฐาน', 0, 3], ['ก่อนบิน', 3, 6], ['ในห้องนักบิน', 6, 9], ['ร่างกาย', 9, 11]];
+const MW = 820;
+const MH = 400;
+const AX = (i) => 50 + i * 72;
+const AY = (i) => 330 - i * 24 - (i % 2) * 40;
+const DEP = [14, 386];
+const phaseOf = (i) => PHASES.find(([, a, b]) => i >= a && i < b)?.[0] || '';
+const AC = 'M0-12L3-3 12 2 12 5 3 2 2 9 5 12 5 13-0 11.5-5 13-5 12-2 9-3 2-12 5-12 2-3-3Z'; // เครื่องบิน หัวชี้ขึ้น
+
+function list() {
+  const { esc, icon, main } = H;
+  const done = doneSet();
+  const { next, st } = statusOf(done);
+  const N = LESSONS.length;
+  const nDone = LESSONS.filter((l) => done.has(l.id)).length;
+  const left = LESSONS.filter((l) => !done.has(l.id)).reduce((a, l) => a + l.mins, 0);
+  sel = next >= 0 ? next : 0;
+
+  const legs = PHASES.map(([n, a, b], k) => `<section class="legs-ph"><h2 class="ph-h">ช่วง ${k + 1} · ${n}</h2><ol>${LESSONS.slice(a, b).map((l, j) => {
+    const i = a + j;
+    const s = st(i);
+    return `<li class="${s}"><a class="leg-r" href="#/theory/${l.id}"><i class="dm" aria-hidden="true"></i>
+      <span class="leg-t"><small>จุดที่ ${two(i + 1)}</small><b>${esc(l.title)}</b><em>${ST_TXT[s]} · ราว ${l.mins} นาที</em></span>${icon('next')}</a></li>`;
+  }).join('')}</ol></section>`).join('');
+
+  main.innerHTML = `<div class="view theory">
+    <p class="eyebrow">ทฤษฎีนิรภัย · เส้นทาง ${N} จุด</p>
+    <h1 class="page-h">เข้าใจได้ใน <em>5 นาที</em></h1>
+    <p class="th-meta">เรียนแล้ว <b>${nDone}/${N}</b> บท · ${left ? `เหลือราว ${left} นาที` : 'ครบทุกบทแล้ว'}</p>
+    <div class="rt">
+      <div class="rmap">${routeMap(st, next)}</div>
+      <aside class="rpanel" aria-live="polite">${panel(sel, st)}</aside>
+    </div>
+    <div class="legs">${legs}</div>
+  </div>`;
+}
+
+function routeMap(st, next) {
+  const { esc } = H;
+  const N = LESSONS.length;
+  const P = LESSONS.map((_, i) => [AX(i), AY(i)]);
+  const pts = [DEP, ...P];
+  const mid = (k) => (AX(k - 1) + AX(k)) / 2;
+  const bands = PHASES.map(([n, a, b], k) => {
+    const x0 = k === 0 ? 0 : mid(a);
+    const x1 = k === PHASES.length - 1 ? MW : mid(b);
+    return `<rect class="band${k % 2 ? '' : ' alt'}" x="${x0}" y="0" width="${x1 - x0}" height="${MH}"/>
+      <text class="band-t" x="${x0 + 12}" y="24">ช่วง ${k + 1} · ${n}</text>`;
+  }).join('');
+  const lines = P.map((p, i) => {
+    const [x1, y1] = pts[i];
+    return `<line class="leg ${st(i)}" x1="${x1}" y1="${y1}" x2="${p[0]}" y2="${p[1]}"/>`;
+  }).join('');
+  // เครื่องบินอยู่กลางขาที่กำลังบินเข้าหาบทถัดไป · เรียนครบแล้วจอดหลังจุดสุดท้าย
+  const [a, b] = next >= 0 ? [pts[next], pts[next + 1]] : [pts[N - 1], pts[N]];
+  const ang = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI + 90;
+  const [cx, cy] = next >= 0 ? [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] : [b[0] + 28, b[1] - 8];
+  const pc = (v, m) => `${((v / m) * 100).toFixed(2)}%`;
+  return `<svg class="rsvg" viewBox="0 0 ${MW} ${MH}" aria-hidden="true">
+      ${bands}
+      <line class="rwy" x1="0" y1="${DEP[1]}" x2="${DEP[0] + 14}" y2="${DEP[1]}"/>
+      ${lines}
+      <path class="ac" d="${AC}" transform="translate(${cx} ${cy}) rotate(${ang.toFixed(1)}) scale(1.15)"/>
+    </svg>
+    ${LESSONS.map((l, i) => `<button class="wp ${st(i)}${i === sel ? ' sel' : ''}" style="left:${pc(AX(i), MW)};top:${pc(AY(i), MH)}"
+      data-lsel="${i}" aria-pressed="${i === sel}" aria-label="จุดที่ ${i + 1} ${esc(l.title)} — ${ST_TXT[st(i)]}">
+      <i class="dm"></i><span class="wl ${i % 2 || i === 0 ? 'up' : 'dn'}"><b>${st(i) === 'done' ? '✓' : st(i) === 'next' ? '▶' : ''}${two(i + 1)}</b>${esc(l.short)}</span></button>`).join('')}`;
+}
+
+function panel(i, st) {
+  const { esc, icon } = H;
+  const l = LESSONS[i];
+  const s = st(i);
+  return `<p class="rp-leg">จุดที่ ${two(i + 1)}/${two(LESSONS.length)} · ช่วง${phaseOf(i)}</p>
+    <div class="rp-h"><span class="app-ic" ${tile(l.color)}>${icon(l.icon)}</span>
+      <div><h2>${esc(l.title)}</h2><p class="rp-st ${s}">${ST_TXT[s]}</p></div></div>
+    <p class="rp-tip">${esc(l.tip)}</p>
+    <p class="rp-meta">${deckOf(l).length} สไลด์ · ราว ${l.mins} นาที</p>
+    <a class="btn btn-primary rp-go" href="#/theory/${l.id}">${s === 'done' ? 'ทบทวนบทนี้' : 'เริ่มบทนี้'} ${icon('next')}</a>
+    <ul class="rp-key" aria-label="ความหมายของจุด"><li class="done"><i class="dm"></i>เรียนแล้ว</li><li class="next"><i class="dm"></i>ถัดไป</li><li class="fut"><i class="dm"></i>ยังไม่เรียน</li></ul>
+    <p class="note th-src">เรียบเรียงจากเอกสารเผยแพร่สาธารณะของ FAA, ICAO และ SKYbrary (ลิงก์อยู่ท้ายแต่ละบท)
+      ใช้ประกอบการบรีฟ ไม่แทนระเบียบหรือคำสั่งของหน่วย · ความคืบหน้าเก็บไว้ในเครื่องนี้เท่านั้น</p>`;
+}
+
+// เลือกจุดบนแผนที่ → เปลี่ยนแผงข้าง ไม่วาดทั้งหน้าใหม่ (โฟกัสคีย์บอร์ดอยู่ที่เดิม)
+function pick(i, focus) {
+  const { st } = statusOf(doneSet());
+  sel = i;
+  H.main.querySelectorAll('.wp').forEach((b, k) => { b.classList.toggle('sel', k === i); b.setAttribute('aria-pressed', k === i); });
+  const p = H.main.querySelector('.rpanel');
+  if (p) p.innerHTML = panel(i, st);
+  if (focus) H.main.querySelector(`.wp[data-lsel="${i}"]`)?.focus();
+}
+
+function notFound() {
+  const { icon, main } = H;
+  main.innerHTML = `<div class="view"><div class="empty">${icon('book')}<h2>ไม่พบบทเรียนนี้</h2>
+    <p>ลิงก์อาจมาจากเวอร์ชันเก่าที่เปลี่ยนชื่อบทไปแล้ว เลือกบทจากรายการได้เลย</p>
+    <div class="acts"><a class="btn" href="#/theory">ดูบทเรียนทั้งหมด</a></div></div></div>`;
+}
+
+/* ── สไลด์ ────────────────────────────────────────────────── */
+
+function draw() {
+  const { esc, icon, main } = H;
+  const deck = deckOf(L);
+  const N = deck.length;
+  const s = deck[idx];
+  const last = idx === N - 1;
+  const nextL = LESSONS[LESSONS.indexOf(L) + 1];
+  // ถึงหน้าจบบทครั้งแรก = เรียนจบ → บันทึก และให้หน้าจบเล่นภาพปิดรู (ถ้าไม่ได้ขอลดการเคลื่อนไหว)
+  fresh = last && markDone(L.id) && !H.reduced.matches;
+  const next = !last
+    ? `<button class="btn btn-primary" data-lgo="1">${idx === 0 ? 'เริ่ม' : 'ถัดไป'} ${icon('next')}</button>`
+    : nextL
+      ? `<button class="btn btn-primary" data-lnext="${nextL.id}">บทถัดไป: ${esc(nextL.short)} ${icon('next')}</button>`
+      : '<button class="btn btn-primary" data-lx>จบบทเรียน</button>';
+
+  main.innerHTML = `<div class="brief lsn" role="region" aria-label="บทเรียน ${esc(L.title)}" aria-roledescription="slide deck">
+    <div class="brief-top">
+      <p class="b-eyebrow"><span class="ls-ic" ${tile(L.color)}>${icon(L.icon)}</span>${esc(L.title)}</p>
+      <div class="tools"><a class="btn btn-icon" href="#/theory" data-lx aria-label="ออกจากบทเรียน (Esc)" title="ออกจากบทเรียน (Esc)">${icon('x')}</a></div>
+    </div>
+    <div class="lmain" aria-live="polite"><div class="ls is-${s.t}">${slide(s)}</div></div>
+    <div class="brief-foot">
+      <button class="btn btn-icon" data-lgo="-1" aria-label="สไลด์ก่อนหน้า"${idx === 0 ? ' disabled' : ''}>${icon('back')}</button>
+      ${climb(N)}
+      <span class="pos">${idx + 1}/${N}</span>
+      ${next}
+    </div>
+  </div>`;
+  // รูหดจนปิดแล้ว → ถอด mask ทิ้ง (ขอบแผ่นคมเหมือนแผ่นที่ปิดแล้วทั่วไป)
+  const cs = main.querySelector('.ce-slice.closing');
+  cs?.addEventListener('animationend', () => cs.classList.replace('closing', 'closed'), { once: true });
+}
+
+// รูบนแผ่นชีสของบท i: ตำแหน่งสุ่มแบบคงที่ต่อบท (เหมือนกันทุกครั้งที่เปิด) · รัศมีคูณ --hr ซึ่ง CSS หดจาก 1 → 0
+// รูอยู่ช่วงบน 14–62% ของแผ่น ป้ายชื่อด้านล่างจึงไม่โดนเจาะ
+function holeMask(i) {
+  const r = (a) => ((Math.sin((i + 1) * 12.9898 + a * 78.233) * 43758.5453) % 1 + 1) % 1;
+  const g = [0, 1, 2, 3].map((k) => {
+    const x = Math.round(18 + r(k) * 64);
+    const y = Math.round(14 + r(k + 9) * 48);
+    const R = (1.3 * (0.6 + r(k + 3) * 0.6)).toFixed(2);
+    return `radial-gradient(circle at ${x}% ${y}%, transparent calc(var(--hr) * ${R}em), #000 calc(var(--hr) * ${R}em + 1px))`;
+  }).join(',');
+  return `-webkit-mask-image:${g};mask-image:${g}`;
+}
+
+// แถบไต่ระดับแทนขีดนับสไลด์: แต่ละสไลด์ไต่ครึ่งแรกแล้วบินระดับครึ่งหลัง · ผ่านแล้วเส้นทึบ ยังไม่ถึงเส้นประ
+// SVG ยืดตามกล่อง (preserveAspectRatio none) เส้นจึงต้อง non-scaling-stroke · จุดและเครื่องบินเป็น HTML วางด้วย %
+function climb(N) {
+  const X = (k) => (N > 1 ? (k / (N - 1)) * 100 : 50);
+  const Y = (k) => (N > 1 ? 92 - (k / (N - 1)) * 84 : 50);
+  const seg = (a, b) => {
+    const p = [[X(a), Y(a)]];
+    for (let k = a; k < b; k++) p.push([(X(k) + X(k + 1)) / 2, Y(k + 1)], [X(k + 1), Y(k + 1)]);
+    return p.map((q) => q.map((v) => v.toFixed(2)).join(',')).join(' ');
+  };
+  const pc = (v) => `${v.toFixed(2)}%`;
+  return `<div class="lroute" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        ${idx > 0 ? `<polyline class="cl-done" points="${seg(0, idx)}" vector-effect="non-scaling-stroke"/>` : ''}
+        ${idx < N - 1 ? `<polyline class="cl-fut" points="${seg(idx, N - 1)}" vector-effect="non-scaling-stroke"/>` : ''}
+      </svg>
+      ${Array.from({ length: N }, (_, k) => k === idx ? ''
+        : `<i class="cl-pt${k < idx ? ' on' : ''}" style="left:${pc(X(k))};top:${pc(Y(k))}"></i>`).join('')}
+      <svg class="cl-ac" viewBox="-14 -14 28 28" style="left:${pc(X(idx))};top:${pc(Y(idx))}"><path d="${AC}" transform="rotate(75)"/></svg>
+    </div>`;
+}
+
+// วาดเฉพาะเนื้อสไลด์ใหม่หลังแตะภาพโต้ตอบ แล้วคืนโฟกัสให้ปุ่มเดิม (คนใช้คีย์บอร์ดไม่หลุดตำแหน่ง)
+function redraw(sel) {
+  const box = H.main.querySelector('.ls');
+  if (!box) return;
+  const s = deckOf(L)[idx];
+  const sc = H.main.querySelector('.lmain').scrollTop;
+  box.innerHTML = slide(s);
+  H.main.querySelector('.lmain').scrollTop = sc;
+  if (sel) H.main.querySelector(sel)?.focus();
+}
+
+const key = () => `${L.id}:${idx}`;
+
+function slide(s) {
+  const { esc, icon } = H;
+  switch (s.t) {
+    case 'title': return `<p class="plab">บทเรียน · ราว ${L.mins} นาที</p>
+      <h1 class="ptitle">${esc(s.h)}</h1><p class="ptext">${esc(s.sub)}</p>
+      ${s.stat ? `<p class="ls-stat"><b>${esc(s.stat.n)}</b><span>${esc(s.stat.t)}</span></p>` : ''}`;
+
+    case 'points': return `<h2 class="ls-h">${esc(s.h)}</h2>
+      <ol class="ls-pts">${s.items.map((it, k) => `<li><span class="n">${k + 1}</span><div><b>${esc(it.b)}</b><p>${esc(it.t)}</p></div></li>`).join('')}</ol>`;
+
+    case 'compare': {
+      const side = (x, c) => `<section class="ls-side ${c}"><h3>${esc(x.h)}</h3><ul>${x.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul></section>`;
+      return `<h2 class="ls-h">${esc(s.h)}</h2><div class="ls-cmp">${side(s.a, 'a')}${side(s.b, 'b')}</div>`;
+    }
+
+    case 'cards': {
+      const st = (ws[key()] ||= { open: [] });
+      const n = s.items.length;
+      const card = (it, k) => s.flip
+        ? `<button class="ls-card flip${st.open.includes(k) ? ' on' : ''}" data-lflip="${k}" aria-pressed="${st.open.includes(k)}">
+            <span class="fr"><b>${esc(it.b)}</b>${it.s ? `<small>${esc(it.s)}</small>` : ''}</span>
+            <span class="bk"><small>${esc(it.s || it.b)}</small>${esc(it.t)}</span></button>`
+        : `<div class="ls-card"><b>${esc(it.b)}</b>${it.s ? `<small>${esc(it.s)}</small>` : ''}<p>${esc(it.t)}</p></div>`;
+      return `<div class="ls-hrow"><h2 class="ls-h">${esc(s.h)}</h2>
+        ${s.flip ? `<button class="btn ls-all" data-lflip="all">${st.open.length === n ? 'พลิกกลับทั้งหมด' : 'เปิดทั้งหมด'}</button>` : ''}</div>
+        ${s.cap ? `<p class="ls-cap">${esc(s.cap)}</p>` : ''}
+        <div class="ls-cards${n > 6 ? ' many' : ''}">${s.items.map(card).join('')}</div>`;
+    }
+
+    case 'widget': return `<h2 class="ls-h">${esc(s.h)}</h2>
+      <div class="lw lw-${s.w} nosw">${WIDGETS[s.w]()}</div><p class="ls-cap">${esc(s.cap)}</p>`;
+
+    case 'quiz': {
+      const a = ws[key()]?.pick;
+      const done = a != null;
+      return `<p class="plab">คำถามทวน</p><h2 class="ls-q">${esc(s.q)}</h2>
+        <div class="ls-opts" role="group" aria-label="ตัวเลือก">${s.opts.map((o, k) => {
+          const cls = !done ? '' : k === s.a ? ' right' : k === a ? ' wrong' : ' dim';
+          const mark = !done ? `<span class="k">${'กขคง'[k]}</span>` : k === s.a ? `<span class="k">${icon('check')}</span>` : k === a ? `<span class="k">${icon('x')}</span>` : `<span class="k">${'กขคง'[k]}</span>`;
+          return `<button class="ls-opt${cls}" data-lq="${k}"${done ? ' aria-disabled="true"' : ''}>${mark}<span>${esc(o)}</span></button>`;
+        }).join('')}</div>
+        ${done ? `<div class="ls-why"><p class="r ${a === s.a ? 'ok' : 'no'}">${a === s.a ? 'ถูกต้อง' : `ยังไม่ใช่ — คำตอบคือข้อ ${'กขคง'[s.a]}`}</p><p>${esc(s.why)}</p></div>` : ''}`;
+    }
+
+    case 'brief': return `<p class="plab">นำไปใช้</p><h2 class="ls-h">${esc(s.h)}</h2>
+      <ol class="pdo">${s.items.map((t, k) => `<li><span>${k + 1}</span>${esc(t)}</li>`).join('')}</ol>`;
+
+    default: { // หน้าจบบท
+      const qs = L.slides.map((x, k) => [x, k]).filter(([x]) => x.t === 'quiz');
+      const got = qs.filter(([x, k]) => ws[`${L.id}:${k}`]?.pick === x.a).length;
+      const tried = qs.filter(([, k]) => ws[`${L.id}:${k}`]?.pick != null).length;
+      // แต่ละบท = ชีสหนึ่งแผ่น เรียนจบ = ปิดรูแผ่นนั้น (ท่าปิดรูจากแนวทาง C) · ครั้งแรกที่จบเล่นภาพรูหด ครั้งต่อไปแสดงแผ่นเต็ม
+      const i = LESSONS.indexOf(L);
+      const done = doneSet();
+      const nDone = LESSONS.filter((l) => done.has(l.id)).length;
+      return `<div class="ce">
+        <figure class="ce-fig">
+          <div class="ce-slice ${fresh ? 'closing' : 'closed'}" style="${holeMask(i)}" aria-hidden="true"><small>ชั้น ${two(i + 1)}</small><b>${esc(L.short)}</b></div>
+          <figcaption><b>✓ ปิดรูชั้นนี้แล้ว</b><span>ปิดแล้ว ${nDone}/${LESSONS.length} ชั้น</span></figcaption>
+          <ol class="ce-row" aria-hidden="true">${LESSONS.map((l, k) => `<li class="${done.has(l.id) ? 'on' : ''}${k === i ? ' cur' : ''}"></li>`).join('')}</ol>
+        </figure>
+        <div class="ce-sum">
+          <p class="plab">สรุป ${L.take.length} ข้อ</p><h2 class="ls-h">${esc(L.title)}</h2>
+          <ol class="pdo">${L.take.map((t, k) => `<li><span>${k + 1}</span>${esc(t)}</li>`).join('')}</ol>
+          ${tried ? `<p class="ls-score">ตอบคำถามทวนถูก ${got}/${qs.length} ข้อ</p>` : ''}
+          <div class="ls-refs"><p class="k">แหล่งอ้างอิง</p><ul>${L.refs.map((r) => `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span>${esc(r.t)}</span>${icon('ext')}</a></li>`).join('')}</ul></div>
+          <button class="btn ls-again" data-lgo="restart">เริ่มบทนี้ใหม่</button>
+        </div>
+      </div>`;
+    }
+  }
+}
+
+/* ── ภาพโต้ตอบ ────────────────────────────────────────────── */
+
+// สวิสชีส: ซ้าย→ขวา องค์กร → การกำกับดูแล → สภาพก่อนเกิดเหตุ → การกระทำ (DECISIONS.md เรื่องลำดับแผ่นชีส)
+const SLICES = ['องค์กร', 'การกำกับดูแล', 'สภาพก่อนเกิดเหตุ', 'การกระทำ'];
+const HOLES = [[22, 74], [30, 80], [18, 70], [26, 82]]; // รูประดับ (% จากบน) — รูที่เส้นผ่านอยู่กลางแผ่นเสมอ
+
+// HFACS: ชื่อภาษาไทยของระดับและหมวด (หมวดและรหัสมาจาก taxonomy ของแอป = DoD HFACS 8.0)
+const TIERS = [
+  ['Organizational Influences', 'อิทธิพลขององค์กร', 'นโยบาย ทรัพยากร วัฒนธรรม และหลักสูตรที่ส่งผลถึงทุกคน'],
+  ['Supervision/Leadership', 'การกำกับดูแล', 'ผู้บังคับบัญชาวางแผน มอบงาน และดูแลลูกน้องอย่างไร'],
+  ['Preconditions', 'สภาพก่อนเกิดเหตุ', 'สภาพของคน ทีม และสิ่งแวดล้อม ที่ทำให้พลาดง่ายขึ้น'],
+  ['Unsafe Acts', 'การกระทำที่ไม่ปลอดภัย', 'สิ่งที่คนหน้างานทำหรือไม่ได้ทำ ก่อนเกิดเหตุ'],
+];
+const HF_TH = {
+  AD000: 'ฝ่าฝืนโดยรู้ตัว', AE100: 'พลาดที่ทักษะการปฏิบัติ', AE200: 'พลาดที่การตัดสินใจ',
+  PC100: 'การรับรู้และความตื่นตัว', PC200: 'สภาพจิตใจ', PC300: 'ร่างกายไม่พร้อม',
+  PE100: 'สภาพแวดล้อมทางกายภาพ', PE200: 'สภาพแวดล้อมทางเทคโนโลยี', PP100: 'การประสานงานและสื่อสารในทีม', PT100: 'สภาพการฝึก',
+  SC100: 'วัฒนธรรมความปลอดภัยของหน่วยไม่ได้ผล', SD000: 'ผู้กำกับดูแลฝ่าฝืนโดยรู้ตัว', SI000: 'การกำกับดูแลไม่ได้ผล', SP000: 'การวางแผนและประสานงานไม่ได้ผล',
+  OC000: 'บรรยากาศและวัฒนธรรมองค์กร', OP000: 'นโยบาย ระเบียบ กระบวนการ', OR000: 'การสนับสนุนทรัพยากร', OT000: 'หลักสูตรการฝึก',
+};
+const TIER_OF = { A: 'Unsafe Acts', P: 'Preconditions', S: 'Supervision/Leadership', O: 'Organizational Influences' };
+
+// SHELL: คำอธิบายรอยต่อเรียบเรียงจาก SKYbrary · ตัวอย่างเป็นสถานการณ์ทั่วไป ไม่ใช่เหตุการณ์จริง
+const SHELL = [
+  { k: 'H', n: 'L–H', th: 'คนกับเครื่อง (Hardware)',
+    d: 'ห้องนักบิน ที่นั่ง จอ สวิตช์ และอุปกรณ์ ต้องเข้ากับร่างกายและการรับรู้ของคน',
+    ex: 'สวิตช์สองตัวหน้าตาเหมือนกันอยู่ติดกันจนกดผิดได้ง่าย หรือแว่นมองกลางคืน (NVG) ที่บีบมุมมองและทำให้กะระยะยาก' },
+  { k: 'S', n: 'L–S', th: 'คนกับระเบียบ (Software)',
+    d: 'ระเบียบ เช็กลิสต์ คู่มือ แผนที่ สัญลักษณ์ และโปรแกรม ต้องอ่านง่ายและตรงกับงานจริง',
+    ex: 'เช็กลิสต์ที่เรียงไม่ตรงลำดับการทำงานจริง หรือคำย่อที่ตีความได้สองแบบ' },
+  { k: 'E', n: 'L–E', th: 'คนกับสภาพแวดล้อม (Environment)',
+    d: 'ทั้งในห้องนักบิน (ความร้อน เสียง การสั่น) และภายนอก (อากาศ ภูมิประเทศ แสง) รวมถึงตารางเวลาและแรงกดดัน',
+    ex: 'ฝุ่นจากแรงลมใบพัดตอนลงจอดจนมองไม่เห็นพื้น (brownout) หรือห้องนักบินร้อนจนล้าเร็ว' },
+  { k: 'L', n: 'L–L', th: 'คนกับคน (Liveware)',
+    d: 'ลูกเรือ ช่าง ผู้ควบคุมการบิน และผู้บังคับบัญชา — การสื่อสาร ภาวะผู้นำ และการทำงานเป็นทีม',
+    ex: 'ระยะห่างของยศมากจนผู้ช่วยนักบินไม่กล้าทักเมื่อเห็นว่าผิด' },
+];
+
+// TEM: ตัวอย่างสมมุติเพื่ออธิบายลำดับ ไม่ใช่เหตุการณ์จริง
+const TEM = [
+  { h: 'ภัยคุกคาม', s: 'Threat', t: 'พายุก่อตัวใกล้สนาม และหอบังคับการบินเปลี่ยนทางวิ่งกะทันหัน', m: 'บรีฟแผนสำรองไว้ก่อน — ไม่เกิดความผิดพลาดตามมา' },
+  { h: 'ความผิดพลาด', s: 'Error', t: 'รีบจนข้ามขั้นตอนในเช็กลิสต์ก่อนลง', m: 'อีกคนทักทัน แก้ก่อนเครื่องผิดไปจากที่ควร' },
+  { h: 'สภาพเครื่องที่ไม่ต้องการ', s: 'Undesired aircraft state', t: 'เข้าหาทางวิ่งสูงและเร็วเกินไป', m: 'บินวนขึ้นใหม่ (go-around) กลับสู่สภาพปกติ' },
+];
+
+// FAA-H-8083-2A Figure 4-1: แถว = โอกาสเกิด, คอลัมน์ = ความรุนแรง
+const LIKE = [['Probable', 'เกิดบ่อย'], ['Occasional', 'เกิดเป็นครั้งคราว'], ['Remote', 'ไม่น่าเกิด'], ['Improbable', 'แทบเป็นไปไม่ได้']];
+const SEV = [['Catastrophic', 'หายนะ'], ['Critical', 'วิกฤต'], ['Marginal', 'จำกัด'], ['Negligible', 'เล็กน้อย']];
+const MX = [['H', 'H', 'S', 'M'], ['H', 'S', 'M', 'L'], ['S', 'M', 'M', 'L'], ['M', 'M', 'M', 'L']];
+const LV = {
+  H: ['สูง', 'High', 'ไม่บิน จนกว่าจะลดความเสี่ยงลงเหลือปานกลางหรือต่ำ'],
+  S: ['ร้ายแรง', 'Serious', 'ไม่บิน จนกว่าจะลดความเสี่ยงลงเหลือปานกลางหรือต่ำ'],
+  M: ['ปานกลาง', 'Medium', 'บินได้ แต่ลดความเสี่ยงลงเท่าที่ทำได้'],
+  L: ['ต่ำ', 'Low', 'บินได้ และยังเฝ้าดูอันตรายนั้นต่อ'],
+};
+const SCEN = [
+  { t: 'อาจต้องอ้อมอากาศไกล เชื้อเพลิงหมดเหนือเขตภูเขา', r: 2, c: 0 },
+  { t: 'เข้าเขตน้ำแข็งเกาะ ด้วยเครื่องที่ไม่ได้รับรองให้บินในสภาพนี้', r: 1, c: 0 },
+];
+
+const IMSAFE = [
+  ['I', 'Illness', 'ไม่มีอาการเจ็บป่วยที่กระทบการบิน'],
+  ['M', 'Medication', 'ไม่ได้ใช้ยาที่ทำให้ง่วง หรือยาที่แพทย์ยังไม่อนุญาตให้บิน'],
+  ['S', 'Stress', 'ไม่มีเรื่องงาน เงิน หรือครอบครัว ที่ดึงสมาธิอยู่ตอนนี้'],
+  ['A', 'Alcohol', 'เว้นการดื่มตามระเบียบของหน่วยแล้ว'],
+  ['F', 'Fatigue', 'นอนพอ ไม่ได้ตื่นติดต่อกันนานเกินไป'],
+  ['E', 'Emotion', 'อารมณ์นิ่ง ไม่โกรธหรือเสียใจจนกระทบการตัดสินใจ'],
+];
+
+// ระยะห่างของอำนาจ: ผลของแต่ละระดับเรียบเรียงจาก SKYbrary Authority Gradients · y = ตำแหน่งของผู้บังคับ/ผู้ช่วยในภาพ
+const GRAD = [
+  { n: 'แบนเกินไป', y: [70, 70], ok: false, d: 'ทุกความเห็นมีน้ำหนักเท่ากัน ไม่ชัดว่าใครเป็นผู้นำ',
+    fx: ['ตัดสินใจช้า', 'อาจตัดสินใจผิด เพราะให้น้ำหนักทุกความเห็นเท่ากัน', 'ผู้นำถูกบั่นทอน และไม่ชัดว่าใครรับผิดชอบอะไร'] },
+  { n: 'พอดีกับงาน', y: [44, 88], ok: true, d: 'มีผู้นำชัด และทุกคนกล้าเสนอข้อมูล',
+    fx: ['ผู้นำตัดสินใจ แต่ฟังข้อมูลจากทีม', 'ช่วยกันตรวจซ้ำ (cross-check) ได้จริง', 'ปรับได้: ปัญหาไม่ชัด → แบนลง · วิกฤตต้องทำทันที → ชันขึ้น'] },
+  { n: 'ชันเกินไป', y: [16, 116], ok: false, d: 'อำนาจรวมอยู่ที่คนเดียว คนอื่นไม่กล้าพูด',
+    fx: ['คนอื่นไม่เสนอข้อมูล หรือไม่กล้าทัก', 'การตรวจซ้ำกันและการจัดการภัยคุกคาม (TEM) อ่อนลง', 'ความผิดพลาดของผู้นำ ไม่มีใครจับได้'] },
+];
+
+// SA 3 ขั้น (Endsley) — ตัวอย่างสมมุติ ไม่ใช่เหตุการณ์จริง
+const SA3 = [
+  { h: 'รับรู้', s: 'Perception', q: 'เห็นอะไร', t: 'ฐานเมฆข้างหน้าต่ำลงเรื่อย ๆ และได้ยินเครื่องอื่นรายงานฝนบนเส้นทาง' },
+  { h: 'เข้าใจ', s: 'Comprehension', q: 'หมายความว่าอะไร', t: 'ถ้าบินต่อ ต้องลดความสูงเข้าใกล้ภูมิประเทศ หรือเข้าเมฆ ซึ่งเกินขีดที่วางแผนไว้' },
+  { h: 'คาดการณ์', s: 'Projection', q: 'อีกไม่กี่นาทีจะเป็นอย่างไร', t: 'อีกราว 10 นาทีจะเลยจุดที่เลี้ยวกลับได้ปลอดภัย — ต้องตัดสินใจตอนนี้ ไม่ใช่ตอนเข้าเมฆแล้ว' },
+];
+
+// DECIDE (FAA PHAK บทที่ 2) — ตัวอย่างประตูเปิดดัดแปลงจากตัวอย่างใน PHAK
+const DEC = [
+  ['D', 'Detect', 'ตรวจพบ', 'รู้ว่ามีอะไรเปลี่ยน หรือสิ่งที่ควรเปลี่ยนกลับไม่เปลี่ยน', 'ไต่ผ่าน 1,500 ฟุต ประตูห้องโดยสารเปิดออก'],
+  ['E', 'Estimate', 'ประเมิน', 'ต้องทำอะไรไหม และเร่งแค่ไหน', 'วันฟ้าโปร่ง ประตูเปิดเป็นเรื่องเล็ก — แต่ถ้าอยู่ในเมฆ อากาศแปรปรวน และเพิ่งได้รับคำอนุญาตใหม่ ความเสี่ยงสูงกว่ามาก'],
+  ['C', 'Choose', 'เลือกผลที่ต้องการ', 'ตั้งเป้าว่าอยากให้เรื่องนี้จบอย่างไร', 'ลงจอดอย่างปลอดภัย แล้วปิดประตูให้เรียบร้อย'],
+  ['I', 'Identify', 'หาทางแก้', 'หาทางที่ไปถึงผลนั้น อย่าติดอยู่กับขั้นตอนจนลืมเป้าหมาย', 'บินต่อทั้งที่ประตูเปิด หรือกลับลงสนามเดิมแล้วปิดประตูบนพื้น'],
+  ['D', 'Do', 'ลงมือ', 'ทำตามทางที่เลือก', 'บินเครื่องให้ดีก่อน แล้วกลับลงสนามเดิม'],
+  ['E', 'Evaluate', 'ประเมินผล', 'ได้ผลตามที่ต้องการไหม — ไม่ได้ผลให้วนกลับไปเริ่มใหม่', 'ลงจอดแล้ว ปิดประตู ตรวจเครื่องก่อนขึ้นบินใหม่'],
+];
+
+// ทัศนคติอันตราย 5 แบบ กับคำแก้ (FAA PHAK รูป 2-4) · ATT_R = ลำดับคำแก้ฝั่งขวา (สลับไว้ให้ต้องคิด)
+const ATT = [
+  ['ต่อต้านอำนาจ', 'Anti-authority', '"อย่ามาสั่งฉัน"', 'ทำตามกฎ กฎมักจะถูก'],
+  ['หุนหัน', 'Impulsivity', '"ทำเร็ว ๆ"', 'ช้าก่อน คิดก่อน'],
+  ['คิดว่าไม่เกิดกับตัวเอง', 'Invulnerability', '"ไม่เกิดกับฉันหรอก"', 'เกิดกับฉันได้'],
+  ['อวดเก่ง', 'Macho', '"ฉันทำได้"', 'เสี่ยงโดยไม่จำเป็นเป็นเรื่องโง่'],
+  ['ยอมแพ้', 'Resignation', '"ทำไปก็เท่านั้น"', 'ฉันไม่ได้หมดหนทาง ฉันทำให้ต่างได้'],
+];
+const ATT_R = [2, 4, 0, 3, 1];
+
+// หูชั้นในกับการเลี้ยว (FAA PHAK รูป 17-4) · มุมเอียง: บวก = ขวา
+const LEANS = [
+  { h: 'ยังไม่เลี้ยว', real: 0, felt: 0, t: 'ของเหลวในท่อครึ่งวงกลมนิ่ง — ไม่รู้สึกว่าหมุน' },
+  { h: 'เริ่มเลี้ยว', real: 20, felt: 20, t: 'ท่อหมุนไปก่อน ของเหลวตามไม่ทัน ขนรับรู้เอน — รู้สึกว่ากำลังเลี้ยว ตรงกับความจริง' },
+  { h: 'เลี้ยวค้าง', real: 20, felt: 0, t: 'เลี้ยวด้วยอัตราคงที่นานพอ ของเหลวหมุนตามทัน ขนกลับตั้งตรง — รู้สึกว่าบินตรง ทั้งที่ยังเอียงอยู่' },
+  { h: 'หยุดเลี้ยว', real: 0, felt: -20, t: 'ท่อหยุด แต่ของเหลวยังหมุนต่อ — รู้สึกว่าเลี้ยวไปอีกทาง ทั้งที่ปีกตรงแล้ว จึงอยากเอียงกลับ (the leans)' },
+];
+
+// ตื่นติดต่อกัน: ตัวเลขจาก Dawson & Reid 1997 และ Williamson & Feyer 2000 · ช่วงตื่นตัวต่ำ (WOCL) ราว 02:00–05:59 ตาม SKYbrary
+const AW_WAKE = 6;
+const AW_MAX = 26;
+const bank = (d) => (d === 0 ? 'ตรง' : `เอียง${d > 0 ? 'ขวา' : 'ซ้าย'} ${Math.abs(d)}°`);
+
+const WIDGETS = {
+  swiss() {
+    const st = (ws[key()] ||= { plug: [] });
+    const stop = SLICES.findIndex((_, k) => st.plug.includes(k));
+    const safe = stop >= 0;
+    // เส้นอันตรายวิ่งจากกลางช่อง "อันตราย" (6 ช่องกว้างเท่ากัน) ถ้าไม่มีแผ่นไหนอุดจะไปจ่อขอบซ้ายของช่องปลายทาง
+    // แผ่นที่อุดแล้วอยู่ชั้นบนกว่าเส้น เส้นจึงดูเหมือนชนแผ่นนั้นแล้วหยุด
+    const end = safe ? stop + 1 : 4.4;
+    return `<div class="sw-stage">
+        <div class="sw-src"><span>อันตราย</span></div>
+        ${SLICES.map((n, k) => {
+          const p = st.plug.includes(k);
+          return `<button class="sw-sl${p ? ' plug' : ''}" style="grid-column:${k + 2}" data-lw="sw:${k}" aria-pressed="${p}" aria-label="ชั้น${n}: ${p ? 'อุดแล้ว แตะเพื่อเปิดรู' : 'แตะเพื่ออุดรู'}">
+            <i class="h" style="top:${HOLES[k][0]}%"></i><i class="h sm" style="top:${HOLES[k][1]}%"></i><i class="h main"></i>
+          </button>`;
+        }).join('')}
+        <div class="sw-out ${safe ? 'ok' : 'bad'}"><span>${safe ? 'ปลอดภัย' : 'อุบัติเหตุ'}</span></div>
+        <div class="sw-ray${safe ? ' cut' : ''}" style="width:${(end * 100) / 6}%" aria-hidden="true"></div>
+        ${SLICES.map((n, k) => `<span class="sw-l" style="grid-column:${k + 2}">${n}</span>`).join('')}
+      </div>
+      <div class="lw-bar"><p class="lw-st" aria-live="polite">${safe
+        ? `อันตรายหยุดที่ชั้น<b>${SLICES[stop]}</b> ไม่ถึงเครื่องบิน`
+        : 'รูทุกชั้นเรียงตรงกัน — อันตรายทะลุถึงเครื่องบิน'}</p>
+        ${st.plug.length ? '<button class="btn" data-lw="sw:reset">เปิดรูทั้งหมด</button>' : ''}</div>`;
+  },
+
+  hfacs() {
+    const st = (ws[key()] ||= { open: 3 });
+    const cats = (H.tax?.hfacs || []).filter((r) => r.level === 'category');
+    const of = (tier) => {
+      const list = cats.filter((r) => r.tier === tier);
+      return list.length ? list : Object.keys(HF_TH).filter((c) => TIER_OF[c[0]] === tier).map((code) => ({ code, label: '' }));
+    };
+    return `<ol class="hf">${TIERS.map(([en, th, d], k) => {
+      const open = st.open === k;
+      const list = of(en);
+      return `<li class="hf-t${open ? ' open' : ''}" style="--w:${100 - (3 - k) * 7}%">
+        <button class="hf-b" data-lw="hf:${k}" aria-expanded="${open}">
+          <span class="n">${4 - k}</span><span class="t"><b>${th}</b><small>${en} · ${list.length} หมวด</small></span>${H.icon('down')}</button>
+        ${open ? `<div class="hf-p"><p>${d}</p><ul>${list.map((r) => `<li><code>${H.esc(r.code)}</code><span>${HF_TH[r.code] || H.esc(r.label)}${r.label ? `<small>${H.esc(r.label)}</small>` : ''}</span></li>`).join('')}</ul></div>` : ''}
+      </li>`;
+    }).join('')}</ol>`;
+  },
+
+  shell() {
+    const st = (ws[key()] ||= { k: 'H' });
+    const cur = SHELL.find((x) => x.k === st.k);
+    const blk = (b, area, lab) => `<span class="sh-b${b === 'L0' || b === st.k || (b === 'L' && st.k === 'L') ? ' hi' : ''}" style="grid-area:${area}"><b>${b === 'L0' ? 'L' : b}</b><small>${lab}</small></span>`;
+    return `<div class="sh">
+        <div class="sh-g">${blk('S', 's', 'ระเบียบ')}${blk('H', 'h', 'เครื่อง')}${blk('L0', 'c', 'คน')}${blk('E', 'e', 'สภาพแวดล้อม')}${blk('L', 'l', 'คนอื่น')}</div>
+        <div class="sh-d">
+          <div class="seg sh-seg" role="group" aria-label="รอยต่อ">${SHELL.map((x) => `<button data-lw="sh:${x.k}" aria-pressed="${x.k === st.k}">${x.n}</button>`).join('')}</div>
+          <div class="sh-info" aria-live="polite"><h3>${cur.th}</h3><p>${cur.d}</p><p class="ex"><span>ตัวอย่าง</span>${cur.ex}</p></div>
+        </div>
+      </div>`;
+  },
+
+  tem() {
+    const st = (ws[key()] ||= { m: [] });
+    const cut = TEM.findIndex((_, k) => st.m.includes(k));
+    const safe = cut >= 0;
+    const node = (x, k) => {
+      const live = !safe || k <= cut;
+      const m = st.m.includes(k);
+      return `<li class="tm-n${live ? '' : ' off'}${k === cut ? ' cut' : ''}">
+        <p class="tm-h"><b>${x.h}</b><small>${x.s}</small></p>
+        <p class="tm-t">${k === cut ? x.m : x.t}</p>
+        <button class="tm-m" data-lw="tm:${k}" aria-pressed="${m}"${live ? '' : ' disabled'}>${m ? H.icon('check') : ''}จัดการได้</button>
+      </li>`;
+    };
+    return `<ol class="tm">${TEM.map(node).join('')}
+        <li class="tm-n tm-end ${safe ? 'ok' : 'bad'}"><p class="tm-h"><b>${safe ? 'จบอย่างปลอดภัย' : 'อุบัติการณ์ / อุบัติเหตุ'}</b><small>Outcome</small></p>
+          <p class="tm-t">${safe ? 'วงจรถูกตัดก่อนถึงปลายทาง' : 'ไม่มีใครจัดการได้ทันสักขั้น — เครื่องวิ่งเลยทางวิ่ง'}</p></li></ol>
+      ${safe ? `<div class="lw-bar"><p class="lw-st ok" aria-live="polite">ตัดวงจรได้ที่ขั้น<b>${TEM[cut].h}</b></p><button class="btn" data-lw="tm:reset">เริ่มใหม่</button></div>` : ''}`;
+  },
+
+  matrix() {
+    const st = (ws[key()] ||= { r: null, c: null });
+    const sel = st.r != null;
+    const lv = sel ? LV[MX[st.r][st.c]] : null;
+    return `<div class="mx-wrap"><table class="mx">
+        <caption class="sr">ตารางความเสี่ยง: แถวคือโอกาสเกิด คอลัมน์คือความรุนแรง</caption>
+        <thead><tr><th scope="col"><span class="mx-ax">โอกาส ↓ · รุนแรง →</span></th>${SEV.map(([en, th]) => `<th scope="col">${th}<small>${en}</small></th>`).join('')}</tr></thead>
+        <tbody>${LIKE.map(([en, th], r) => `<tr><th scope="row">${th}<small>${en}</small></th>${MX[r].map((v, c) =>
+          `<td><button class="mx-c lv-${v}${sel && r === st.r && c === st.c ? ' on' : ''}" data-lw="mx:${r}:${c}" aria-pressed="${sel && r === st.r && c === st.c}" aria-label="${th} × ${SEV[c][1]} = ${LV[v][0]}">${LV[v][0]}</button></td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+      <div class="mx-scen">${SCEN.map((x, k) => `<button class="btn" data-lw="mx:s:${k}" aria-pressed="${st.s === k}">${x.t}</button>`).join('')}</div>
+      <div class="mx-out" aria-live="polite">${sel
+        ? `<p class="mx-lv lv-${MX[st.r][st.c]}"><b>${lv[0]}</b> ${lv[1]}</p><p>${LIKE[st.r][1]} × ${SEV[st.c][1]} → ${lv[2]}</p>`
+        : '<p>แตะช่องในตาราง หรือเลือกตัวอย่างด้านบน · ไม่แน่ใจระหว่างสองช่อง ให้เลือกช่องที่เสี่ยงกว่า</p>'}</div>`;
+  },
+
+  imsafe() {
+    const st = (ws[key()] ||= { ok: [] });
+    const n = st.ok.length;
+    return `<ul class="ims">${IMSAFE.map(([k, en, t], i) => {
+      const on = st.ok.includes(i);
+      return `<li><button class="ims-r${on ? ' on' : ''}" data-lw="im:${i}" aria-pressed="${on}">
+        <span class="l">${k}</span><span class="t"><b>${en}</b>${t}</span><span class="c">${on ? H.icon('check') : ''}</span></button></li>`;
+    }).join('')}</ul>
+      <div class="lw-bar"><p class="lw-st ${n === 6 ? 'ok' : ''}" aria-live="polite">ผ่าน <b>${n}/6</b> — ${n === 6
+        ? 'พร้อมในส่วนของตัวเอง ยังต้องดู PAVE ข้ออื่นต่อ'
+        : 'ข้อที่ยังไม่ผ่าน บอกหัวหน้าเที่ยวบินก่อนบิน'}</p></div>
+      <p class="ims-n">บางตำราให้ E = Eating (กินอาหารและดื่มน้ำพอ) และรวมอารมณ์ไว้กับความเครียด</p>`;
+  },
+
+  gradient() {
+    const st = (ws[key()] ||= { k: 1 });
+    const g = GRAD[st.k];
+    const [a, b] = g.y;
+    return `<div class="gr">
+        <svg class="gr-v" viewBox="0 0 320 140" role="img" aria-label="ระยะห่างของอำนาจแบบ${g.n}">
+          <line class="gr-base" x1="20" y1="132" x2="300" y2="132"/>
+          <line class="gr-ln${g.ok ? ' ok' : ''}" x1="88" y1="${a}" x2="232" y2="${b}"/>
+          <g class="gr-p" style="transform:translateY(${a - 70}px)"><circle cx="88" cy="70" r="15"/><text x="88" y="75">ผบ.</text></g>
+          <g class="gr-p fo" style="transform:translateY(${b - 70}px)"><circle cx="232" cy="70" r="15"/><text x="232" y="75">ผช.</text></g>
+        </svg>
+        <div class="gr-d">
+          <div class="seg" role="group" aria-label="ระดับความชัน">${GRAD.map((x, k) => `<button data-lw="gr:${k}" aria-pressed="${k === st.k}">${x.n}</button>`).join('')}</div>
+          <div class="gr-info" aria-live="polite">
+            <p class="gr-tag ${g.ok ? 'ok' : 'bad'}">${H.icon(g.ok ? 'check' : 'warn')}${g.ok ? 'เหมาะกับงาน' : 'มีความเสี่ยง'}</p>
+            <p>${g.d}</p>
+            <ul>${g.fx.map((t) => `<li>${t}</li>`).join('')}</ul>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  sa3() {
+    const st = (ws[key()] ||= { n: 0 });
+    return `<ol class="sa">${SA3.map((x, k) => {
+      const open = k < st.n;
+      const next = k === st.n;
+      return `<li class="sa-l${open ? ' open' : ''}">
+        <button class="sa-b" data-lw="sa:${k}" aria-expanded="${open}"${open || next ? '' : ' disabled'}>
+          <span class="n">${k + 1}</span><span class="t"><b>${x.h}</b><small>${x.s} · ${x.q}</small></span></button>
+        <p class="sa-t">${open ? x.t : next ? 'แตะเพื่อดูขั้นนี้' : 'เปิดขั้นก่อนหน้าก่อน'}</p>
+      </li>`;
+    }).join('')}</ol>
+      <div class="lw-bar"><p class="lw-st${st.n === 3 ? ' ok' : ''}" aria-live="polite">${st.n === 3
+        ? 'ครบ <b>3 ขั้น</b> — เห็นอย่างเดียวไม่พอ ต้องรู้ว่ามันหมายถึงอะไร และจะไปทางไหน'
+        : `เปิดแล้ว <b>${st.n}/3</b> ขั้น — ระดับที่สูงกว่าต้องอาศัยระดับที่ต่ำกว่า`}</p>
+        ${st.n ? '<button class="btn" data-lw="sa:reset">เริ่มใหม่</button>' : ''}</div>`;
+  },
+
+  decide() {
+    const st = (ws[key()] ||= { k: 0 });
+    const [l, en, th, d, ex] = DEC[st.k];
+    return `<div class="dc">
+        <div class="dc-row" role="group" aria-label="ขั้นของ DECIDE">${DEC.map((x, k) => `<button class="dc-l" data-lw="dc:${k}" aria-pressed="${k === st.k}" aria-label="${x[1]} ${x[2]}"><b>${x[0]}</b><small>${x[1]}</small></button>`).join('')}</div>
+        <div class="dc-p" aria-live="polite">
+          <h3><span>${l}</span>${en} · ${th}</h3>
+          <p>${d}</p>
+          <p class="ex"><span>ตัวอย่าง: ประตูเปิดระหว่างไต่</span>${ex}</p>
+        </div>
+      </div>
+      <div class="lw-bar"><p class="lw-st">ขั้น <b>${st.k + 1}/6</b>${st.k === 5 ? ' — ถ้ายังไม่ได้ผล วนกลับไปขั้น D อีกรอบ' : ''}</p>
+        ${st.k < 5 ? `<button class="btn" data-lw="dc:${st.k + 1}">ขั้นถัดไป</button>` : '<button class="btn" data-lw="dc:0">กลับไปขั้นแรก</button>'}</div>`;
+  },
+
+  attitude() {
+    const st = (ws[key()] ||= { l: null, m: [], bad: null });
+    const done = st.m.length === ATT.length;
+    return `<div class="at">
+        <ul class="at-c" aria-label="ทัศนคติอันตราย">${ATT.map(([th, en, q], i) => {
+          const m = st.m.includes(i);
+          return `<li><button class="at-b${m ? ' ok' : ''}" data-lw="at:l:${i}" aria-pressed="${st.l === i}"${m ? ' disabled' : ''}>
+            <b>${th}</b><small>${en}</small><q>${q.replace(/"/g, '')}</q>${m ? H.icon('check') : ''}</button></li>`;
+        }).join('')}</ul>
+        <ul class="at-c" aria-label="คำแก้">${ATT_R.map((i, j) => {
+          const m = st.m.includes(i);
+          return `<li><button class="at-b anti${m ? ' ok' : ''}${st.bad === j ? ' no' : ''}" data-lw="at:r:${j}"${m || st.l == null ? ' disabled' : ''}>
+            <span>${ATT[i][3]}</span>${m ? `<small>แก้ ${ATT[i][0]}</small>${H.icon('check')}` : ''}</button></li>`;
+        }).join('')}</ul>
+      </div>
+      <div class="lw-bar"><p class="lw-st${done ? ' ok' : ''}" aria-live="polite">${done
+        ? 'จับคู่ครบ <b>5/5</b> — รู้ตัวว่าคิดแบบไหน แล้วพูดคำแก้กับตัวเอง'
+        : st.bad != null ? 'ยังไม่ใช่ — ลองคำแก้อื่น'
+        : st.l == null ? `แตะทัศนคติทางซ้ายก่อน แล้วแตะคำแก้ที่คู่กัน · <b>${st.m.length}/5</b>`
+        : `เลือก <b>${ATT[st.l][0]}</b> แล้ว — แตะคำแก้ที่คู่กัน`}</p>
+        ${st.m.length ? '<button class="btn" data-lw="at:reset">เริ่มใหม่</button>' : ''}</div>`;
+  },
+
+  leans() {
+    const st = (ws[key()] ||= { k: 0 });
+    const p = LEANS[st.k];
+    const ai = (deg, id, lab) => `<figure class="ln-ai">
+        <svg viewBox="0 0 140 140" role="img" aria-label="${lab}: ${bank(deg)}">
+          <defs><clipPath id="${id}"><circle cx="70" cy="70" r="58"/></clipPath></defs>
+          <g clip-path="url(#${id})"><g class="ln-h" style="transform:rotate(${-deg}deg)">
+            <rect class="sky" x="-40" y="-40" width="220" height="110"/><rect class="gnd" x="-40" y="70" width="220" height="110"/>
+            <line x1="-40" y1="70" x2="180" y2="70"/></g></g>
+          <circle class="rim" cx="70" cy="70" r="58"/>
+          <path class="ac" d="M30 70h26l6 8 8-8 8 8 6-8h26"/>
+        </svg>
+        <figcaption><b>${lab}</b>${bank(deg)}</figcaption></figure>`;
+    const miss = p.real !== p.felt;
+    return `<div class="ln">
+        <div class="ln-v">${ai(p.real, 'ln-r', 'เครื่องบินจริง')}${ai(p.felt, 'ln-f', 'หูชั้นในรู้สึก')}</div>
+        <div class="ln-d">
+          <div class="seg ln-seg" role="group" aria-label="ช่วงของการเลี้ยว">${LEANS.map((x, k) => `<button data-lw="ln:${k}" aria-pressed="${k === st.k}">${x.h}</button>`).join('')}</div>
+          <div class="ln-info" aria-live="polite">
+            <p class="gr-tag ${miss ? 'bad' : 'ok'}">${H.icon(miss ? 'warn' : 'check')}${miss ? 'ความรู้สึกไม่ตรงกับความจริง — เชื่อเครื่องวัด' : 'ความรู้สึกตรงกับความจริง'}</p>
+            <p>${p.t}</p>
+          </div>
+        </div>
+      </div>`;
+  },
+
+  awake() {
+    const st = (ws[key()] ||= { h: 8 });
+    const pc = (h) => `${(h / AW_MAX) * 100}%`;
+    return `<div class="aw">
+        <div class="aw-track">
+          <span class="aw-z wf" style="left:${pc(17)};width:${pc(2)}" title="Williamson &amp; Feyer 2000"></span>
+          <span class="aw-z wocl" style="left:${pc(20)};width:${pc(4)}" title="WOCL"></span>
+          <input type="range" min="0" max="${AW_MAX}" step="1" value="${st.h}" data-lwr="aw" aria-label="ชั่วโมงที่ตื่นติดต่อกัน" aria-valuetext="${awText(st.h)}">
+        </div>
+        <div class="aw-ax" aria-hidden="true"><span>ตื่น 06:00</span><span style="left:${pc(10)}">10 ชม.</span><span style="left:${pc(17)}">17</span><span style="left:${pc(20)}">02:00</span><span>26 ชม.</span></div>
+        <div class="aw-live" aria-live="polite">${awLive(st.h)}</div>
+      </div>`;
+  },
+};
+
+const awClock = (h) => `${String((AW_WAKE + h) % 24).padStart(2, '0')}:00`;
+const awText = (h) => `ตื่นมา ${h} ชั่วโมง เวลา ${awClock(h)}`;
+function awLive(h) {
+  const hr = (AW_WAKE + h) % 24;
+  const fx = [];
+  if (h > 10) fx.push(['warn', `ประสิทธิภาพลดลงราว <b>${((h - 10) * 0.74).toFixed(1)}%</b> จากค่าตั้งต้น <small>Dawson &amp; Reid 1997 วัดได้ราว 0.74% ต่อชั่วโมง ระหว่างชั่วโมงที่ 10–26</small>`]);
+  if (h >= 17) fx.push(['bad', `ผลทดสอบบางอย่าง <b>เท่ากับหรือแย่กว่า</b> คนที่มีแอลกอฮอล์ในเลือด 0.05% <small>Williamson &amp; Feyer 2000 · ตื่น 17–19 ชั่วโมง</small>`]);
+  if (hr >= 2 && hr < 6) fx.push(['bad', `อยู่ในช่วง <b>ตื่นตัวต่ำ (WOCL)</b> ราว 02:00–05:59 — ง่วงที่สุดของวัน แม้นอนพอ <small>SKYbrary</small>`]);
+  return `<p class="aw-n"><b>${h}</b> ชม. <span>ตอนนี้ ${awClock(h)}</span></p>
+    ${fx.length
+      ? `<ul class="aw-fx">${fx.map(([c, t]) => `<li class="${c}">${H.icon('warn')}<span>${t}</span></li>`).join('')}</ul>`
+      : `<p class="aw-ok">${h < 10 ? 'ยังไม่ถึงช่วงที่งานวิจัยวัดการลดลง (เริ่มนับที่ชั่วโมงที่ 10) — แต่ขึ้นกับการนอนคืนก่อนด้วย' : 'เริ่มเข้าช่วงที่ประสิทธิภาพลดลง'}</p>`}`;
+}
+
+/* ── การแตะ / คีย์บอร์ด / ปัด ─────────────────────────────── */
+
+function go(dir) {
+  const N = deckOf(L).length;
+  const to = idx + dir;
+  if (to < 0 || to >= N) return;
+  idx = to; // ตั้งทันที กดรัวแล้วไม่ข้ามหน้า
+  location.replace(url(L.id, to));
+}
+
+function exit() {
+  if (from != null && !from.startsWith('/theory/')) { from = null; history.back(); }
+  else location.replace('#/theory');
+}
+
+function onWidget(v) {
+  const [w, a, b] = v.split(':');
+  const st = ws[key()];
+  if (w === 'sw') {
+    if (a === 'reset') st.plug = [];
+    else { const k = +a; st.plug = st.plug.includes(k) ? st.plug.filter((x) => x !== k) : [...st.plug, k]; }
+  } else if (w === 'hf') st.open = st.open === +a ? -1 : +a;
+  else if (w === 'sh') st.k = a;
+  else if (w === 'tm') {
+    if (a === 'reset') st.m = [];
+    else { const k = +a; st.m = st.m.includes(k) ? st.m.filter((x) => x !== k) : [...st.m, k]; }
+  } else if (w === 'mx') {
+    if (a === 's') Object.assign(st, { r: SCEN[+b].r, c: SCEN[+b].c, s: +b });
+    else Object.assign(st, { r: +a, c: +b, s: SCEN.findIndex((x) => x.r === +a && x.c === +b) });
+  } else if (w === 'im') {
+    const k = +a;
+    st.ok = st.ok.includes(k) ? st.ok.filter((x) => x !== k) : [...st.ok, k];
+  } else if (w === 'gr' || w === 'dc' || w === 'ln') st.k = +a;
+  else if (w === 'sa') st.n = a === 'reset' ? 0 : Math.max(st.n, +a + 1);
+  else if (w === 'at') {
+    if (a === 'reset') Object.assign(st, { l: null, m: [], bad: null });
+    else if (a === 'l') Object.assign(st, { l: +b, bad: null });
+    else if (st.l != null) {
+      if (ATT_R[+b] === st.l) { st.m.push(st.l); Object.assign(st, { l: null, bad: null }); }
+      else st.bad = +b;
+    }
+  }
+  const sel = a === 'reset' ? null : `[data-lw="${v}"]`;
+  redraw(sel);
+  navigator.vibrate?.(8);
+}
+
+let wired = false;
+function wire() {
+  if (wired) return;
+  wired = true;
+  const on = () => document.body.classList.contains('lesson') && L;
+
+  H.main.addEventListener('click', (e) => {
+    const t = e.target.closest('button, a');
+    if (t?.dataset.lsel != null && !L) { pick(Number(t.dataset.lsel)); return; }
+    if (!t || !on()) return;
+    const d = t.dataset;
+    if (d.lgo) { if (d.lgo === 'restart') { idx = 0; location.replace(url(L.id, 0)); } else go(Number(d.lgo)); return; }
+    if (t.hasAttribute('data-lx')) { e.preventDefault(); exit(); return; }
+    if (d.lnext) { location.replace(url(d.lnext, 0)); return; }
+    if (d.lw) { onWidget(d.lw); return; }
+    if (d.lq) {
+      const st = (ws[key()] ||= {});
+      if (st.pick != null) return;
+      st.pick = Number(d.lq);
+      redraw('.ls-why');
+      H.main.querySelector('.ls-why')?.scrollIntoView({ block: 'nearest', behavior: H.reduced.matches ? 'auto' : 'smooth' });
+      navigator.vibrate?.(st.pick === deckOf(L)[idx].a ? 10 : [10, 60, 10]);
+      return;
+    }
+    if (d.lflip) {
+      const st = ws[key()];
+      const n = deckOf(L)[idx].items.length;
+      if (d.lflip === 'all') st.open = st.open.length === n ? [] : [...Array(n).keys()];
+      else { const k = +d.lflip; st.open = st.open.includes(k) ? st.open.filter((x) => x !== k) : [...st.open, k]; }
+      redraw(`[data-lflip="${d.lflip}"]`);
+    }
+  });
+
+  // แถบเลื่อน (ตื่นติดต่อกัน) วาดใหม่เฉพาะผลลัพธ์ ไม่วาดทั้งสไลด์ ไม่อย่างนั้นลากไม่ต่อเนื่อง
+  H.main.addEventListener('input', (e) => {
+    const r = e.target.closest?.('[data-lwr="aw"]');
+    if (!r || !on()) return;
+    const h = Number(r.value);
+    ws[key()].h = h;
+    r.setAttribute('aria-valuetext', awText(h));
+    const live = H.main.querySelector('.aw-live');
+    if (live) live.innerHTML = awLive(h);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    // ลูกศรบนแผนที่เส้นทาง: เลื่อนไปจุดก่อน/ถัดไป
+    const wp = e.target.closest?.('.wp');
+    if (wp && !L && ['ArrowRight', 'ArrowLeft'].includes(e.key)) {
+      e.preventDefault();
+      const i = Number(wp.dataset.lsel) + (e.key === 'ArrowRight' ? 1 : -1);
+      if (i >= 0 && i < LESSONS.length) pick(i, true);
+      return;
+    }
+    if (!on() || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key !== 'Escape' && e.target.closest?.('input, textarea, select')) return; // ลูกศรบนแถบเลื่อนเป็นของแถบเลื่อน
+    const onBtn = e.target.closest?.('button, a');
+    // Space บนปุ่มให้กดปุ่มนั้น (เลือกคำตอบ พลิกการ์ด) ไม่ใช่เลื่อนสไลด์
+    if (['ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !onBtn)) { e.preventDefault(); go(1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    else if (e.key === 'Escape') exit();
+  });
+
+  // ปัดซ้าย/ขวาเลื่อนสไลด์ · เริ่มปัดบนภาพโต้ตอบ (ตารางเลื่อนแนวนอนได้) ไม่นับ
+  let x0 = null;
+  let y0 = 0;
+  document.addEventListener('touchstart', (e) => {
+    x0 = on() && !e.target.closest('.nosw') ? e.touches[0].clientX : null;
+    y0 = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (x0 == null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+  }, { passive: true });
+}

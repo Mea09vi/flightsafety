@@ -1,5 +1,6 @@
 // W2 Safety Brief — vanilla JS, hash routing, ไม่มี build step
-// เส้นทาง: #/  #/results  #/case/:id  #/brief (หน้าปก)  #/brief/:id[/ประเด็น]  #/brief/end  #/dashboard  #/areas  #/about
+// เส้นทาง: #/ (หน้าหลัก)  #/filter  #/results  #/case/:id  #/brief (หน้าปก)  #/brief/:id[/ประเด็น]  #/brief/end
+//          #/dashboard  #/areas  #/about  #/theory  #/theory/:บท[/สไลด์]
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -30,8 +31,19 @@ const TYPE = {
 };
 const SRC_RANK = { W2: 0, RTAF: 1, INTL: 2 };
 const SHOW_TOP = 3;
+// ป้ายแหล่งข้อมูลภาษาไทย · เคส INTL ของ AAIC เป็นอากาศยานพลเรือนในไทย (DECISIONS.md หัวข้อ "แหล่ง")
+const SRC_TH = { W2: 'บน.2', RTAF: 'ทอ.', INTL: 'ต่างประเทศ' };
+const srcLabel = (c) => (c.source === 'INTL' && /AAIC/.test(c.ref_label || '') ? 'พลเรือนไทย' : SRC_TH[c.source] ?? c.source);
+// ขั้น "ข้อมูลจาก" ในหน้าเลือกเที่ยวบิน
+const SRC_SET = { TH: ['W2', 'RTAF'], INTL: ['INTL'], ALL: ['W2', 'RTAF', 'INTL'] };
+const SRC_OPT = [
+  { v: 'TH', th: 'กองทัพอากาศไทย', short: 'ทอ. ไทย', sub: 'บน.2 และหน่วยอื่นของ ทอ.' },
+  { v: 'INTL', th: 'ต่างประเทศ', short: 'ต่างประเทศ', sub: 'รายงานสอบสวนสาธารณะ · รวมพลเรือนไทย (AAIC)' },
+  { v: 'ALL', th: 'ทั้งหมด', short: 'ทั้งหมด', sub: 'ทั้งของ ทอ. และต่างประเทศ' },
+];
+const srcOpt = (v) => SRC_OPT.find((o) => o.v === v) ?? SRC_OPT[2];
 
-const EMPTY_SEL = { aircraft: null, mission: null, environment: [], phase: [], hfacs: [], area: null };
+const EMPTY_SEL = { src: 'ALL', aircraft: null, mission: null, environment: [], phase: [], hfacs: [], area: null };
 // ค่าเริ่มต้น 10 ปี: กราฟรายปีอ่านง่ายบนมือถือ และเป็นช่วงที่ยังเกี่ยวกับการบินปัจจุบัน
 const DASH0 = { src: 'ALL', ac: 'ALL', span: '10Y' };
 const state = {
@@ -42,8 +54,7 @@ const state = {
   unitVersion: '',
   unitStatus: 'missing', // missing | locked | unlocked
   sel: { ...EMPTY_SEL, ...LS.get('sel', {}) },
-  showAll: false,
-  nearOpen: false,
+  open: {}, // กลุ่มผลลัพธ์ที่กด "ดูอีก" ไว้ { a, b, c }
   dash: { ...DASH0, ...LS.get('dash', {}) },
   drill: null, // { k, v, l } แท่งที่กดในหน้าภาพรวม
   dashDeck: [],
@@ -157,38 +168,45 @@ const hit = (arr, v) => arr.includes('ALL') || arr.includes(v);
 const anyHit = (arr, vs) => arr.includes('ALL') || vs.some((v) => arr.includes(v));
 const overlap = (arr, vs) => vs.filter((v) => arr.includes(v)).length;
 const ready = (s = state.sel) => !!(s.aircraft && s.mission && s.environment.length);
+const inSrc = (c, s = state.sel) => (SRC_SET[s.src] ?? SRC_SET.ALL).includes(c.source);
+
+/* กลุ่มผลลัพธ์ (DECISIONS.md "การจัดกลุ่มผลลัพธ์")
+   a = ติดแบบ ฮ. ที่เลือก + ตรงภารกิจและสภาพอากาศ
+   b = ติดแบบ ฮ. ที่เลือก + ตรงภารกิจหรือสภาพอากาศอย่างใดอย่างหนึ่ง
+   c = ติด ALL แต่ไม่ได้ติดแบบที่เลือก + ตรงภารกิจและสภาพอากาศ
+   เคสที่ติดแต่แบบอื่นไม่ขึ้นเลย · ALL ในภารกิจ/สภาพอากาศยังนับว่าตรง */
+const GROUPS = ['a', 'b', 'c'];
 
 function match() {
   const s = state.sel;
-  const strict = [], near = [];
-  if (!ready(s)) return { strict, near };
+  const g = { a: [], b: [], c: [] };
+  if (!ready(s)) return { ...g, all: [] };
   for (const c of allCases()) {
-    const m = [hit(c.aircraft, s.aircraft), hit(c.mission, s.mission), anyHit(c.environment, s.environment)];
-    const n = m.filter(Boolean).length;
+    if (!inSrc(c, s)) continue;
+    const own = c.aircraft.includes(s.aircraft);
+    if (!own && !c.aircraft.includes('ALL')) continue;
+    const m = [own, hit(c.mission, s.mission), anyHit(c.environment, s.environment)];
+    const n = m[1] + m[2];
+    const key = n === 2 ? (own ? 'a' : 'c') : n === 1 && own ? 'b' : null;
+    if (!key) continue;
     const opt = overlap(c.phase, s.phase)
       + overlap(c.hfacs.map(hfacsCat), s.hfacs)
       + (s.area && c.area_id === s.area ? 1 : 0);
-    // ตรงจริง ไม่ใช่ผ่าน ALL: แบบ ฮ. > ภารกิจ > สภาพแวดล้อม — เคสเฉพาะแบบขึ้นก่อนเคสทุกแบบ
-    const spec = (c.aircraft.includes(s.aircraft) ? 4 : 0) + (c.mission.includes(s.mission) ? 2 : 0)
-      + (overlap(c.environment, s.environment) ? 1 : 0);
-    const item = { c, m, opt, spec };
-    if (n === 3) strict.push(item);
-    else if (n === 2) near.push(item);
+    // ตรงจริง ไม่ใช่ผ่าน ALL: ภารกิจ > สภาพแวดล้อม
+    const spec = (c.mission.includes(s.mission) ? 2 : 0) + (overlap(c.environment, s.environment) ? 1 : 0);
+    g[key].push({ c, m, opt, spec, g: key });
   }
-  // เคสของหน่วย (W2) ขึ้นก่อนเสมอ แล้วจึงดูตัวกรองเสริม → ความเฉพาะเจาะจง → RTAF > INTL → ปีใหม่กว่า
-  const unitFirst = (a, b) => (a.c.source !== 'W2') - (b.c.source !== 'W2');
-  const order = (a, b) => unitFirst(a, b) || b.opt - a.opt || b.spec - a.spec
+  // ในแต่ละกลุ่ม: W2 ก่อน → ตัวกรองเสริม → ความเฉพาะเจาะจง → RTAF > INTL → ปีใหม่กว่า
+  const order = (a, b) => (a.c.source !== 'W2') - (b.c.source !== 'W2') || b.opt - a.opt || b.spec - a.spec
     || SRC_RANK[a.c.source] - SRC_RANK[b.c.source] || b.c.year - a.c.year;
-  strict.sort(order);
-  // เคสใกล้เคียง: W2 ก่อน แล้วแบบ ฮ. เดียวกันขึ้นก่อน
-  near.sort((a, b) => unitFirst(a, b) || b.m[0] - a.m[0] || order(a, b));
-  return { strict, near };
+  for (const k of GROUPS) g[k].sort(order);
+  return { ...g, all: [...g.a, ...g.b, ...g.c] };
 }
 
 // ลำดับเคสสำหรับปุ่มก่อนหน้า/ถัดไป = เคสที่เห็นอยู่ในหน้ารายการ (โหมดบรีฟใช้ชุดที่เลือกเข้าบรีฟ ดู briefSet)
 function deck() {
-  const { shown, nearShown } = visible();
-  return [...shown, ...nearShown].map((x) => x.c.id);
+  const { shown } = visible();
+  return GROUPS.flatMap((k) => shown[k]).map((x) => x.c.id);
 }
 function deckFor(id) {
   if (state.from === 'dashboard') return state.dashDeck.includes(id) ? state.dashDeck : [id];
@@ -205,13 +223,14 @@ const dot = (cls) => `<i class="dot ${cls}" aria-hidden="true"></i>`;
 function tags(c, { year = true } = {}) {
   const [th, cls] = typeOf(c);
   return `<span class="tag type">${dot(cls)}${esc(th)}</span>`
-    + `<span class="tag src ${esc(c.source)}">${esc(c.source)}</span>`
+    + `<span class="tag src ${esc(c.source)}">${esc(srcLabel(c))}</span>`
     + (year ? `<span class="yr">${esc(c.year)}</span>` : '')
     + (c.status !== 'published' ? `<span class="tag draft" title="ยังไม่ผ่านการตรวจทาน">${dot('hollow')}ร่าง</span>` : '');
 }
 
 // ค่าที่เลือกไว้ แสดงเป็นคำไทย
 const selText = {
+  src: (s) => srcOpt(s.src).short,
   aircraft: (s) => s.aircraft || '',
   mission: (s) => (s.mission ? label('mission', s.mission) : ''),
   environment: (s) => s.environment.map((e) => label('environment', e)).join(' · '),
@@ -236,7 +255,11 @@ const wide = matchMedia('(min-width: 1024px)');
 
 /* ── หน้าเลือกเที่ยวบิน ───────────────────────────────────── */
 
+// ช่องที่จะเลือกให้หลังปลดล็อกสำเร็จ (กดช่อง "กองทัพอากาศไทย" ตอนยังล็อกอยู่)
+let wantSrc = null;
+
 const STEPS = [
+  { k: 'src', th: 'ข้อมูลจาก', short: 'ข้อมูลจาก' },
   { k: 'aircraft', th: 'แบบ ฮ.', short: 'แบบ ฮ.' },
   { k: 'mission', th: 'ภารกิจ', short: 'ภารกิจ' },
   { k: 'environment', th: 'อากาศ / สภาพแวดล้อม', short: 'สภาพอากาศ' },
@@ -251,14 +274,37 @@ function viewFilter() {
   const tiers = {};
   for (const h of t.hfacs) if (h.level === 'category') (tiers[h.tier] ??= []).push(h);
   const optCount = state.sel.phase.length + state.sel.hfacs.length + (state.sel.area ? 1 : 0);
+  // กดปลดล็อกจากช่อง "กองทัพอากาศไทย" แล้วปลดล็อกสำเร็จ → เลือกช่องนั้นให้เลย
+  if (wantSrc && state.unitStatus === 'unlocked') { state.sel.src = wantSrc; LS.set('sel', state.sel); }
+  wantSrc = null;
+
+  const st = state.unitStatus;
+  const srcN = (v) => allCases().filter((c) => SRC_SET[v].includes(c.source)).length;
+  const srcTile = (o) => {
+    const head = `<span class="code">${esc(o.th)}</span>`;
+    if (o.v === 'TH' && st === 'locked') {
+      return `<button class="tile src-t locked" data-act="unlock" data-v="TH">${head}
+        <span class="lab">${icon('lock')}ล็อกอยู่ · แตะเพื่อใส่รหัสหน่วย</span></button>`;
+    }
+    if (o.v === 'TH' && st === 'missing') {
+      return `<button class="tile src-t" disabled>${head}<span class="lab">ยังไม่มีข้อมูลหน่วยในเวอร์ชันนี้</span></button>`;
+    }
+    return `<button class="tile src-t" data-k="src" data-v="${o.v}" aria-pressed="false">${head}
+      <span class="lab">${esc(o.sub)}</span><span class="n">${srcN(o.v)} เคส</span>${ck}</button>`;
+  };
 
   main.innerHTML = `<div class="lay"><div class="view filter">
     <p class="eyebrow">บรีฟก่อนบิน · บน.2 · ${esc(thDate())}</p>
     <h1 class="page-h">เที่ยวบิน<em>วันนี้</em></h1>
     ${steps()}
 
+    <section class="step" id="st-src">
+      <div class="step-h"><span class="num">01</span><h2>ข้อมูลจาก</h2><span class="hint"></span></div>
+      <div class="tiles src-tiles" role="group" aria-label="แหล่งข้อมูล">${SRC_OPT.map(srcTile).join('')}</div>
+    </section>
+
     <section class="step" id="st-aircraft">
-      <div class="step-h"><span class="num">01</span><h2>แบบ ฮ.</h2><span class="hint"></span></div>
+      <div class="step-h"><span class="num">02</span><h2>แบบ ฮ.</h2><span class="hint"></span></div>
       ${Object.entries(squadrons).map(([q, list]) => `<div class="sqn" role="group" aria-label="ฝูง ${q}">
         <p class="sqn-l">ฝูง<b>${esc(q)}</b></p>
         <div class="tiles">${list.map((a) => `<button class="tile" data-k="aircraft" data-v="${esc(a.code)}" aria-pressed="false">
@@ -267,24 +313,24 @@ function viewFilter() {
     </section>
 
     <section class="step" id="st-mission">
-      <div class="step-h"><span class="num">02</span><h2>ภารกิจ</h2><span class="hint"></span></div>
+      <div class="step-h"><span class="num">03</span><h2>ภารกิจ</h2><span class="hint"></span></div>
       <div class="chips">${t.mission.map((x) => chip('mission', x)).join('')}</div>
     </section>
 
     <section class="step" id="st-environment">
-      <div class="step-h"><span class="num">03</span><h2>อากาศ / สภาพแวดล้อม</h2><span class="hint"></span></div>
+      <div class="step-h"><span class="num">04</span><h2>อากาศ / สภาพแวดล้อม</h2><span class="hint"></span></div>
       <div class="chips">${t.environment.map((x) => chip('environment', x)).join('')}</div>
     </section>
 
     <details class="opt step" id="st-opt"${optCount ? ' open' : ''}>
-      <summary class="step-h"><span class="num">04</span><h2>เพิ่มเติม <span class="note">ไม่บังคับ</span></h2><span class="hint" id="opt-hint"></span>${icon('down')}</summary>
+      <summary class="step-h"><span class="num">05</span><h2>เพิ่มเติม <span class="note">ไม่บังคับ</span></h2><span class="hint" id="opt-hint"></span>${icon('down')}</summary>
       <div class="body">
         <div><p class="sub-h">ขั้นตอนการบิน</p><div class="chips">${t.phase.map((x) => chip('phase', x)).join('')}</div></div>
         <div><p class="sub-h">หมวดสาเหตุ (HFACS)</p>
           ${Object.entries(tiers).map(([tier, list]) => `<p class="tier-h">${esc(tier)}</p>
             <div class="chips">${list.map((h) => `<button class="chip" data-k="hfacs" data-v="${esc(h.code)}" aria-pressed="false">${ck}${esc(h.label)}<small>${esc(h.code)}</small></button>`).join('')}</div>`).join('')}
         </div>
-        <div><p class="sub-h">พื้นที่</p><p class="note">ยังเลือกไม่ได้ เพราะยังไม่มีรายการ hazard ประจำพื้นที่ — จะเพิ่มหลังได้ไฟล์จาก FSO คนเดิม ระหว่างนี้ดูเคสได้จาก 3 ขั้นด้านบน</p></div>
+        <div><p class="sub-h">พื้นที่</p><p class="note">ยังเลือกไม่ได้ เพราะยังไม่มีรายการ hazard ประจำพื้นที่ — จะเพิ่มหลังได้ไฟล์จาก FSO คนเดิม ระหว่างนี้ดูเคสได้จากขั้นด้านบน</p></div>
       </div>
     </details>
   </div>
@@ -299,10 +345,14 @@ function viewFilter() {
 // แผงด้านขวาบนจอคอมฯ: ค่าที่เลือก (แตะเพื่อกลับไปแก้) + จำนวนเคสที่ตรง
 function sideSum(s) {
   const optN = s.phase.length + s.hfacs.length;
-  let counts = '<p class="note">เลือกให้ครบ 3 ขั้นเพื่อดูบทเรียน</p>';
+  let counts = '<p class="note">เลือกแบบ ฮ. ภารกิจ และสภาพอากาศให้ครบเพื่อดูบทเรียน</p>';
   if (ready(s)) {
-    const { strict, near } = match();
-    counts = `<p class="side-n"><b>${strict.length}</b> เคสตรงเที่ยวบินนี้${near.length ? `<span>+${near.length} ใกล้เคียง</span>` : ''}</p>`;
+    const { a, b, c } = match();
+    counts = `<p class="side-n"><b>${a.length}</b> เคสตรงเที่ยวบินนี้</p>
+      <ul class="side-g">
+        <li><i class="g-b"></i>${esc(s.aircraft)} ต่าง 1 เงื่อนไข<b>${b.length}</b></li>
+        <li><i class="g-c"></i>แบบอื่น · ใช้ได้ทุกแบบ<b>${c.length}</b></li>
+      </ul>`;
   }
   return `<p class="side-h">เที่ยวบินนี้</p>
     <ul class="side-sel">${STEPS.map((st) => {
@@ -325,9 +375,11 @@ function syncFilter() {
     const done = Array.isArray(s[st.k]) ? s[st.k].length > 0 : !!s[st.k];
     el.classList.toggle('done', done);
     el.classList.remove('need');
-    $('.hint', el).textContent = done
-      ? (st.k === 'environment' ? `เลือก ${s.environment.length} ข้อ` : 'เลือกแล้ว')
-      : (st.k === 'environment' ? 'เลือกได้หลายข้อ' : 'เลือก 1 ข้อ');
+    $('.hint', el).textContent = st.k === 'src'
+      ? `ค้นจาก ${allCases().filter((c) => inSrc(c, s)).length} เคส`
+      : done
+        ? (st.k === 'environment' ? `เลือก ${s.environment.length} ข้อ` : 'เลือกแล้ว')
+        : (st.k === 'environment' ? 'เลือกได้หลายข้อ' : 'เลือก 1 ข้อ');
   }
   const optN = s.phase.length + s.hfacs.length;
   $('#opt-hint').textContent = optN ? `เลือก ${optN} ข้อ` : '';
@@ -340,10 +392,11 @@ function syncFilter() {
     go.innerHTML = `เลือก${miss.th}ต่อ ${icon('next')}`;
     go.dataset.miss = miss.k;
   } else {
-    const { strict, near } = match();
+    const { a, b, c } = match();
+    const more = b.length + c.length;
     go.className = 'btn btn-primary';
-    go.innerHTML = `ดูบทเรียน <span class="count">${strict.length}</span>`
-      + (near.length ? ` <span class="near">+${near.length} ใกล้เคียง</span>` : '');
+    go.innerHTML = `ดูบทเรียน <span class="count">${a.length}</span>`
+      + (more ? ` <span class="near">+${more} ใกล้เคียง</span>` : '');
     delete go.dataset.miss;
   }
 }
@@ -365,11 +418,10 @@ function toggleSel(k, v) {
     const i = s[k].indexOf(v);
     if (i < 0) s[k].push(v); else s[k].splice(i, 1);
   } else {
-    s[k] = s[k] === v ? null : v;
+    s[k] = k === 'src' ? v : (s[k] === v ? null : v); // "ข้อมูลจาก" ต้องมีค่าเสมอ
   }
   LS.set('sel', s);
-  state.showAll = false;
-  state.nearOpen = false;
+  state.open = {};
   syncFilter();
   // ช่วยให้ครบใน ~5 แตะ: เลือกขั้นบังคับแล้วเลื่อนไปขั้นถัดไปที่ยังไม่ได้เลือก
   if (!before && (k === 'aircraft' || k === 'mission') && s[k]) {
@@ -388,8 +440,10 @@ function matchLine({ c, m }) {
   const s = state.sel;
   const labs = (kind, arr) => arr.map((v) => label(kind, v)).join('/');
   const miss = (k, txt) => `<span class="miss">ต่าง${k}: ${esc(txt)}</span>`;
+  // กลุ่ม ค: บอกว่าเกิดกับแบบไหน เพื่อไม่ให้เข้าใจผิดว่าเป็นเคสของแบบที่เลือก
+  const other = c.aircraft.filter((a) => a !== 'ALL');
   const parts = [
-    m[0] ? (c.aircraft.includes('ALL') ? 'ทุกแบบ' : esc(s.aircraft)) : miss('แบบ', c.aircraft.join('/')),
+    m[0] ? esc(s.aircraft) : `<span class="oth">${other.length ? `เกิดกับ ${esc(other.join('/'))} · ` : ''}ใช้ได้ทุกแบบ</span>`,
     m[1] ? (c.mission.includes('ALL') ? 'ทุกภารกิจ' : esc(label('mission', s.mission))) : miss('ภารกิจ', labs('mission', c.mission)),
     m[2] ? (c.environment.includes('ALL') ? 'ทุกสภาพอากาศ' : esc(labs('environment', s.environment.filter((e) => c.environment.includes(e)))))
       : miss('สภาพอากาศ', labs('environment', c.environment)),
@@ -411,24 +465,24 @@ function card(item) {
 
 /* เรื่องที่เลือกเข้าบรีฟ (ปุ่ม +/✓): จำต่อชุดตัวกรอง เปลี่ยนตัวกรองแล้วกลับไปใช้ 3 อันดับแรก */
 function selKey(s = state.sel) {
-  return JSON.stringify([s.aircraft, s.mission, [...s.environment].sort(), [...s.phase].sort(), [...s.hfacs].sort(), s.area]);
+  return JSON.stringify([s.src, s.aircraft, s.mission, [...s.environment].sort(), [...s.phase].sort(), [...s.hfacs].sort(), s.area]);
 }
-function picks({ strict, near } = match()) {
-  const order = [...strict, ...near].map((x) => x.c.id);
+// ค่าเริ่มต้น = 3 อันดับแรกเรียงกลุ่ม ก → ข → ค
+function picks(m = match()) {
+  const order = m.all.map((x) => x.c.id);
   const saved = LS.get('picks', null);
-  const ids = saved && saved.key === selKey() ? saved.ids
-    : (strict.length ? strict : near).slice(0, SHOW_TOP).map((x) => x.c.id);
+  const ids = saved && saved.key === selKey() ? saved.ids : order.slice(0, SHOW_TOP);
   return ids.filter((id) => order.includes(id)).sort((a, b) => order.indexOf(a) - order.indexOf(b));
 }
 function setPicks(ids) { LS.set('picks', { key: selKey(), ids }); }
 
-// แถวที่เห็นในหน้ารายการ: 3 อันดับแรก + เรื่องที่เลือกไว้ (หรือทั้งหมดเมื่อกด "ดูเพิ่ม")
+// แถวที่เห็นในแต่ละกลุ่ม: 3 อันดับแรก + เรื่องที่เลือกไว้ (หรือทั้งกลุ่มเมื่อกด "ดูอีก")
 function visible() {
   const m = match();
   const pk = picks(m);
-  const shown = m.strict.filter((x, i) => state.showAll || i < SHOW_TOP || pk.includes(x.c.id));
-  const nearShown = m.near.filter((x) => state.nearOpen || !m.strict.length || pk.includes(x.c.id));
-  return { ...m, pk, shown, nearShown };
+  const shown = {};
+  for (const k of GROUPS) shown[k] = m[k].filter((x, i) => state.open[k] || i < SHOW_TOP || pk.includes(x.c.id));
+  return { ...m, pk, shown };
 }
 
 const pickBtn = (c, on) => `<button class="pick" data-pick="${esc(c.id)}" aria-pressed="${on}" aria-label="เลือกเข้าบรีฟ: ${esc(c.title)}" title="เลือกเข้าบรีฟ">${icon('plus', 'ic off')}${icon('check', 'ic on')}</button>`;
@@ -448,53 +502,64 @@ function pickList(pk) {
 }
 
 function viewResults() {
-  if (!ready()) { location.replace('#/'); return; }
-  const { strict, near, pk, shown, nearShown } = visible();
+  if (!ready()) { location.replace('#/filter'); return; }
+  const m = visible();
+  const { all, pk, shown } = m;
   const s = state.sel;
+  const ac = esc(s.aircraft);
+  const locked = state.unitStatus === 'locked';
+  const pool = allCases().filter((c) => inSrc(c, s)).length;
   const row = (x) => `<li><span class="yr">${esc(x.c.year)}</span>
     <a class="rt" href="#/case/${encodeURIComponent(x.c.id)}"><b>${esc(x.c.title)}</b><span class="meta">${tags(x.c, { year: false })}</span><span class="ml">${matchLine(x)}</span></a>
     ${pickBtn(x.c, pk.includes(x.c.id))}</li>`;
+  // หัวกลุ่ม: ตัวอักษร ก/ข/ค + คำอธิบายว่าทำไมเคสถึงอยู่ในกลุ่มนี้
+  const GH = {
+    a: ['ก', `${ac} · ตรงทั้งภารกิจและสภาพอากาศ`, 'ตรงเที่ยวบินนี้ที่สุด ใช้บรีฟได้ทันที'],
+    b: ['ข', `${ac} · ต่างภารกิจหรือสภาพอากาศ`, 'แบบเดียวกัน แต่ต่างไป 1 เงื่อนไข — ข้อความสีส้มบอกว่าต่างตรงไหน'],
+    c: ['ค', 'แบบอื่น · บทเรียนใช้ได้ทุกแบบ', `เกิดกับ ฮ. แบบอื่น แต่บทเรียนไม่ขึ้นกับแบบ · ตรงทั้งภารกิจและสภาพอากาศ`],
+  };
 
-  const filt = [s.aircraft, label('mission', s.mission), ...s.environment.map((e) => label('environment', e))];
-  let html = `<div class="lay${strict.length || near.length ? '' : ' solo'}"><div class="view results">
+  const filt = [`ข้อมูล${srcOpt(s.src).th}`, s.aircraft, label('mission', s.mission), ...s.environment.map((e) => label('environment', e))];
+  let html = `<div class="lay${all.length ? '' : ' solo'}"><div class="view results">
     <p class="eyebrow">บรีฟก่อนบิน · ${esc(thDate())}</p>
-    <div class="filt" aria-label="ตัวกรองที่ใช้">${filt.map((f) => `<span>${esc(f)}</span>`).join('')}<a class="edit" href="#/">แก้</a></div>`;
+    <div class="filt" aria-label="ตัวกรองที่ใช้">${filt.map((f) => `<span>${esc(f)}</span>`).join('')}<a class="edit" href="#/filter">แก้</a></div>`;
+  const lockNote = locked && s.src !== 'INTL'
+    ? `<p class="note dash-note">${icon('lock')}<span>ข้อมูลหน่วย (บน.2 / ทอ.) ยังล็อกอยู่ ผลนี้มีแต่เคสต่างประเทศ · <a href="#/results" data-act="unlock">ใส่รหัสหน่วย</a></span></p>` : '';
 
-  if (strict.length) {
-    const types = {};
-    for (const x of strict) types[x.c.type] = (types[x.c.type] || 0) + 1;
-    html += `<div class="hero"><span class="big">${strict.length}</span><div>
-        <h1>บทเรียนตรงเที่ยวบินนี้</h1><p>ตรงครบ 3 เงื่อนไข · จากทั้งหมด ${allCases().length} เคส</p></div></div>
-      <div class="mix">${Object.entries(types).sort((a, b) => b[1] - a[1]).map(([t, n]) => {
-        const [th, cls] = typeOf({ type: t });
-        return `<div class="${cls === 'bad' ? 'c-bad' : 'c-warn'}">${esc(th)}<b>${n}</b><i style="--w:${(n / strict.length) * 100}%"></i></div>`;
-      }).join('')}</div>
+  if (all.length) {
+    const from = `ค้นจาก ${pool} เคส${s.src === 'ALL' ? '' : ` (${esc(srcOpt(s.src).th)})`}`;
+    // ไม่มีกลุ่ม ก: ตัวเลขใหญ่เป็นจำนวนเคสใกล้เคียง (ข + ค) และบอกตรง ๆ ว่ายังไม่มีเคสที่ตรงทั้งหมด
+    html += m.a.length
+      ? `<div class="hero"><span class="big">${m.a.length}</span><div>
+        <h1>บทเรียนตรงเที่ยวบินนี้</h1><p>${ac} · ตรงทั้งภารกิจและสภาพอากาศ · ${from}</p></div></div>`
+      : `<div class="hero near"><span class="big">${all.length}</span><div>
+        <h1>บทเรียนใกล้เคียงเที่ยวบินนี้</h1><p>ยังไม่มีเคส ${ac} ที่ตรงทั้งภารกิจและสภาพอากาศ · ${from}</p></div></div>`;
+    html += `
+      <ol class="gsum" aria-label="จำนวนเคสแต่ละกลุ่ม">${GROUPS.map((k) => `<li class="g-${k}${m[k].length ? '' : ' zero'}">
+        <span class="gl">${GH[k][0]}</span><span class="gt">${k === 'a' ? '<span>ตรงเที่ยวบินนี้</span>' : k === 'b' ? `<span>${ac}</span> <span>ต่าง 1 เงื่อนไข</span>` : '<span>แบบอื่น</span> <span>ใช้ได้ทุกแบบ</span>'}</span><b>${m[k].length}</b></li>`).join('')}</ol>
+      ${lockNote}
       <div class="sec-row"><h2>เลือกเข้าบรีฟ</h2><span id="pick-n">เลือกแล้ว ${pk.length} เรื่อง</span></div>
-      <p class="note">แตะ + เพื่อเลือกเรื่องเข้าบรีฟ · 3 อันดับแรกเลือกไว้ให้แล้ว</p>
-      <ul class="rows">${shown.map(row).join('')}</ul>`;
-    if (strict.length > SHOW_TOP) {
-      html += `<button class="btn more" data-act="all">${state.showAll ? 'แสดงเฉพาะ 3 อันดับแรกและเรื่องที่เลือก' : `ดูเพิ่ม · อีก ${strict.length - shown.length} เคส`}</button>`;
+      <p class="note">แตะ + เพื่อเลือกเรื่องเข้าบรีฟ · 3 อันดับแรกเลือกไว้ให้แล้ว</p>`;
+    for (const k of GROUPS) {
+      const list = m[k];
+      if (!list.length) continue; // กลุ่มว่างเห็นเป็น 0 ในแถบสรุปด้านบนแล้ว
+      html += `<section class="grp g-${k}" aria-label="กลุ่ม ${GH[k][0]}">
+        <div class="grp-h"><span class="gl">${GH[k][0]}</span><div><h2>${GH[k][1]} <span class="gn">${list.length}</span></h2><p>${GH[k][2]}</p></div></div>
+        <ul class="rows">${shown[k].map(row).join('')}</ul>`;
+      if (list.length > SHOW_TOP) {
+        html += `<button class="btn more" data-act="grp" data-g="${k}">${state.open[k] ? 'แสดงเฉพาะ 3 อันดับแรกและเรื่องที่เลือก' : `ดูอีก ${list.length - shown[k].length} เคส`}</button>`;
+      }
+      html += '</section>';
     }
   } else {
-    const locked = state.unitStatus === 'locked';
     html += `<div class="empty">${icon('brief')}
-      <h2>ยังไม่มีบทเรียนที่ตรงครบ 3 เงื่อนไข</h2>
-      <p>ฐานข้อมูลยังไม่มีเคสที่ตรงทั้งแบบ ฮ. ภารกิจ และสภาพอากาศที่เลือกพร้อมกัน</p>
-      <p>${near.length ? 'ด้านล่างคือเคสที่ตรง 2 ใน 3 เงื่อนไข ใช้ประกอบการบรีฟได้ หรือแก้ตัวกรองให้กว้างขึ้น'
-        : 'ลองเลือกสภาพอากาศเพิ่ม หรือเปลี่ยนภารกิจ'}${locked ? ' · ปลดล็อกข้อมูลหน่วยเพื่อดูเคสของ บน.2 ด้วย' : ''}</p>
-      <div class="acts"><a class="btn" href="#/">แก้ตัวกรอง</a>${locked ? '<a class="btn" href="#/about">ปลดล็อกข้อมูลหน่วย</a>' : ''}</div></div>`;
-  }
-
-  if (near.length) {
-    html += `<div class="group-h"><h2>ใกล้เคียง · ${near.length}</h2><p>ตรง 2 ใน 3 เงื่อนไข — ข้อความสีส้มบอกว่าต่างตรงไหน</p></div>`;
-    if (!strict.length) html += `<div class="sec-row"><h2>เลือกเข้าบรีฟ</h2><span id="pick-n">เลือกแล้ว ${pk.length} เรื่อง</span></div>`;
-    if (nearShown.length) html += `<ul class="rows">${nearShown.map(row).join('')}</ul>`;
-    if (nearShown.length < near.length) {
-      html += `<button class="btn more" data-act="near">แสดงเคสใกล้เคียง${nearShown.length ? 'อีก' : ''} ${near.length - nearShown.length} เคส</button>`;
-    }
+      <h2>ยังไม่มีบทเรียนสำหรับเที่ยวบินนี้</h2>
+      <p>ใน${s.src === 'ALL' ? 'ฐานข้อมูล' : `ข้อมูล${esc(srcOpt(s.src).th)}`}ยังไม่มีเคสของ ${ac} ที่ตรงภารกิจหรือสภาพอากาศที่เลือก และไม่มีเคสที่ใช้ได้ทุกแบบซึ่งตรงทั้งสองอย่าง</p>
+      <p>ลองเลือกสภาพอากาศเพิ่ม เปลี่ยนภารกิจ${s.src === 'ALL' ? '' : ' หรือเปลี่ยน "ข้อมูลจาก" เป็นทั้งหมด'}${locked ? ' · ปลดล็อกข้อมูลหน่วยเพื่อดูเคสของ บน.2 ด้วย' : ''}</p>
+      <div class="acts"><a class="btn" href="#/filter">แก้ตัวกรอง</a>${locked ? '<button class="btn" data-act="unlock">ใส่รหัสหน่วย</button>' : ''}</div></div>`;
   }
   html += '</div>';
-  if (strict.length || near.length) {
+  if (all.length) {
     html += `<aside class="side" aria-label="ชุดบรีฟวันนี้">
       <div class="side-sum" id="side-picks">${pickList(pk)}</div>
       <div class="actbar"><div class="actbar-in">
@@ -626,7 +691,8 @@ async function keepAwake() {
 }
 function releaseAwake() { wake?.release().catch(() => {}); wake = null; }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && document.body.classList.contains('briefing')) keepAwake();
+  const cl = document.body.classList;
+  if (document.visibilityState === 'visible' && (cl.contains('briefing') || cl.contains('lesson'))) keepAwake();
 });
 
 let briefDeck = [];
@@ -701,7 +767,7 @@ function viewBriefCover() {
         const c = byId(id);
         const [th, cls] = typeOf(c);
         return `<li><a href="${briefUrl(id)}" data-replace><span class="n">${k + 1}</span>
-          <span class="t">${esc(c.title)}</span><span class="m">${dot(cls)}${esc(th)} · ${esc(c.year)}</span></a></li>`;
+          <span class="t">${esc(c.title)}</span><span class="m">${dot(cls)}${esc(th)} · ${esc(srcLabel(c))} · ${esc(c.year)}</span></a></li>`;
       }).join('')}</ol>
     </div>
     <div class="brief-foot">${KEYS}
@@ -883,7 +949,7 @@ function dashCases() {
   const d = state.dash;
   const y0 = d.span === 'ALL' ? 0 : new Date().getFullYear() - (d.span === '5Y' ? 4 : 9);
   return allCases().filter((c) => (d.src === 'ALL' || c.source === d.src)
-    && (d.ac === 'ALL' || hit(c.aircraft, d.ac)) && c.year >= y0);
+    && (d.ac === 'ALL' || c.aircraft.includes(d.ac)) && c.year >= y0);
 }
 
 function mix(list) {
@@ -926,13 +992,13 @@ function viewDashboard() {
   const segBtns = (k, opts) => `<div class="seg" role="group" style="grid-template-columns:repeat(${opts.length},1fr)">${opts.map(([v, t]) =>
     `<button data-dash="${k}" data-v="${v}" aria-pressed="${d[k] === v}">${t}</button>`).join('')}</div>`;
   const locked = state.unitStatus !== 'unlocked'
-    ? `<p class="note dash-note">${icon('lock')}<span>ยังไม่ได้ปลดล็อกข้อมูลหน่วย ตอนนี้เห็นแค่เคสต่างประเทศ (INTL) · <a href="#/about">ปลดล็อก</a></span></p>` : '';
+    ? `<p class="note dash-note">${icon('lock')}<span>ยังไม่ได้ปลดล็อกข้อมูลหน่วย ตอนนี้เห็นแค่เคสต่างประเทศ · <a href="#/about">ปลดล็อก</a></span></p>` : '';
   const filters = `<section class="panel dash-f" aria-label="ตัวกรองภาพรวม">
-    <p class="sub-h">แหล่งข้อมูล</p>${segBtns('src', [['ALL', 'ทั้งหมด'], ['W2', 'W2'], ['RTAF', 'RTAF'], ['INTL', 'INTL']])}
+    <p class="sub-h">แหล่งข้อมูล</p>${segBtns('src', [['ALL', 'ทั้งหมด'], ['W2', 'บน.2'], ['RTAF', 'ทอ.'], ['INTL', 'ต่างประเทศ']])}
     <p class="sub-h">ช่วงปี</p>${segBtns('span', [['ALL', 'ทั้งหมด'], ['10Y', '10 ปี'], ['5Y', '5 ปี']])}
     <p class="sub-h">แบบ ฮ.</p><div class="chips">${[['ALL', 'ทุกแบบ'], ...state.tax.aircraft.filter(inService).map((a) => [a.code, a.code])].map(([v, t]) =>
       `<button class="chip" data-dash="ac" data-v="${esc(v)}" aria-pressed="${d.ac === v}">${esc(t)}</button>`).join('')}</div>
-    ${d.ac !== 'ALL' ? '<p class="note" style="margin-top:8px">รวมเคสที่ระบุว่าใช้ได้ทุกแบบ</p>' : ''}
+    ${d.ac !== 'ALL' ? '<p class="note" style="margin-top:8px">นับเฉพาะเคสที่เกิดกับแบบนี้ ไม่รวมเคสที่ระบุว่าใช้ได้ทุกแบบ</p>' : ''}
     ${locked}
   </section>`;
 
@@ -958,7 +1024,7 @@ function viewDashboard() {
   const kpi = (k, n, t) => `<button data-drill="type" data-dv="${k}" data-dl="${t}" aria-pressed="${isOn('type', k)}" class="k-${k}"${n ? '' : ' disabled'}><b>${n}</b><span>${t}</span></button>`;
   html += `<section class="dsec kpi" id="sec-kpi">
     <div class="stats kpis"><div><b>${m.n}</b><span>ทั้งหมด</span></div>${kpi('a', m.a, 'อุบัติเหตุ')}${kpi('i', m.i, 'อุบัติการณ์')}${kpi('h', m.h, 'ความเสี่ยง')}</div>
-    <p class="kpi-sub">W2 ${src('W2')} · RTAF ${src('RTAF')} · INTL ${src('INTL')} · ${y0 === y1 ? y0 : `${y0}–${y1}`}</p>
+    <p class="kpi-sub">บน.2 ${src('W2')} · ทอ. ${src('RTAF')} · ต่างประเทศ ${src('INTL')} · ${y0 === y1 ? y0 : `${y0}–${y1}`}</p>
     ${drillHtml('kpi', cs)}</section>`;
 
   // รายปี
@@ -1019,6 +1085,84 @@ function viewDashboard() {
   main.innerHTML = `${html}</div>`;
 }
 
+/* ── หน้าหลัก ─────────────────────────────────────────────── */
+// หน้าแรกหลังเข้าสู่ระบบ: ไอคอนแอปแบบหน้าจอโทรศัพท์ (DECISIONS.md หัวข้อ "หน้าหลัก")
+
+const APPS = [
+  { href: '#/filter', ic: 'brief', th: 'บรีฟก่อนบิน', c: 'gold' },
+  { href: '#/dashboard', ic: 'chart', th: 'ภาพรวม', c: 'blue' },
+  { href: '#/theory', ic: 'book', th: 'ทฤษฎีนิรภัย', c: 'violet' },
+  { href: '#/areas', ic: 'pin', th: 'พื้นที่บิน', c: 'green' },
+  { href: '#/about', ic: 'info', th: 'ข้อมูล', c: 'grey' },
+];
+const appTile = (a) => {
+  const inner = `<span class="app-ic" style="--c:var(--tile-${a.c})">${icon(a.ic)}</span><span class="app-l">${esc(a.th)}</span>`;
+  return a.act ? `<button class="app" data-act="${a.act}">${inner}</button>` : `<a class="app" href="${a.href}">${inner}</a>`;
+};
+// เลขวันตามเวลาเครื่อง ใช้หมุนทฤษฎีวันนี้ (ทุกเครื่องในวันเดียวกันได้บทเดียวกัน)
+const dayNo = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
+
+function viewHome() {
+  const st = state.unitStatus;
+  const unitLine = {
+    missing: `${dot('hollow')}ยังไม่มีข้อมูลของหน่วยในเวอร์ชันนี้`,
+    locked: `${dot('warn')}ข้อมูลของหน่วยล็อกอยู่ · เห็นเฉพาะเคสต่างประเทศ`,
+    unlocked: `${dot('ok')}ปลดล็อกข้อมูลของหน่วยแล้ว`,
+  }[st];
+  const apps = st === 'locked' ? [...APPS, { act: 'unlock', ic: 'lock', th: 'ปลดล็อก', c: 'orange' }] : APPS;
+
+  main.innerHTML = `<div class="view home">
+    <section class="widget" aria-label="สรุปวันนี้">
+      <p class="w-eyebrow">บน.2 · ${esc(thDate())}</p>
+      <h1 class="w-h">พร้อมบรีฟ<em>ก่อนบิน</em></h1>
+      <div class="w-stats">
+        <div><b>${state.intl.length}</b><span>เคสต่างประเทศ</span></div>
+        <div><b>${st === 'unlocked' ? state.unit.length : '—'}</b><span>เคสของหน่วย</span></div>
+      </div>
+      <p class="w-unit">${unitLine}</p>
+    </section>
+    <nav class="apps" aria-label="แอป">${apps.map(appTile).join('')}</nav>
+    <section class="home-sec" aria-labelledby="lsn-h">
+      <h2 class="sec-h" id="lsn-h">ทฤษฎีนิรภัย <span>บทละ 5 นาที</span></h2>
+      <div class="apps" id="lsn-row"></div>
+      <a class="tip" id="tip" href="#/theory" hidden></a>
+    </section>
+  </div>`;
+
+  // บทเรียนอยู่ในไฟล์แยก โหลดทีหลัง — ไม่ทำให้หน้าหลักช้า
+  import('./lessons.js').then(({ LESSONS }) => {
+    const row = $('#lsn-row');
+    if (!row) return; // ผู้ใช้ไปหน้าอื่นแล้ว
+    row.innerHTML = LESSONS.map((l) => appTile({ href: `#/theory/${l.id}`, ic: l.icon, th: l.short, c: l.color })).join('');
+    const l = LESSONS[dayNo() % LESSONS.length];
+    const tip = $('#tip');
+    tip.href = `#/theory/${l.id}`;
+    tip.innerHTML = `<span class="tip-l">ทฤษฎีวันนี้ · ${esc(l.short)}</span><span class="tip-t">${esc(l.tip)}</span>${icon('next')}`;
+    tip.hidden = false;
+  }).catch((err) => {
+    const row = $('#lsn-row');
+    if (row) row.innerHTML = '<p class="sec-empty">โหลดบทเรียนไม่สำเร็จ ลองเปิดหน้านี้อีกครั้งตอนมีสัญญาณ</p>';
+    console.warn('lessons', err);
+  });
+}
+
+/* ── ทฤษฎีนิรภัย ──────────────────────────────────────────── */
+
+// theory.js โหลดเฉพาะตอนเปิดแอปนี้ · arg = บท, n = เลขสไลด์
+async function viewTheory(arg, n, prev) {
+  const at = location.hash;
+  try {
+    const t = await import('./theory.js');
+    if (location.hash !== at) return;
+    t.render({ main, arg, n, prev, tax: state.tax, esc, icon, keepAwake, reduced, store: LS });
+  } catch (err) {
+    main.innerHTML = `<div class="view"><div class="empty">${icon('info')}<h2>เปิดบทเรียนไม่สำเร็จ</h2>
+      <p>ไฟล์บทเรียนยังไม่อยู่ในเครื่อง เปิดแอปตอนมีสัญญาณหนึ่งครั้ง หลังจากนั้นใช้แบบออฟไลน์ได้</p>
+      <div class="acts"><a class="btn" href="#/">กลับหน้าหลัก</a></div></div></div>`;
+    console.warn('theory', err);
+  }
+}
+
 /* ── พื้นที่ / ข้อมูล ─────────────────────────────────────── */
 
 function viewAreas() {
@@ -1029,7 +1173,7 @@ function viewAreas() {
       <h2>ยังไม่มีข้อมูลพื้นที่</h2>
       <p>ยังไม่มีรายชื่อพื้นที่ พิกัด และอันตรายที่ต้องรู้ เพราะรอไฟล์จาก FSO คนเดิม เมื่อได้แล้วจะเพิ่มเข้ามาแบบเข้ารหัสเหมือนเคสของหน่วย</p>
       <p>ระหว่างนี้หาบทเรียนได้จากการเลือกเที่ยวบิน</p>
-      <div class="acts"><a class="btn" href="#/">ไปเลือกเที่ยวบิน</a></div>
+      <div class="acts"><a class="btn" href="#/filter">ไปเลือกเที่ยวบิน</a></div>
     </div>
   </div>`;
 }
@@ -1065,7 +1209,7 @@ function viewAbout() {
     <h1 class="page-h">ข้อมูลและการตั้งค่า</h1>
 
     <section class="panel">
-      <h2>${icon('lock')} ข้อมูลของหน่วย (W2 / RTAF)</h2>
+      <h2>${icon('lock')} ข้อมูลของหน่วย (บน.2 / ทอ.)</h2>
       <p>เคสของหน่วยถูกเข้ารหัสไว้ ใส่รหัสผ่านครั้งเดียว เครื่องนี้จะจำกุญแจไว้และใช้ได้แม้ไม่มีสัญญาณ</p>
       ${unitPanel}
     </section>
@@ -1082,9 +1226,9 @@ function viewAbout() {
     <section class="panel">
       <h2>ฐานข้อมูล</h2>
       <div class="stats" style="margin-top:12px">
-        <div><b>${count('W2')}</b><span>W2</span></div>
-        <div><b>${count('RTAF')}</b><span>RTAF</span></div>
-        <div><b>${count('INTL')}</b><span>INTL</span></div>
+        <div><b>${count('W2')}</b><span>บน.2</span></div>
+        <div><b>${count('RTAF')}</b><span>ทอ.</span></div>
+        <div><b>${count('INTL')}</b><span>ต่างประเทศ</span></div>
       </div>
       <dl class="kv">
         <dt>เคสต่างประเทศ</dt><dd>${esc(fmtVer(state.intlVersion))}</dd>
@@ -1163,35 +1307,39 @@ function route() {
 
   if (lastPath) scrollMemo[lastPath] = scrollY;
   const briefing = page === 'brief';
+  const lesson = page === 'theory' && !!arg; // สไลด์บทเรียนเต็มจอ ซ่อนหัวแอปและแถบแท็บเหมือนโหมดบรีฟ
   document.body.classList.toggle('briefing', briefing);
+  document.body.classList.toggle('lesson', lesson);
   if (!briefing) {
-    releaseAwake();
     briefFromList = false;
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
+  if (!briefing && !lesson) releaseAwake();
 
   if (page === 'dashboard') state.from = 'dashboard';
-  else if (page === '' || page === 'results') state.from = 'results';
+  else if (page === 'filter' || page === 'results') state.from = 'results';
 
   switch (page) {
-    case '': viewFilter(); break;
+    case 'filter': viewFilter(); break;
     case 'results': viewResults(); break;
     case 'case': viewCase(arg); break;
     case 'brief': drawBrief(arg, parts[2]); break;
     case 'dashboard': viewDashboard(); break;
     case 'areas': viewAreas(); break;
     case 'about': viewAbout(); break;
-    default: viewFilter();
+    case 'theory': viewTheory(arg, parts[2], lastPath); break;
+    default: viewHome();
   }
 
   const tab = ['case', 'brief'].includes(page) && state.from === 'dashboard' ? 'dashboard'
-    : ['', 'results', 'case', 'brief'].includes(page) ? 'brief' : page;
+    : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
+      : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
   for (const a of $$('.tabbar a')) {
     if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
-  const keep = ['', 'results', 'dashboard'].includes(page) && scrollMemo[path] != null;
+  const keep = ['', 'filter', 'results', 'dashboard', 'theory'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
-  if (lastPath !== null && !briefing) main.focus({ preventScroll: true });
+  if (lastPath !== null && !briefing && !lesson) main.focus({ preventScroll: true });
   lastPath = path;
 }
 
@@ -1232,8 +1380,7 @@ main.addEventListener('click', (e) => {
   }
   if (t.hasAttribute('data-replace')) { e.preventDefault(); location.replace(t.getAttribute('href')); return; }
   switch (t.dataset.act) {
-    case 'all': state.showAll = !state.showAll; viewResults(); break;
-    case 'near': state.nearOpen = true; viewResults(); break;
+    case 'grp': state.open[t.dataset.g] = !state.open[t.dataset.g]; viewResults(); break;
     case 'undrill': state.drill = null; viewDashboard(); break;
     case 'dashreset': state.dash = { ...DASH0 }; state.drill = null; LS.set('dash', state.dash); viewDashboard(); break;
     case 'factors': {
@@ -1251,11 +1398,18 @@ main.addEventListener('click', (e) => {
     }
     case 'full': toggleFull(); break;
     case 'exit': e.preventDefault(); exitBrief(); break;
+    case 'unlock':
+      e.preventDefault();
+      if (state.unitStatus !== 'locked') break;
+      if (t.dataset.v) wantSrc = t.dataset.v;
+      showGate();
+      break;
     case 'forget':
       LS.del('key');
       SS.del('key');
       state.unit = [];
       state.unitStatus = unitEnc ? 'locked' : 'missing';
+      if (state.sel.src === 'TH') { state.sel.src = 'ALL'; LS.set('sel', state.sel); }
       viewAbout();
       break;
   }
@@ -1283,8 +1437,11 @@ async function boot() {
   const valid = (k) => new Set(state.tax[k].filter(inService).map((x) => x.code));
   for (const k of ['environment', 'phase', 'hfacs']) state.sel[k] = state.sel[k].filter((v) => valid(k).has(v));
   for (const k of ['aircraft', 'mission']) if (state.sel[k] && !valid(k).has(state.sel[k])) state.sel[k] = null;
+  if (!SRC_SET[state.sel.src]) state.sel.src = 'ALL';
 
   await loadUnit();
+  // ยังไม่ได้ปลดล็อก เลือก "กองทัพอากาศไทย" ไว้ไม่ได้ (จะไม่มีเคสเลย)
+  if (state.sel.src === 'TH' && state.unitStatus !== 'unlocked') state.sel.src = 'ALL';
   updateNet();
   route();
   if (state.unitStatus === 'locked' && !SS.get('gateSkip', false)) await showGate();
