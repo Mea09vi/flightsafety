@@ -1,5 +1,5 @@
 // W2 Safety Brief — vanilla JS, hash routing, ไม่มี build step
-// เส้นทาง: #/  #/results  #/case/:id  #/brief/:id  #/dashboard  #/areas  #/about
+// เส้นทาง: #/  #/results  #/case/:id  #/brief (หน้าปก)  #/brief/:id[/ประเด็น]  #/brief/end  #/dashboard  #/areas  #/about
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -185,19 +185,14 @@ function match() {
   return { strict, near };
 }
 
-// ลำดับเคสสำหรับปุ่มก่อนหน้า/ถัดไป = เคสที่เห็นอยู่ในหน้ารายการ
-// โหมดฉายจอใช้เฉพาะเรื่องที่เลือกเข้าบรีฟ (ถ้าเคสที่ฉายอยู่ในนั้น)
+// ลำดับเคสสำหรับปุ่มก่อนหน้า/ถัดไป = เคสที่เห็นอยู่ในหน้ารายการ (โหมดบรีฟใช้ชุดที่เลือกเข้าบรีฟ ดู briefSet)
 function deck() {
   const { shown, nearShown } = visible();
   return [...shown, ...nearShown].map((x) => x.c.id);
 }
-function deckFor(id, brief = false) {
+function deckFor(id) {
   if (state.from === 'dashboard') return state.dashDeck.includes(id) ? state.dashDeck : [id];
   if (!ready()) return [id];
-  if (brief) {
-    const pk = picks();
-    if (pk.includes(id)) return pk;
-  }
   const d = deck();
   return d.includes(id) ? d : [id];
 }
@@ -236,6 +231,9 @@ const thDate = (d = new Date()) => d.toLocaleDateString('th-TH', { day: 'numeric
 
 function nextIdx(len, i, d) { return (i + d + len) % len; }
 
+// จอคอมฯ (≥1024px): หน้ามีแผงด้านขวา — ตรงกับ @media ใน styles.css
+const wide = matchMedia('(min-width: 1024px)');
+
 /* ── หน้าเลือกเที่ยวบิน ───────────────────────────────────── */
 
 const STEPS = [
@@ -254,7 +252,7 @@ function viewFilter() {
   for (const h of t.hfacs) if (h.level === 'category') (tiers[h.tier] ??= []).push(h);
   const optCount = state.sel.phase.length + state.sel.hfacs.length + (state.sel.area ? 1 : 0);
 
-  main.innerHTML = `<div class="view filter">
+  main.innerHTML = `<div class="lay"><div class="view filter">
     <p class="eyebrow">บรีฟก่อนบิน · บน.2 · ${esc(thDate())}</p>
     <h1 class="page-h">เที่ยวบิน<em>วันนี้</em></h1>
     ${steps()}
@@ -290,9 +288,29 @@ function viewFilter() {
       </div>
     </details>
   </div>
-  <div class="actbar"><div class="actbar-in"><button class="btn btn-primary" id="go"></button></div></div>`;
+  <aside class="side" aria-label="สรุปเที่ยวบิน">
+    <div class="side-sum" id="side-sum"></div>
+    <div class="actbar"><div class="actbar-in"><button class="btn btn-primary" id="go"></button></div></div>
+  </aside></div>`;
 
   syncFilter();
+}
+
+// แผงด้านขวาบนจอคอมฯ: ค่าที่เลือก (แตะเพื่อกลับไปแก้) + จำนวนเคสที่ตรง
+function sideSum(s) {
+  const optN = s.phase.length + s.hfacs.length;
+  let counts = '<p class="note">เลือกให้ครบ 3 ขั้นเพื่อดูบทเรียน</p>';
+  if (ready(s)) {
+    const { strict, near } = match();
+    counts = `<p class="side-n"><b>${strict.length}</b> เคสตรงเที่ยวบินนี้${near.length ? `<span>+${near.length} ใกล้เคียง</span>` : ''}</p>`;
+  }
+  return `<p class="side-h">เที่ยวบินนี้</p>
+    <ul class="side-sel">${STEPS.map((st) => {
+      const v = selText[st.k](s);
+      return `<li><button data-step="${st.k}"><span>${esc(st.th)}</span><b${v ? '' : ' class="unset"'}>${v ? esc(v) : 'ยังไม่เลือก'}</b></button></li>`;
+    }).join('')}
+    ${optN ? `<li><button data-step="opt"><span>เพิ่มเติม</span><b>${optN} ข้อ</b></button></li>` : ''}</ul>
+    ${counts}`;
 }
 
 function syncFilter() {
@@ -313,6 +331,7 @@ function syncFilter() {
   }
   const optN = s.phase.length + s.hfacs.length;
   $('#opt-hint').textContent = optN ? `เลือก ${optN} ข้อ` : '';
+  $('#side-sum').innerHTML = sideSum(s);
 
   const go = $('#go');
   if (!ready(s)) {
@@ -415,7 +434,17 @@ function visible() {
 const pickBtn = (c, on) => `<button class="pick" data-pick="${esc(c.id)}" aria-pressed="${on}" aria-label="เลือกเข้าบรีฟ: ${esc(c.title)}" title="เลือกเข้าบรีฟ">${icon('plus', 'ic off')}${icon('check', 'ic on')}</button>`;
 
 function presentLabel(n) {
-  return n ? `${icon('screen')} ฉายจอบรีฟ <span class="count">${n}</span> เรื่อง` : 'แตะ + เพื่อเลือกเรื่องที่จะฉาย';
+  return n ? `${icon('play')} เริ่มบรีฟ <span class="count">${n}</span> เรื่อง` : 'แตะ + เพื่อเลือกเรื่องเข้าบรีฟ';
+}
+
+// แผงด้านขวาบนจอคอมฯ: ชุดบรีฟวันนี้ ตามลำดับที่จะขึ้นจอ
+function pickList(pk) {
+  return `<p class="side-h" tabindex="-1">ชุดบรีฟวันนี้ <span>${pk.length} เรื่อง</span></p>
+    ${pk.length ? `<ol class="side-picks">${pk.map((id, k) => {
+      const c = byId(id);
+      return `<li><span class="n">${k + 1}</span><a href="#/case/${encodeURIComponent(id)}"><span class="yr">${esc(c.year)}</span>${esc(c.title)}</a>
+        <button class="pick unpick" data-pick="${esc(id)}" aria-label="เอาออกจากบรีฟ: ${esc(c.title)}" title="เอาออกจากบรีฟ">${icon('x')}</button></li>`;
+    }).join('')}</ol>` : '<p class="note">ยังไม่ได้เลือก — แตะ + ที่เรื่องในรายการ</p>'}`;
 }
 
 function viewResults() {
@@ -427,7 +456,7 @@ function viewResults() {
     ${pickBtn(x.c, pk.includes(x.c.id))}</li>`;
 
   const filt = [s.aircraft, label('mission', s.mission), ...s.environment.map((e) => label('environment', e))];
-  let html = `<div class="view results">
+  let html = `<div class="lay${strict.length || near.length ? '' : ' solo'}"><div class="view results">
     <p class="eyebrow">บรีฟก่อนบิน · ${esc(thDate())}</p>
     <div class="filt" aria-label="ตัวกรองที่ใช้">${filt.map((f) => `<span>${esc(f)}</span>`).join('')}<a class="edit" href="#/">แก้</a></div>`;
 
@@ -441,7 +470,7 @@ function viewResults() {
         return `<div class="${cls === 'bad' ? 'c-bad' : 'c-warn'}">${esc(th)}<b>${n}</b><i style="--w:${(n / strict.length) * 100}%"></i></div>`;
       }).join('')}</div>
       <div class="sec-row"><h2>เลือกเข้าบรีฟ</h2><span id="pick-n">เลือกแล้ว ${pk.length} เรื่อง</span></div>
-      <p class="note">แตะ + เพื่อเลือกเรื่องที่จะฉายในห้องบรีฟ · 3 อันดับแรกเลือกไว้ให้แล้ว</p>
+      <p class="note">แตะ + เพื่อเลือกเรื่องเข้าบรีฟ · 3 อันดับแรกเลือกไว้ให้แล้ว</p>
       <ul class="rows">${shown.map(row).join('')}</ul>`;
     if (strict.length > SHOW_TOP) {
       html += `<button class="btn more" data-act="all">${state.showAll ? 'แสดงเฉพาะ 3 อันดับแรกและเรื่องที่เลือก' : `ดูเพิ่ม · อีก ${strict.length - shown.length} เคส`}</button>`;
@@ -466,11 +495,13 @@ function viewResults() {
   }
   html += '</div>';
   if (strict.length || near.length) {
-    html += `<div class="actbar"><div class="actbar-in">
-      <button class="btn btn-primary" id="present"${pk.length ? ` data-present="${esc(pk[0])}"` : ' disabled'}>${presentLabel(pk.length)}</button>
-    </div></div>`;
+    html += `<aside class="side" aria-label="ชุดบรีฟวันนี้">
+      <div class="side-sum" id="side-picks">${pickList(pk)}</div>
+      <div class="actbar"><div class="actbar-in">
+        <button class="btn btn-primary" id="present"${pk.length ? '' : ' disabled'}>${presentLabel(pk.length)}</button>
+      </div></div></aside>`;
   }
-  main.innerHTML = html;
+  main.innerHTML = html + '</div>';
 }
 
 function togglePick(id) {
@@ -478,7 +509,7 @@ function togglePick(id) {
   const i = ids.indexOf(id);
   if (i < 0) ids.push(id); else ids.splice(i, 1);
   setPicks(ids);
-  for (const b of $$('[data-pick]', main)) if (b.dataset.pick === id) b.setAttribute('aria-pressed', String(i < 0));
+  for (const b of $$('.rows [data-pick], .case-top [data-pick]', main)) if (b.dataset.pick === id) b.setAttribute('aria-pressed', String(i < 0));
   const pk = picks();
   const n = $('#pick-n');
   if (n) n.textContent = `เลือกแล้ว ${pk.length} เรื่อง`;
@@ -486,7 +517,13 @@ function togglePick(id) {
   if (go) {
     go.innerHTML = presentLabel(pk.length);
     go.disabled = !pk.length;
-    if (pk.length) go.dataset.present = pk[0]; else delete go.dataset.present;
+  }
+  const side = $('#side-picks');
+  if (side) {
+    // กด ✕ ในแผงขวาแล้วปุ่มหายไปกับรายการ — ย้ายโฟกัสไปเรื่องถัดไป (หรือปุ่มเริ่มบรีฟ) ไม่ให้หลุดไปต้นหน้า
+    const inSide = side.contains(document.activeElement);
+    side.innerHTML = pickList(pk);
+    if (inSide) { const left = $$('.unpick', side); (left[Math.min(i, left.length - 1)] || (pk.length ? go : $('.side-h', side)))?.focus(); }
   }
   if (i < 0) navigator.vibrate?.(10);
 }
@@ -511,6 +548,7 @@ function hfacsHtml(c) {
 }
 
 // ลำดับในหน้าเคส: สรุป → ปัจจัย (พับไว้) → ทำวันนี้ (เช็กลิสต์ 56px) → คำถามบรีฟ → HFACS → ต้นฉบับ
+// จอคอมฯ: ทำวันนี้ + คำถามบรีฟ ย้ายไปแผงด้านขวา และกางปัจจัยไว้ (ลำดับ DOM คงเดิมสำหรับมือถือ)
 function viewCase(id) {
   const c = byId(id);
   if (!c) { viewNotFound(); return; }
@@ -519,46 +557,51 @@ function viewCase(id) {
   const done = ticks().cases[id] || [];
   const ref = safeUrl(c.ref);
   const fromRes = state.from !== 'dashboard' && ready();
-  const navLink = (dir, ic, lab) => d.length > 1
-    ? `<a class="btn btn-icon" data-replace href="#/case/${encodeURIComponent(d[nextIdx(d.length, i, dir)])}" aria-label="${lab}">${icon(ic)}</a>`
-    : `<span class="btn btn-icon" aria-disabled="true">${icon(ic)}</span>`;
+  const facOpen = wide.matches;
+  const href = (dir) => `#/case/${encodeURIComponent(d[nextIdx(d.length, i, dir)])}`;
+  const nav = d.length > 1 ? `<a class="btn" data-replace href="${href(-1)}" aria-label="เคสก่อนหน้า">${icon('back')}<span>ก่อนหน้า</span></a>
+    <a class="btn" data-replace href="${href(1)}" aria-label="เคสถัดไป"><span>ถัดไป</span>${icon('next')}</a>` : '';
 
   main.innerHTML = `<article class="view case">
-    <div class="case-top">
-      <a class="back" href="${state.from === 'dashboard' ? '#/dashboard' : '#/results'}" aria-label="กลับไปรายการ">${icon('back')}</a>
-      <div class="meta">${tags(c)}</div>
-      <span class="pos">${d.length > 1 ? `${i + 1}/${d.length}` : ''}</span>
-      ${fromRes ? pickBtn(c, picks().includes(id)) : ''}
+    <div class="case-head">
+      <div class="case-top">
+        <a class="back" href="${state.from === 'dashboard' ? '#/dashboard' : '#/results'}" aria-label="กลับไปรายการ">${icon('back')}</a>
+        <div class="meta">${tags(c)}</div>
+        <span class="pos">${d.length > 1 ? `${i + 1}/${d.length}` : ''}</span>
+        ${fromRes ? pickBtn(c, picks().includes(id)) : ''}
+      </div>
+      <h1>${esc(c.title)}</h1>
+      <p class="summary">${esc(c.summary)}</p>
+
+      ${c.factors.length ? `<button class="fac-t" data-act="factors" aria-expanded="${facOpen}" aria-controls="fac">ปัจจัยที่เกี่ยวข้อง
+        <span class="n">${c.factors.length} ข้อ ${icon('down')}</span></button>
+      <ul class="factors" id="fac"${facOpen ? '' : ' hidden'}>${c.factors.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
     </div>
-    <h1>${esc(c.title)}</h1>
-    <p class="summary">${esc(c.summary)}</p>
 
-    ${c.factors.length ? `<button class="fac-t" data-act="factors" aria-expanded="false" aria-controls="fac">ปัจจัยที่เกี่ยวข้อง
-      <span class="n">${c.factors.length} ข้อ ${icon('down')}</span></button>
-    <ul class="factors" id="fac" hidden>${c.factors.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+    <div class="case-side">
+      <section class="sec">
+        <h2 class="sec-h">ทำวันนี้ <span class="prog" id="prog">${done.length}/${c.actions_today.length}</span></h2>
+        <ol class="todo">${c.actions_today.map((a, k) => `<li><button data-tick="${k}" aria-pressed="${done.includes(k)}">
+          <span class="n">${k + 1}</span><span class="t">${esc(a)}</span><span class="box">${icon('check')}</span></button></li>`).join('')}</ol>
+      </section>
 
-    <section class="sec">
-      <h2 class="sec-h">ทำวันนี้ <span class="prog" id="prog">${done.length}/${c.actions_today.length}</span></h2>
-      <ol class="todo">${c.actions_today.map((a, k) => `<li><button data-tick="${k}" aria-pressed="${done.includes(k)}">
-        <span class="n">${k + 1}</span><span class="t">${esc(a)}</span><span class="box">${icon('check')}</span></button></li>`).join('')}</ol>
-    </section>
+      <section class="ask">
+        <p class="ask-l">คำถามบรีฟ</p>
+        <p class="q">${esc(c.brief_question)}</p>
+      </section>
 
-    <section class="ask">
-      <p class="ask-l">คำถามบรีฟ</p>
-      <p class="q">${esc(c.brief_question)}</p>
-    </section>
+      ${nav ? `<nav class="side-nav" aria-label="เลื่อนเคส">${nav}</nav>` : ''}
+    </div>
 
-    ${hfacsHtml(c)}
+    <div class="case-more">
+      ${hfacsHtml(c)}
 
-    ${ref ? `<a class="btn ref" href="${esc(ref)}" target="_blank" rel="noopener noreferrer">
-      <span>อ่านรายงานต้นฉบับ<small>${esc(c.ref_label)} · ${esc(c.id)}</small></span>${icon('ext')}</a>`
-      : `<p class="ref-note"><span class="k">ที่มา</span>${esc(c.ref)} · ${esc(c.id)}</p>`}
+      ${ref ? `<a class="btn ref" href="${esc(ref)}" target="_blank" rel="noopener noreferrer">
+        <span>อ่านรายงานต้นฉบับ<small>${esc(c.ref_label)} · ${esc(c.id)}</small></span>${icon('ext')}</a>`
+        : `<p class="ref-note"><span class="k">ที่มา</span>${esc(c.ref)} · ${esc(c.id)}</p>`}
+    </div>
   </article>
-  <div class="actbar case-nav"><div class="actbar-in">
-    ${navLink(-1, 'back', 'เคสก่อนหน้า')}
-    <button class="btn" data-present="${esc(c.id)}">${icon('screen')} ฉายจอ</button>
-    ${navLink(1, 'next', 'เคสถัดไป')}
-  </div></div>`;
+  ${nav ? `<div class="actbar case-nav"><div class="actbar-in">${nav}</div></div>` : ''}`;
 }
 
 function toggleTick(id, k) {
@@ -574,7 +617,8 @@ function toggleTick(id, k) {
   if (i < 0) navigator.vibrate?.(10);
 }
 
-/* ── โหมดฉายจอ ────────────────────────────────────────────── */
+/* ── โหมดบรีฟ ─────────────────────────────────────────────── */
+// หน้าเปิด → เคสที่เลือกทีละเรื่อง → หน้าปิด (รวมคำถามบรีฟ) ไม่วนกลับ (DECISIONS.md "หน้าตาแอป" ข้อ 3)
 
 let wake = null;
 async function keepAwake() {
@@ -586,15 +630,25 @@ document.addEventListener('visibilitychange', () => {
 });
 
 let briefDeck = [];
-let briefIdx = 0;
+let briefIdx = 0; // -1 = หน้าเปิด, briefDeck.length = หน้าปิด
 let briefStep = 0;
+let briefFromList = false; // เข้ามาจากปุ่มเริ่มบรีฟ → ออกด้วย history.back() ไม่ให้หน้ารายการซ้อนในประวัติ
 
 /* สองแบบ (DECISIONS.md หัวข้อ "หน้าตาแอป"): ทั้งการ์ดในหน้าเดียว หรือทีละประเด็น สรุป → ปัจจัย → ทำวันนี้ → ถามลูกเรือ */
 const PSTEP = { sum: 'สรุป', fac: 'ปัจจัย', do: 'ทำวันนี้', ask: 'ถามลูกเรือ' };
 const pstepsOf = (c) => ['sum', ...(c.factors.length ? ['fac'] : []), 'do', 'ask'];
 const projMode = () => (LS.get('projMode', 'card') === 'step' ? 'step' : 'card');
 const briefUrl = (id, step) => `#/brief/${encodeURIComponent(id)}${step == null ? '' : `/${step}`}`;
+const COVER = '#/brief';
+const END = '#/brief/end';
 const FAC_MAX = 3;
+
+// ชุดบรีฟ = เรื่องที่เลือกไว้ในหน้ารายการ · เปิดลิงก์เคสที่ไม่อยู่ในชุด → บรีฟเคสนั้นเคสเดียว
+function briefSet(id) {
+  const pk = ready() ? picks() : [];
+  if (!id || pk.includes(id)) return pk;
+  return briefDeck.includes(id) ? briefDeck : [id];
+}
 
 function pmain(c, key) {
   const pdo = `<ol class="pdo">${c.actions_today.map((a, k) => `<li><span>${k + 1}</span>${esc(a)}</li>`).join('')}</ol>`;
@@ -607,43 +661,99 @@ function pmain(c, key) {
   }
 }
 
+const fullLabel = () => `${document.fullscreenElement ? 'ออกจากเต็มจอ' : 'เต็มจอ'} (F)`;
+
+function briefTools() {
+  const mode = projMode();
+  const other = document.documentElement.dataset.theme === 'day' ? 'กลางคืน' : 'กลางวัน';
+  return `<div class="tools">
+      <div class="seg mini" role="group" aria-label="รูปแบบการแสดง">
+        <button data-mode="card" aria-pressed="${mode === 'card'}">ทั้งการ์ด</button>
+        <button data-mode="step" aria-pressed="${mode === 'step'}">ทีละประเด็น</button>
+      </div>
+      <button class="btn" data-act="theme" aria-label="สลับเป็นธีม${other}" title="สลับธีมให้เหมาะกับจอโปรเจกเตอร์">${other}</button>
+      ${document.fullscreenEnabled ? `<button class="btn btn-icon" id="full" data-act="full" aria-label="${fullLabel()}" title="${fullLabel()}">${icon(document.fullscreenElement ? 'shrink' : 'full')}</button>` : ''}
+      <a class="btn btn-icon" href="#/results" data-act="exit" aria-label="ออกจากโหมดบรีฟ (Esc)" title="ออกจากโหมดบรีฟ (Esc)">${icon('x')}</a>
+    </div>`;
+}
+
+const KEYS = '<p class="keys"><kbd>←</kbd> <kbd>→</kbd> หรือรีโมต · <kbd>F</kbd> เต็มจอ · <kbd>Esc</kbd> ออก</p>';
+
+function briefFrame(body, edges) {
+  main.innerHTML = `<div class="brief" role="region" aria-label="โหมดบรีฟ" aria-roledescription="slide deck">${body}</div>
+  ${edges ? '<button class="edge l" data-go="-1" tabindex="-1" aria-hidden="true"></button><button class="edge r" data-go="1" tabindex="-1" aria-hidden="true"></button>' : ''}`;
+  keepAwake();
+}
+
+// หน้าเปิด: วันที่ เงื่อนไขเที่ยวบิน และรายชื่อเรื่องที่จะคุย
+function viewBriefCover() {
+  briefDeck = briefSet();
+  if (!briefDeck.length) { location.replace('#/results'); return; }
+  briefIdx = -1;
+  briefStep = 0;
+  const s = state.sel;
+  const cond = [s.aircraft, label('mission', s.mission), ...s.environment.map((e) => label('environment', e))];
+  briefFrame(`<div class="brief-top"><p class="b-eyebrow">บรีฟก่อนบิน · บน.2 · ${esc(thDate())}</p>${briefTools()}</div>
+    <div class="cover">
+      <h1>บทเรียนนิรภัย <em>${briefDeck.length} เรื่อง</em></h1>
+      <p class="cond" aria-label="เงื่อนไขเที่ยวบิน">${cond.map((f) => `<span>${esc(f)}</span>`).join('')}</p>
+      <ol class="cover-list">${briefDeck.map((id, k) => {
+        const c = byId(id);
+        const [th, cls] = typeOf(c);
+        return `<li><a href="${briefUrl(id)}" data-replace><span class="n">${k + 1}</span>
+          <span class="t">${esc(c.title)}</span><span class="m">${dot(cls)}${esc(th)} · ${esc(c.year)}</span></a></li>`;
+      }).join('')}</ol>
+    </div>
+    <div class="brief-foot">${KEYS}
+      <button class="btn btn-primary" data-go="1">เริ่มเรื่องแรก ${icon('next')}</button></div>`, false);
+}
+
+// หน้าปิด: คำถามบรีฟทุกเรื่องในหน้าเดียว ใช้ทวนก่อนจบ
+function viewBriefEnd() {
+  briefDeck = briefSet();
+  if (!briefDeck.length) { location.replace('#/results'); return; }
+  briefIdx = briefDeck.length;
+  briefStep = 0;
+  briefFrame(`<div class="brief-top"><p class="b-eyebrow">ทวนก่อนจบบรีฟ</p>${briefTools()}</div>
+    <div class="endq">
+      <h1>คำถามบรีฟ <em>${briefDeck.length} ข้อ</em></h1>
+      <ol>${briefDeck.map((id, k) => {
+        const c = byId(id);
+        return `<li><span class="n">${k + 1}</span><div><p class="q">${esc(c.brief_question)}</p><p class="t">${esc(c.title)}</p></div></li>`;
+      }).join('')}</ol>
+    </div>
+    <div class="brief-foot">
+      <button class="btn btn-icon" data-go="-1" aria-label="กลับไปเรื่องสุดท้าย">${icon('back')}</button>
+      ${KEYS}
+      <a class="btn btn-primary" href="#/results" data-act="exit">จบบรีฟ</a></div>`, false);
+}
+
 function viewBrief(id, step) {
   const c = byId(id);
   if (!c) { viewNotFound(); return; }
-  briefDeck = deckFor(id, true);
+  briefDeck = briefSet(id);
   briefIdx = briefDeck.indexOf(id);
   const n = briefDeck.length;
   const mode = projMode();
   const ps = pstepsOf(c);
   briefStep = mode === 'step' ? Math.min(Math.max(Number(step) || 0, 0), ps.length - 1) : 0;
-  const theme = document.documentElement.dataset.theme;
-  const other = theme === 'day' ? 'กลางคืน' : 'กลางวัน';
-  const canGo = mode === 'step' || n > 1;
   const unit = mode === 'step' ? 'ประเด็น' : 'เคส';
   const [, cls] = typeOf(c);
 
-  const tools = `<div class="tools">
-      <div class="seg mini" role="group" aria-label="รูปแบบการฉาย">
-        <button data-mode="card" aria-pressed="${mode === 'card'}">ทั้งการ์ด</button>
-        <button data-mode="step" aria-pressed="${mode === 'step'}">ทีละประเด็น</button>
-      </div>
-      <button class="btn" data-act="theme" aria-label="สลับเป็นธีม${other}" title="สลับธีมให้เหมาะกับจอโปรเจกเตอร์">${other}</button>
-      <a class="btn btn-icon" href="#/case/${encodeURIComponent(id)}" data-replace aria-label="ออกจากโหมดฉายจอ">${icon('x')}</a>
-    </div>`;
-  const prev = `<button class="btn btn-icon" data-go="-1" aria-label="${unit}ก่อนหน้า"${canGo ? '' : ' disabled'}>${icon('back')}</button>`;
-  const next = `<button class="btn btn-icon" data-go="1" aria-label="${unit}ถัดไป"${canGo ? '' : ' disabled'}>${icon('next')}</button>`;
+  const prev = `<button class="btn btn-icon" data-go="-1" aria-label="${unit}ก่อนหน้า">${icon('back')}</button>`;
+  const next = `<button class="btn btn-icon" data-go="1" aria-label="${unit}ถัดไป">${icon('next')}</button>`;
   const pos = `<span class="pos" aria-live="polite">${briefIdx + 1}/${n}</span>`;
 
-  const body = mode === 'step'
+  briefFrame(mode === 'step'
     ? `<div class="brief-top">
         <ol class="psteps" aria-label="ประเด็น">${ps.map((p, k) => `<li class="${k < briefStep ? 'done' : k === briefStep ? 'now' : ''}"${k === briefStep ? ' aria-current="step"' : ''}>${PSTEP[p]}</li>`).join('')}</ol>
-        ${tools}
+        ${briefTools()}
       </div>
       <div class="pmain" aria-live="polite">${pmain(c, ps[briefStep])}</div>
       <div class="brief-foot">${prev}
         <div class="pft">${dot(cls)}<span class="y">${esc(c.year)}</span><span class="t">${esc(c.title)}</span></div>
         ${pos}${next}</div>`
-    : `<div class="brief-top"><div class="meta">${tags(c)}</div>${tools}</div>
+    : `<div class="brief-top"><div class="meta">${tags(c)}</div>${briefTools()}</div>
       <div class="brief-body">
         <div><h1>${esc(c.title)}</h1><p class="summary">${esc(c.summary)}</p></div>
         <div>
@@ -654,49 +764,80 @@ function viewBrief(id, step) {
       </div>
       <div class="brief-foot">${prev}
         <div class="bars" aria-hidden="true">${briefDeck.map((_, k) => `<i class="${k === briefIdx ? 'on' : ''}"></i>`).join('')}</div>
-        ${pos}${next}</div>`;
-
-  main.innerHTML = `<div class="brief" role="region" aria-label="โหมดฉายจอ" aria-roledescription="slide deck">${body}</div>
-  ${canGo ? '<button class="edge l" data-go="-1" tabindex="-1" aria-hidden="true"></button><button class="edge r" data-go="1" tabindex="-1" aria-hidden="true"></button>' : ''}`;
-  keepAwake();
+        ${pos}${next}</div>`, true);
 }
 
-// โหมดทีละประเด็น: เดินในเคสก่อน สุดแล้วข้ามไปเคสถัดไป (ย้อนจากประเด็นแรก = ประเด็นสุดท้ายของเคสก่อน)
+function drawBrief(arg, step) {
+  if (!arg) viewBriefCover();
+  else if (arg === 'end') viewBriefEnd();
+  else viewBrief(arg, step);
+}
+// วาดหน้าเดิมใหม่ (สลับธีม/แบบ) — URL เดิมไม่เกิด hashchange
+function redrawBrief() {
+  const p = location.hash.split('/');
+  drawBrief(p[2] ? decodeURIComponent(p[2]) : '', p[3]);
+}
+
+// ทีละประเด็น: เดินในเคสก่อน สุดแล้วข้ามไปเคสถัดไป (ย้อนจากประเด็นแรก = ประเด็นสุดท้ายของเคสก่อน)
+// หน้าเปิด ← เคสแรก … เคสสุดท้าย → หน้าปิด ไม่วนกลับ
 function briefGo(dir) {
   const n = briefDeck.length;
-  const id = briefDeck[briefIdx];
-  if (projMode() === 'step') {
+  if (!n) return;
+  const step = projMode() === 'step';
+  if (step && briefIdx >= 0 && briefIdx < n) {
+    const id = briefDeck[briefIdx];
     const s = briefStep + dir;
-    if (s >= 0 && s < pstepsOf(byId(id)).length) { location.replace(briefUrl(id, s)); return; }
-    const to = briefDeck[nextIdx(n, briefIdx, dir)];
-    location.replace(briefUrl(to, dir > 0 ? 0 : pstepsOf(byId(to)).length - 1));
-    return;
+    if (s >= 0 && s < pstepsOf(byId(id)).length) { briefStep = s; location.replace(briefUrl(id, s)); return; }
   }
-  if (n < 2) return;
-  location.replace(briefUrl(briefDeck[nextIdx(n, briefIdx, dir)]));
+  const to = briefIdx + dir;
+  if (to < -1 || to > n) return;
+  // ตั้งตำแหน่งทันที ไม่รอ hashchange — รีโมตกดรัวแล้วครั้งที่สองจะคำนวณจากหน้าเดิมจนหายไป
+  briefIdx = to;
+  briefStep = step && dir < 0 && to >= 0 && to < n ? pstepsOf(byId(briefDeck[to])).length - 1 : 0;
+  if (to === -1) location.replace(COVER);
+  else if (to === n) location.replace(END);
+  else location.replace(briefUrl(briefDeck[to], step ? briefStep : null));
 }
 
 function setProjMode(mode) {
   if (mode === projMode()) return;
   LS.set('projMode', mode);
-  const id = briefDeck[briefIdx];
-  const url = briefUrl(id, mode === 'step' ? 0 : null);
-  // URL เดิมไม่เกิด hashchange → วาดใหม่เอง
-  if (location.hash === url) viewBrief(id, 0); else location.replace(url);
+  if (briefIdx < 0 || briefIdx >= briefDeck.length) { redrawBrief(); return; }
+  const url = briefUrl(briefDeck[briefIdx], mode === 'step' ? 0 : null);
+  if (location.hash === url) redrawBrief(); else location.replace(url);
 }
 
-function present(id) {
+function present() {
   // เต็มจอต้องเรียกจากการกดของผู้ใช้โดยตรง
   document.documentElement.requestFullscreen?.().catch(() => {});
-  location.hash = `#/brief/${encodeURIComponent(id)}`;
+  briefFromList = true;
+  location.hash = COVER;
 }
 
+function exitBrief() {
+  if (briefFromList) { briefFromList = false; history.back(); }
+  else location.replace('#/results');
+}
+
+function toggleFull() {
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+}
+document.addEventListener('fullscreenchange', () => {
+  const b = $('#full');
+  if (!b) return;
+  b.innerHTML = icon(document.fullscreenElement ? 'shrink' : 'full');
+  b.setAttribute('aria-label', fullLabel());
+  b.title = fullLabel();
+});
+
 document.addEventListener('keydown', (e) => {
-  if (!document.body.classList.contains('briefing')) return;
-  // รีโมตพรีเซนเทชันส่ง PageUp/PageDown
+  if (!document.body.classList.contains('briefing') || e.ctrlKey || e.metaKey || e.altKey) return;
+  // รีโมตพรีเซนเทชันส่ง PageUp/PageDown · ใช้ e.code กับ F เพื่อให้กดได้ตอนแป้นพิมพ์เป็นภาษาไทย
   if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); briefGo(1); }
   else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); briefGo(-1); }
-  else if (e.key === 'Escape') location.replace(`#/case/${encodeURIComponent(briefDeck[briefIdx])}`);
+  else if (e.code === 'KeyF') { e.preventDefault(); toggleFull(); }
+  else if (e.key === 'Escape') exitBrief();
 });
 
 let touchX = null;
@@ -1025,6 +1166,7 @@ function route() {
   document.body.classList.toggle('briefing', briefing);
   if (!briefing) {
     releaseAwake();
+    briefFromList = false;
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }
 
@@ -1035,7 +1177,7 @@ function route() {
     case '': viewFilter(); break;
     case 'results': viewResults(); break;
     case 'case': viewCase(arg); break;
-    case 'brief': viewBrief(arg, parts[2]); break;
+    case 'brief': drawBrief(arg, parts[2]); break;
     case 'dashboard': viewDashboard(); break;
     case 'areas': viewAreas(); break;
     case 'about': viewAbout(); break;
@@ -1066,7 +1208,7 @@ main.addEventListener('click', (e) => {
     return;
   }
   if (t.dataset.tick != null) { toggleTick(decodeURIComponent(location.hash.split('/')[2]), Number(t.dataset.tick)); return; }
-  if (t.dataset.present) { present(t.dataset.present); return; }
+  if (t.id === 'present') { present(); return; }
   if (t.dataset.go) { briefGo(Number(t.dataset.go)); return; }
   if (t.dataset.themeSet) {
     LS.set('theme', t.dataset.themeSet);
@@ -1104,9 +1246,11 @@ main.addEventListener('click', (e) => {
       const next = document.documentElement.dataset.theme === 'day' ? 'night' : 'day';
       LS.set('theme', next);
       applyTheme(next);
-      viewBrief(briefDeck[briefIdx], briefStep);
+      redrawBrief();
       break;
     }
+    case 'full': toggleFull(); break;
+    case 'exit': e.preventDefault(); exitBrief(); break;
     case 'forget':
       LS.del('key');
       SS.del('key');

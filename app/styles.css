@@ -167,6 +167,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 :focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; border-radius: 4px; }
+/* main / หัวแผงรับโฟกัสจากโค้ดตอนเปลี่ยนหน้า — ไม่ต้องตีกรอบทั้งหน้า */
+[tabindex="-1"]:focus { outline: none; }
 .skip { position: absolute; left: 8px; top: -60px; z-index: 100; background: var(--gold); color: var(--on-pri); padding: 10px 14px; border-radius: var(--r); }
 .skip:focus { top: 8px; }
 
@@ -455,11 +457,38 @@ details.opt .body { padding: 4px 16px 18px; display: grid; gap: 22px; }
 .ref-note { font-size: 13px; line-height: 1.6; color: var(--text2); }
 .ref-note .k { margin-right: 8px; font-weight: 600; color: var(--muted); }
 
-.case-nav .actbar-in { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; }
-.case-nav .btn { min-height: 56px; }
-.case-nav .btn-icon { width: 56px; }
+/* เลื่อนเคส: มือถืออยู่แถบล่าง (.case-nav) · จอคอมฯ อยู่ท้ายแผงขวา (.side-nav) */
+.case-nav .actbar-in, .side-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.case-nav .btn, .side-nav .btn { min-height: 56px; }
+.side-nav { display: none; }
 
-/* ── โหมดฉายจอ ────────────────────────────────────────────── */
+/* ── แผงด้านขวา (จอคอมฯ ≥1024px เท่านั้น — มือถือเห็นแค่ปุ่มในแถบล่าง) ── */
+.side-sum { display: none; }
+.side-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; font: 600 16px/1.3 var(--f-d); }
+.side-h span { font: 500 13px/1 var(--f-m); color: var(--muted); }
+.side-sel { border-top: 1px solid var(--line); }
+.side-sel button {
+  width: 100%; min-height: 52px; display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 8px 6px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; text-align: left;
+}
+.side-sel button:hover { background: var(--surface2); }
+.side-sel span { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.side-sel b { font-size: 14.5px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.side-sel b.unset { color: var(--muted); font-weight: 400; }
+.side-sum .note { margin-top: 14px; }
+.side-n { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 16px; font-size: 14px; color: var(--text2); }
+.side-n b { font: 600 34px/1 var(--f-d); color: var(--gold); font-variant-numeric: tabular-nums; }
+.side-n span { font-size: 13px; color: var(--muted); }
+.side-picks { border-top: 1px solid var(--line); }
+.side-picks li { display: grid; grid-template-columns: 22px minmax(0, 1fr) 48px; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.side-picks .n { font: 600 13px/1 var(--f-m); color: var(--sky); }
+.side-picks a { display: flex; flex-direction: column; justify-content: center; min-height: 48px; padding: 4px 0; font-size: 14px; font-weight: 500; line-height: 1.45; text-decoration: none; }
+.side-picks a:hover { text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+.side-picks .yr { margin-bottom: 2px; padding: 0; font-size: 12px; color: var(--muted); }
+.pick.unpick { border-color: transparent; background: none; color: var(--muted); }
+.pick.unpick:hover { border-color: var(--line2); color: var(--text); }
+
+/* ── โหมดบรีฟ ─────────────────────────────────────────────── */
 body.briefing .annun, body.briefing .tabbar, body.briefing .actbar { display: none; }
 body.briefing main { max-width: none; padding: 0; }
 .brief {
@@ -484,7 +513,8 @@ body.briefing main { max-width: none; padding: 0; }
 /* แบบ A: ทั้งการ์ด */
 .brief-body {
   display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr); gap: clamp(20px, 4.4vw, 64px);
-  align-items: start; align-content: center; min-height: 0; overflow: auto;
+  /* safe: การ์ดยาวกว่าจอ (โน้ตบุ๊ก 768px) ต้องชิดบนแล้วเลื่อนได้ ไม่ใช่ล้นขึ้นบนจนหัวเรื่องหาย — เบราว์เซอร์เก่าใช้ start */
+  align-items: start; align-content: start; align-content: safe center; min-height: 0; overflow: auto;
 }
 .brief h1 { margin-bottom: .5em; font: 600 clamp(24px, min(3.3vw, 5.6vh), 64px)/1.3 var(--f-d); }
 .brief .summary { margin: 0; font-size: clamp(16px, min(1.65vw, 2.9vh), 32px); line-height: 1.7; }
@@ -530,9 +560,47 @@ body.briefing main { max-width: none; padding: 0; }
 .edge.l { left: 0; }
 .edge.r { right: 0; }
 
+/* หน้าเปิด / หน้าปิด */
+.b-eyebrow { flex: 1 1 auto; min-width: 0; font-size: clamp(13px, min(1.35vw, 2.4vh), 20px); color: var(--muted); }
+.cover, .endq { align-self: center; width: 100%; max-width: 1500px; min-height: 0; max-height: 100%; overflow: auto; }
+.brief .cover h1, .brief .endq h1 { margin-bottom: .4em; font: 600 clamp(30px, min(4.4vw, 7.8vh), 84px)/1.2 var(--f-d); }
+.cover h1 em, .endq h1 em { font-style: normal; color: var(--gold); }
+.cond { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(18px, 4vh, 44px); }
+.cond span { padding: .3em .8em; border: 1px solid var(--line2); border-radius: 4px; font-size: clamp(13px, min(1.4vw, 2.5vh), 22px); font-weight: 500; line-height: 1.4; color: var(--text2); }
+.cover-list { border-top: 1px solid var(--line); }
+.cover-list a {
+  min-height: 48px; display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto; gap: 1em; align-items: baseline;
+  padding: .6em .2em; border-bottom: 1px solid var(--line); text-decoration: none;
+  font-size: clamp(16px, min(1.9vw, 3.3vh), 34px);
+}
+.cover-list a:hover { background: var(--surface); }
+.cover-list .n { font: 600 .85em/1.4 var(--f-m); color: var(--sky); }
+.cover-list .t { font-weight: 600; line-height: 1.4; }
+.cover-list .m { display: inline-flex; align-items: center; gap: .5em; font-size: .7em; color: var(--muted); white-space: nowrap; }
+.cover-list .m .dot { width: .6em; height: .6em; }
+.endq ol { border-top: 1px solid var(--line); }
+.endq li { display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 1em; align-items: baseline; padding: clamp(12px, 2.4vh, 28px) .2em; border-bottom: 1px solid var(--line); font-size: clamp(19px, min(2.3vw, 4vh), 46px); }
+.endq .n { font: 600 .7em/1.4 var(--f-m); color: var(--gold); }
+.endq .q { font: 600 1em/1.45 var(--f-d); }
+.endq .t { margin-top: .35em; font-size: .55em; line-height: 1.4; color: var(--muted); }
+.brief-foot .btn-primary { flex: none; margin-left: auto; padding: 0 clamp(20px, 2.4vw, 40px); min-height: clamp(56px, 7vh, 80px); font-size: clamp(17px, min(1.6vw, 2.8vh), 26px); }
+.keys { min-width: 0; font-size: clamp(12px, min(1.1vw, 2vh), 16px); line-height: 2; color: var(--muted); }
+.keys kbd {
+  display: inline-grid; place-items: center; min-width: 1.9em; height: 1.9em; padding: 0 .4em;
+  border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 4px; font: 500 .9em/1 var(--f-m); color: var(--text2);
+}
+/* จอสัมผัสไม่มีคีย์บอร์ด — ไม่ต้องบอกปุ่มลัด */
+@media (hover: none) and (pointer: coarse) { .keys { display: none; } }
+
 @media (orientation: portrait) and (max-width: 760px) {
   .brief-body { grid-template-columns: minmax(0, 1fr); align-content: start; }
   .edge { display: none; }
+  /* มือถือแนวตั้ง: ปุ่มเต็มจอไม่จำเป็น เอาที่ให้ป้ายปุ่มอยู่บรรทัดเดียว (จอ 320px ก็ยังพอ) */
+  .tools { gap: 6px; }
+  .tools #full { display: none; }
+  .tools .btn, .seg.mini button { padding: 0 10px; white-space: nowrap; }
+  .cover-list a { grid-template-columns: 1.6em minmax(0, 1fr); }
+  .cover-list .m { grid-column: 2; }
 }
 
 /* ── ข้อมูล / พื้นที่ ─────────────────────────────────────── */
@@ -679,12 +747,64 @@ body.briefing main { max-width: none; padding: 0; }
   .case h1 { font-size: 27px; }
 }
 
+/* ── จอคอมฯ ≥1024px (DECISIONS.md "หน้าตาแอป") ─────────────────
+   เมนูขึ้นไปอยู่ในหัวแอป · เนื้อหา 2 คอลัมน์ กว้างสุด 1240px · ปุ่มหลักอยู่ในแผงขวา ไม่มีแถบล่าง */
+@media (min-width: 1024px) {
+  :root { --head-h: 64px; }
+  .annun { padding-left: max(24px, calc((100% - 1240px) / 2)); padding-right: max(24px, calc((100% - 1240px) / 2)); gap: 16px; }
+  .tabbar {
+    position: static; height: auto; padding: 0; margin-left: 20px; gap: 4px; justify-content: flex-start;
+    background: none; border: 0;
+  }
+  .tabbar a { flex: none; max-width: none; min-height: 48px; flex-direction: row; gap: 8px; padding: 0 14px; border-radius: var(--r); font-size: 14.5px; color: var(--text2); }
+  .tabbar a:hover { background: var(--surface); color: var(--text); }
+  .tabbar .pill { width: auto; height: auto; border-radius: 0; }
+  .tabbar .pill .ic { width: 18px; height: 18px; }
+  .tabbar a[aria-current="page"] { background: var(--surface2); color: var(--text); }
+  .tabbar a[aria-current="page"] .pill,
+  :root[data-theme="day"] .tabbar a[aria-current="page"] .pill { background: none; }
+  :root[data-theme="day"] .tabbar a[aria-current="page"] { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line2); }
+
+  main { max-width: calc(1240px + 48px); padding: 32px 24px 64px; }
+  /* หน้าคอลัมน์เดียว (พื้นที่ ข้อมูล ไม่พบหน้า) ชิดซ้ายแนวเดียวกับหน้าอื่น อ่านง่ายที่ ~760px */
+  main > .view:not(.case):not(.dash), .lay.solo > .view { max-width: 760px; }
+
+  .lay { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 48px; align-items: start; }
+  .lay.solo { display: block; }
+  .side {
+    position: sticky; top: calc(var(--head-h) + 24px);
+    max-height: calc(100vh - var(--head-h) - 48px); display: flex; flex-direction: column; gap: 14px;
+  }
+  .side-sum { display: block; min-height: 0; overflow: auto; padding: 18px 16px; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface); }
+  .side .actbar { position: static; padding: 0; border: 0; background: none; }
+  .side .actbar-in { max-width: none; }
+
+  /* หน้าเลือกเที่ยวบิน: แผงขวาแทนแถบขั้นด้านบน */
+  .filter > .steps { display: none; }
+  .tiles { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+
+  /* หน้าเคส: ซ้าย = เรื่อง/ปัจจัย/ที่มา · ขวา = ทำวันนี้ + คำถามบรีฟ + เลื่อนเคส */
+  .case { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto 1fr; column-gap: 48px; align-items: start; }
+  .case-head { grid-column: 1; grid-row: 1; }
+  .case-more { grid-column: 1; grid-row: 2; }
+  .case-side { grid-column: 2; grid-row: 1 / 3; }
+  .case-side > .sec:first-child { margin-top: 0; }
+  .case-side .ask { margin-bottom: 16px; }
+  .side-nav { display: grid; }
+  .case-nav { display: none; }
+
+  /* ภาพรวม: ตัวกรอง KPI และกราฟรายปีเต็มแถว ที่เหลือ 2 คอลัมน์ */
+  .view.dash { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; align-items: start; }
+  .view.dash > .eyebrow, .view.dash > .page-h, .view.dash > .dash-f, .view.dash > .kpi, .view.dash > #sec-year, .view.dash > .empty { grid-column: 1 / -1; }
+  .dash-f .seg { max-width: 520px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
 @media print {
-  .annun, .tabbar, .actbar, .case-nav { display: none !important; }
+  .annun, .tabbar, .actbar, .case-nav, aside.side, .side-nav { display: none !important; }
 }
 
 /* จอแคบมาก: ซ่อนเวอร์ชันข้อมูลในหัวแอป (ยังดูได้ที่หน้า ข้อมูล) */
