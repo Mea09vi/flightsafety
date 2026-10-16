@@ -28,7 +28,8 @@ jobs:
       # กันพลาดชั้นสุดท้าย: ห้ามมีไฟล์หน่วยแบบไม่เข้ารหัสในสิ่งที่จะเผยแพร่
       - name: Block unencrypted unit data
         run: |
-          if find app -name 'unit.dev.json' -o -name 'unit_cases*.json' | grep -q .; then
+          if find app -name 'unit.dev.json' -o -name 'unit_cases*.json' -o -name 'history.dev.json' \
+               -o -name 'history.json' -o -name 'himg' | grep -q .; then
             echo "พบไฟล์หน่วยแบบไม่เข้ารหัสใน app/ — หยุดการเผยแพร่"; exit 1
           fi
       - uses: actions/configure-pages@v5

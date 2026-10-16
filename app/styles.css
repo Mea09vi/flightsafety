@@ -130,6 +130,8 @@
   --sky-d: rgb(108 201 255 / .12);
   --warn-d: rgb(244 162 89 / .14);
   --on-pri: #1b1300;
+  /* ประวัติเหตุ: แหล่งของเรื่อง m/e/r/f · ตัวเลขบนช่องสีเข้มของตารางหัวข้อ */
+  --seg-m: #6cc9ff; --seg-e: #f2c66d; --seg-r: #b48cff; --seg-f: #5f6b82; --hm-hi: #0b1120;
   color-scheme: dark;
 }
 
@@ -158,6 +160,7 @@
   --sky-d: rgb(13 100 166 / .09);
   --warn-d: rgb(138 71 13 / .1);
   --on-pri: #ffffff;
+  --seg-m: #0d64a6; --seg-e: #a8720c; --seg-r: #6d5bd0; --seg-f: #7d8594; --hm-hi: #faf6ec;
   color-scheme: light;
 }
 
@@ -234,6 +237,7 @@ main {
   outline: none;
 }
 .view { animation: enter .22s var(--ease) both; }
+.view.still { animation: none; } /* วาดหน้าเดิมใหม่หลังกดตัวกรอง ไม่ต้องเลื่อนเข้าอีกรอบ */
 @keyframes enter { from { opacity: 0; transform: translateY(6px); } }
 
 .eyebrow { font-size: 12.5px; line-height: 1.4; color: var(--muted); margin-bottom: 8px; }
@@ -1493,6 +1497,188 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
   .ls-cards.many .ls-card.flip { min-height: 6.2em; padding: .7em .8em; }
 }
 
+/* ── ประวัติเหตุ บน.2 (#/history · แผงในหน้าเคส) ───────────────
+   แหล่งของเรื่องมีคำกำกับเสมอ สีเป็นตัวช่วยเท่านั้น · ไม่มีปุ่มทองในหน้านี้ */
+.hv .sec-h, .histp .sec-h { display: block; }
+.hv .sec-h > span { margin-left: 6px; font: 400 13px/1.4 var(--f-b); color: var(--muted); }
+.hv .sec-h > .ic, .histp .sec-h > .ic { width: 18px; height: 18px; margin-right: 8px; vertical-align: -3px; color: var(--sky); }
+.hv > .status-line { margin: -8px 0 16px; }
+
+.h-tabs { display: flex; gap: 4px; margin: 0 0 22px; border-bottom: 1px solid var(--line2); }
+.h-tabs a {
+  min-height: 48px; margin-bottom: -1px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px;
+  border-bottom: 2px solid transparent; color: var(--text2); font: 600 15px/1.2 var(--f-d); text-decoration: none;
+}
+.h-tabs a:hover { color: var(--text); }
+.h-tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
+.h-tabs .ic { width: 18px; height: 18px; }
+
+/* ป้ายแหล่ง: m แบบฟอร์ม+ประชุม · e ประชุมอย่างเดียว · r เหตุ ทอ. · f แบบฟอร์มอย่างเดียว (ประชุม = เส้นประ) */
+.h-src {
+  display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px;
+  border: 1px solid var(--line2); border-radius: 4px; font-size: 11.5px; line-height: 1; color: var(--text2); white-space: nowrap;
+}
+.h-src .ic { width: 12px; height: 12px; }
+.h-src.m { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 45%, transparent); }
+.h-src.e { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 55%, transparent); border-style: dashed; }
+.h-src.r { color: var(--seg-r); border-color: color-mix(in srgb, var(--seg-r) 55%, transparent); border-style: dashed; }
+.meta .h-src { height: 22px; padding: 0 8px; font-size: 12px; }
+.seg-k { display: inline-block; flex: none; background: var(--seg-f); }
+.seg-k.m { background: var(--seg-m); }
+.seg-k.e { background: var(--seg-e); }
+.seg-k.r { background: var(--seg-r); }
+
+/* แบบ B: เส้นเวลารายปีงบ */
+.hv-l > .sec-h:first-child, .hv-r > .sec-h:first-child { margin-top: 0; }
+.h-tls { display: grid; gap: 2px; }
+.h-tl {
+  width: 100%; min-height: 48px; padding: 0 8px; display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 10px; align-items: center;
+  border: 0; border-radius: var(--r); background: none; text-align: left;
+}
+.h-tl:hover { box-shadow: inset 0 0 0 1px var(--line2); }
+.h-tl .fy { font: 500 13px/1 var(--f-m); color: var(--text2); }
+.h-tl .n { font: 500 13px/1 var(--f-m); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.h-tl .bar { display: flex; height: 16px; }
+.h-tl .seg-k { height: 100%; }
+.h-tl .seg-k:first-child { border-radius: 3px 0 0 3px; }
+.h-tl .seg-k:last-child { border-radius: 0 3px 3px 0; }
+.h-tl .seg-k:only-child { border-radius: 3px; }
+.h-tl .seg-k + .seg-k { border-left: 1px solid var(--bg); }
+.h-tl[aria-pressed="true"] { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line2), inset 3px 0 0 var(--gold); }
+.h-tl[aria-pressed="true"] .fy, .h-tl[aria-pressed="true"] .n { color: var(--text); font-weight: 600; }
+.h-tl[aria-pressed="true"] .seg-k + .seg-k { border-left-color: var(--surface); }
+.h-keys { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; }
+.h-keys span { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; line-height: 1.4; color: var(--text2); }
+.h-keys .seg-k { width: 12px; height: 12px; border-radius: 3px; }
+.gap-note { margin-top: 12px; }
+
+.hv-r { margin-top: 30px; }
+#hlist { scroll-margin-top: calc(var(--head-h) + env(safe-area-inset-top, 0px) + 12px); }
+.h-ystat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px; }
+.h-ystat button {
+  position: relative; min-height: 72px; padding: 10px 8px 9px; display: grid; align-content: start; gap: 5px;
+  border: 1px solid var(--line2); border-radius: var(--r); background: var(--surface); text-align: left;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.h-ystat b { font: 600 22px/1 var(--f-s); font-variant-numeric: tabular-nums; }
+.h-ystat span { display: flex; align-items: flex-start; gap: 5px; font-size: 11.5px; line-height: 1.35; color: var(--text2); }
+.h-ystat span .seg-k { width: 9px; height: 9px; margin-top: 3px; border-radius: 2px; }
+.h-ystat .ck { position: absolute; top: 8px; right: 7px; width: 15px; height: 15px; stroke-width: 2.6; }
+.h-ystat button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.h-ystat button[aria-pressed="true"] span { color: inherit; }
+.h-ystat button[disabled] { opacity: .45; cursor: default; }
+
+/* รายการเรื่อง: หัวกลุ่มติดขอบบนตอนเลื่อน */
+.hg { margin-top: 18px; }
+.yh {
+  position: sticky; top: calc(var(--head-h) + env(safe-area-inset-top, 0px)); z-index: 5;
+  display: flex; align-items: center; gap: 8px; padding: 10px 0 8px;
+  background: var(--bg); border-bottom: 1px solid var(--line2); font: 600 15px/1.3 var(--f-d);
+}
+.yh .n { margin-left: auto; font: 500 12.5px/1 var(--f-m); color: var(--muted); }
+.evs li { border-bottom: 1px solid var(--line); }
+.ev {
+  min-height: 48px; padding: 11px 0; display: grid; grid-template-columns: minmax(0, 1fr) 18px; gap: 5px 10px; align-items: center;
+  text-decoration: none;
+}
+.ev .t { grid-column: 1; font-size: 15px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+.ev:hover .t { text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px; }
+.ev .m { grid-column: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.ev .m .ic { width: 14px; height: 14px; }
+.ev .ty, .ev .card-l, .ev .img-n { display: inline-flex; align-items: center; gap: 5px; }
+.ev .ty { color: var(--text2); }
+.ev .card-l { color: var(--sky); }
+.ev .img-n { color: var(--text2); }
+.ev .yr { padding: 0; font-size: 12.5px; }
+.ev .go { grid-column: 2; grid-row: 1 / 3; width: 18px; height: 18px; color: var(--muted); }
+/* คำที่ปิดไว้ตอนทำความสะอาดข้อมูล เช่น [ชื่อ] */
+.h-ph { padding: 0 3px; border-radius: 3px; background: var(--surface2); color: var(--muted); font-size: .9em; }
+
+/* แบบ C: ตารางหัวข้อ × ปีงบ · ช่องสีเข้มขึ้นตามจำนวน ตัวเลขอยู่ในช่องเสมอ */
+.chips.h-sq { margin-bottom: 12px; }
+.hm-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface); }
+.hm { border-collapse: separate; border-spacing: 2px; margin: 4px; }
+/* ความกว้างคอลัมน์ปีคงที่ ปีที่ไม่มีเรื่องเลย (เช่น ฝูง 202 ก่อนปีงบ 63) จะได้ไม่บีบหัวคอลัมน์ติดกัน */
+.hm thead th { min-width: 26px; padding: 8px 0 6px; font: 500 11.5px/1 var(--f-m); color: var(--muted); text-align: center; }
+.hm thead th.tp { padding-left: 6px; font-family: var(--f-b); text-align: left; }
+.hm th.tp { position: sticky; left: 0; z-index: 2; background: var(--surface); }
+.hm th.tp button {
+  display: block; width: 100%; min-width: 112px; max-width: 168px; min-height: 28px; padding: 4px 8px 4px 6px;
+  border: 0; border-radius: 4px; background: none; text-align: left; font: 500 13px/1.3 var(--f-b); color: var(--text);
+}
+.hm th.tp button:hover { background: var(--surface2); }
+.hm th.tp button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.hm td { padding: 0; text-align: center; }
+.hm td button {
+  position: relative; width: 100%; min-width: 26px; height: 28px; padding: 0 2px;
+  border: 0; border-radius: 4px; font: 600 12px/1 var(--f-m); font-variant-numeric: tabular-nums;
+}
+.hm td button:hover { filter: brightness(1.12); }
+.hm td button[aria-pressed="true"] { z-index: 1; box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text); }
+.hm .l1 { background: color-mix(in srgb, var(--warn) 14%, var(--surface2)); color: var(--text); }
+.hm .l2 { background: color-mix(in srgb, var(--warn) 28%, var(--surface2)); color: var(--text); }
+.hm .l3 { background: color-mix(in srgb, var(--warn) 42%, var(--surface2)); color: var(--text); }
+.hm .l4 { background: color-mix(in srgb, var(--warn) 85%, var(--surface2)); color: var(--hm-hi); }
+.hm .l5 { background: var(--warn); color: var(--hm-hi); }
+.hm .z { color: var(--line2); font: 12px/1 var(--f-m); }
+.hm .tot { padding: 0 8px 0 6px; font: 600 12.5px/1 var(--f-m); color: var(--text2); text-align: right; }
+.hm-wrap + .note { margin-top: 10px; }
+.btn.more[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+/* รายละเอียดหนึ่งเรื่อง */
+.hd-h { margin-bottom: 14px; font: 600 23px/1.38 var(--f-s); overflow-wrap: anywhere; }
+.banner {
+  margin: 0 0 18px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px;
+  border: 1px dashed color-mix(in srgb, var(--gold) 55%, transparent); border-radius: var(--r-l); background: var(--gold-d);
+  font-size: 14px; line-height: 1.6; color: var(--text2);
+}
+.banner .ic { margin-top: 2px; color: var(--gold); }
+.banner b { color: var(--text); }
+.seg.h-mode { margin-bottom: 4px; }
+.para { font-size: 15.5px; line-height: 1.75; overflow-wrap: anywhere; }
+.para + .para { margin-top: 10px; }
+.ptag { display: inline-flex; align-items: center; height: 20px; margin-right: 8px; padding: 0 6px; border-radius: 4px; font: 600 11px/1 var(--f-b); vertical-align: 2px; }
+.ptag.fm { color: var(--sky); background: var(--sky-d); }
+.ptag.mt { color: var(--gold); background: var(--gold-d); }
+.hd-side { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.hd-side .kv { margin-top: 0; }
+.prov { margin-top: 16px; font-size: 13.5px; line-height: 1.6; color: var(--text2); }
+.prov .k { display: block; margin-bottom: 2px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.prov .auto { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.hd-side > .note { margin-top: 14px; }
+.lnk {
+  min-height: 56px; margin-top: 14px; padding: 10px 12px; display: grid; grid-template-columns: 20px minmax(0, 1fr) 18px; gap: 10px; align-items: center;
+  border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface);
+  color: var(--sky); font-size: 14.5px; font-weight: 600; line-height: 1.4; text-decoration: none;
+}
+.lnk:hover { border-color: var(--sky); }
+.lnk small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; line-height: 1.45; color: var(--text2); }
+.lnk .go { width: 18px; height: 18px; color: var(--muted); }
+
+/* ภาพจากเอกสาร (เฉพาะ dev server · DECISIONS.md "ประวัติเหตุ บน.2") */
+.h-img { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.h-img a { display: block; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface2); }
+.h-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.h-img + .note { margin-top: 8px; }
+.h-img.mini { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.h-img.mini a { aspect-ratio: 1; }
+
+/* แบบ D: แผง "เกิดใน บน.2 มาแล้ว" ท้ายหน้าเคส */
+.sec.histp { margin: 28px 0; padding: 16px 16px 6px; border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface); }
+.histp .sec-h { margin-bottom: 4px; }
+.histp > .note { margin-bottom: 4px; }
+.histp .evs li:last-child { border-bottom: 0; }
+.histp .more { margin-top: 8px; }
+.h-hide {
+  display: block; width: 100%; min-height: 48px; border: 0; background: none;
+  font-size: 13px; color: var(--muted); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px;
+}
+.h-hide:hover { color: var(--text2); }
+
+@media (min-width: 720px) {
+  .hd-h { font-size: 27px; }
+}
+
 @media (min-width: 720px) {
   main { padding-top: 32px; }
   .page-h { font-size: 32px; }
@@ -1519,7 +1705,8 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 
   main { max-width: calc(1240px + 48px); padding: 32px 24px 64px; }
   /* หน้าคอลัมน์เดียว (พื้นที่ ข้อมูล ไม่พบหน้า) ชิดซ้ายแนวเดียวกับหน้าอื่น อ่านง่ายที่ ~760px */
-  main > .view:not(.case):not(.dash):not(.theory), .lay.solo > .view { max-width: 760px; }
+  main > .view:not(.case):not(.dash):not(.theory):not(.hv), .lay.solo > .view,
+  main > .view.hv.hs, main > .view.hv:has(> .empty) { max-width: 760px; }
 
   .lay { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 48px; align-items: start; }
   .lay.solo { display: block; }
@@ -1560,6 +1747,23 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
   .dv-sec h2 { font-size: 26px; }
   .dv-strip { grid-template-columns: 230px 1fr 60px; }
   .dv-pill { bottom: 20px; }
+
+  /* ประวัติเหตุ: รายปี = เส้นเวลาซ้าย รายการขวา · ตามหัวข้อ = ตารางซ้าย รายการขวา · รายละเอียด = เนื้อหา + แผงขวา */
+  .hv-grid { display: grid; gap: 48px; align-items: start; }
+  .hv-grid.y { grid-template-columns: 420px minmax(0, 1fr); }
+  .hv-grid.t { grid-template-columns: minmax(0, 1fr) 400px; }
+  .hv-grid .hv-r { margin-top: 0; }
+  .hv-d { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; align-items: start; }
+  .hv-d .hd-main > :first-child { margin-top: 0; }
+  .hd-side {
+    position: sticky; top: calc(var(--head-h) + 24px); margin-top: 0;
+    padding: 18px 16px; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface);
+  }
+  .hd-side .lnk { background: var(--bg); }
+}
+/* เส้นเวลาติดอยู่กับที่ตอนเลื่อนรายการ เฉพาะจอที่สูงพอให้เห็นครบทั้งแผง */
+@media (min-width: 1024px) and (min-height: 860px) {
+  .hv-grid.y .hv-l { position: sticky; top: calc(var(--head-h) + 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

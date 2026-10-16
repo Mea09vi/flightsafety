@@ -4,6 +4,9 @@
 # ข้อมูลหน่วยแบบไม่เข้ารหัส — ห้ามเข้า repo (dev server เสิร์ฟจากนอก repo อยู่แล้ว กันไว้อีกชั้น)
 app/data/unit.dev.json
 unit_cases*.json
+app/data/history.dev.json
+app/data/himg/
+history.json
 
 # ไฟล์ตรวจเคสของ FSO (หมายเหตุอาจอ้างถึงหน่วย) และสำเนาสำรอง seed
 review/
