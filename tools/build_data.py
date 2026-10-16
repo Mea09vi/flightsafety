@@ -54,6 +54,16 @@ PII_PATTERNS = [
 ]
 
 
+# หัวข้อในเนื้อเรื่องเคส (docs/DECISIONS.md "เนื้อเรื่องเคส") ต้องตรงกับ STORY_H ใน app/app.js
+STORY_LABELS = {"เหตุการณ์", "การรอดชีวิต", "ผลการสอบสวน", "นักบิน", "สาเหตุ", "หลังเหตุ"}
+STORY_LINE = re.compile(r"^\[([^\]]+)\]\s*(.*)$")
+# ระดับความแน่นอนของ JTSB เก็บเป็นภาษาญี่ปุ่นในวงเล็บ แอปแปลงเป็นป้ายภาษาไทยตอนแสดงผล (CONF ใน app/app.js)
+CONF_TOKENS = ["可能性が高いと考えられる", "可能性は低い", "否定できない", "認められる", "推定",
+               "考えられる", "思われる", "可能性"]
+CONF_RX = re.compile(r"\(([^()]*?)(" + "|".join(CONF_TOKENS) + r")([^()]*)\)")
+JAPANESE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
+
+
 def read_csv(path):
     with open(path, encoding="utf-8-sig", newline="") as f:
         return list(csv.DictReader(f))
@@ -124,9 +134,19 @@ def main():
                 elif col == "aircraft" and t in retired:
                     errors.append(f"{cid}: aircraft '{t}' ปลดประจำการแล้ว เคส INTL ให้ติด ALL หรือแบบที่ใช้อยู่")
 
+        summary = "\n".join(split_lines(row["summary"]))
+        for line in summary.splitlines():
+            m = STORY_LINE.match(line)
+            if m and m.group(1) not in STORY_LABELS:
+                errors.append(f"{cid}: หัวข้อ [{m.group(1)}] ใน summary ไม่อยู่ในรายการ {sorted(STORY_LABELS)}")
+            elif m and not m.group(2):
+                errors.append(f"{cid}: หัวข้อ [{m.group(1)}] ใน summary ไม่มีข้อความตามหลัง")
+
         for col, val in row.items():
             if col == "ref" or not val:
                 continue
+            if JAPANESE.search(CONF_RX.sub("", val)):
+                warnings.append(f"{cid}.{col}: มีอักษรญี่ปุ่นนอกวงเล็บระดับความแน่นอน — ผู้อ่านอ่านไม่ออก")
             for pattern, what in PII_PATTERNS:
                 if pattern.search(val):
                     warnings.append(f"{cid}.{col}: พบ{what} — ตรวจก่อนเผยแพร่")
@@ -142,7 +162,7 @@ def main():
             **tags,
             "area_id": row.get("area_id", "").strip(),
             "severity": row.get("severity", "").strip(),
-            "summary": row["summary"].strip(),
+            "summary": summary,
             "factors": split_lines(row["factors"]),
             "actions_today": split_lines(row["actions_today"]),
             "brief_question": row["brief_question"].strip(),

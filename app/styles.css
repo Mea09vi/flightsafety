@@ -470,6 +470,31 @@ details.opt .body { padding: 4px 16px 18px; display: grid; gap: 22px; }
 .case h1 { margin-bottom: 12px; font: 600 23px/1.38 var(--f-s); }
 .summary { margin-bottom: 18px; color: var(--text2); line-height: 1.72; }
 
+/* เนื้อเรื่องเคส (app.js storyHtml) — ย่อหน้าเปิด → หมวดตามรายงาน ICAO · สาเหตุเป็นกล่อง · ป้ายระดับความแน่นอน */
+.facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 24px;
+  margin: 0 0 20px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.facts dt { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.facts dd { margin: 2px 0 0; font-size: 14px; line-height: 1.5; color: var(--text); }
+.story { max-width: 46em; margin-bottom: 22px; color: var(--text2); line-height: 1.78; }
+.story p + p { margin-top: .9em; }
+.story .lede { font-size: 17px; line-height: 1.72; color: var(--text); }
+.st-g { margin-top: 24px; }
+.st-h { margin-bottom: 8px; font: 600 15.5px/1.4 var(--f-d); color: var(--text); }
+.st-cause { padding: 14px 16px 16px; border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface2); }
+.st-cause .st-h { color: var(--warn); }
+.st-cause p { color: var(--text); }
+.cf {
+  display: inline-block; margin: 0 .1em; padding: .02em .5em .08em; border: 1px solid var(--line2); border-radius: 4px;
+  font-size: .8em; font-weight: 600; line-height: 1.45; color: var(--text2); white-space: nowrap;
+}
+.cf-m { width: 1.15em; height: .78em; margin-right: .4em; vertical-align: -.03em; fill: currentColor; }
+.cf-m .off { opacity: .28; }
+.cf-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
+.cf-key .k { margin-right: 2px; }
+.cf-key .cf { margin: 0; font-size: 12.5px; }
+
 .fac-t {
   width: 100%; min-height: 52px; padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: none;
@@ -588,6 +613,11 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 }
 .brief h1 { margin-bottom: .5em; font: 600 clamp(24px, min(3.3vw, 5.6vh), 64px)/1.3 var(--f-s); }
 .brief .summary { margin: 0; font-size: clamp(16px, min(1.65vw, 2.9vh), 32px); line-height: 1.7; }
+.brief .story { max-width: none; margin: 0; line-height: inherit; }
+.brief .story .lede { font-size: inherit; line-height: inherit; }
+.brief .st-g { margin-top: .9em; }
+.brief .st-h { margin-bottom: .35em; font-size: .82em; }
+.brief .st-cause { padding: .7em .9em .8em; }
 .brief .ask { margin: 0 0 clamp(16px, 2.6vh, 32px); padding: clamp(16px, 2vw, 32px) clamp(18px, 2.4vw, 40px); border-radius: 16px; }
 .brief .ask-l { margin-bottom: .5em; font-size: clamp(13px, min(1.35vw, 2.4vh), 24px); }
 .brief .ask .q { font-size: clamp(19px, min(2.2vw, 3.9vh), 44px); line-height: 1.45; }
