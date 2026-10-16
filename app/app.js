@@ -1249,7 +1249,7 @@ function viewHome() {
     </section>
     <nav class="apps" aria-label="แอป">${apps.map(appTile).join('')}</nav>
     <section class="home-sec" aria-labelledby="lsn-h">
-      <h2 class="sec-h" id="lsn-h">ทฤษฎีนิรภัย <span>บทละ 5 นาที</span></h2>
+      <h2 class="sec-h" id="lsn-h">ทฤษฎีนิรภัย <span id="lsn-m"></span></h2>
       <div class="apps" id="lsn-row"></div>
       <a class="tip" id="tip" href="#/theory" hidden></a>
     </section>
@@ -1260,6 +1260,9 @@ function viewHome() {
     const row = $('#lsn-row');
     if (!row) return; // ผู้ใช้ไปหน้าอื่นแล้ว
     row.innerHTML = LESSONS.map((l) => appTile({ href: `#/theory/${l.id}`, ic: l.icon, th: l.short, c: l.color })).join('');
+    // อ่านเวลาจากบทเรียนจริง ไม่เขียนตายตัว (เดิมเขียน "บทละ 5 นาที" ค้างไว้หลังบทยาวขึ้น)
+    const mins = LESSONS.map((x) => x.mins);
+    $('#lsn-m').textContent = `บทละ ${Math.min(...mins)}–${Math.max(...mins)} นาที`;
     const l = LESSONS[dayNo() % LESSONS.length];
     const tip = $('#tip');
     tip.href = `#/theory/${l.id}`;
@@ -1583,8 +1586,15 @@ async function boot() {
   if (state.unitStatus === 'locked') await showGate();
 
   if ('serviceWorker' in navigator) {
+    // เวอร์ชันใหม่เข้ามาแทนตัวเดิม (sw.js เรียก skipWaiting + claim) → โหลดหน้าใหม่ 1 ครั้งให้เห็นของใหม่เลย
+    // ไม่งั้นหน้าที่เปิดอยู่ใช้ไฟล์เก่าต่อจนปิดแอป · เปิดครั้งแรก (ยังไม่มี SW) ไม่ต้องโหลดซ้ำ
+    // กุญแจอยู่ใน localStorage/sessionStorage จึงไม่ต้องใส่รหัสใหม่หลังโหลด
+    const hadSW = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err));
-    navigator.serviceWorker.addEventListener('controllerchange', updateNet);
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      updateNet();
+      if (hadSW && !document.querySelector('.gate')) location.reload();
+    });
   }
 }
 
