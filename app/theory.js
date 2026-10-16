@@ -79,7 +79,7 @@ function list() {
 
   main.innerHTML = `<div class="view theory">
     <p class="eyebrow">ทฤษฎีนิรภัย · เส้นทาง ${N} จุด</p>
-    <h1 class="page-h">เข้าใจได้ใน <em>5 นาที</em></h1>
+    <h1 class="page-h">ทฤษฎีจาก<em>ต้นฉบับ</em></h1>
     <p class="th-meta">เรียนแล้ว <b>${nDone}/${N}</b> บท · ${left ? `เหลือราว ${left} นาที` : 'ครบทุกบทแล้ว'}</p>
     <div class="rt">
       <div class="rmap">${routeMap(st, next)}</div>
@@ -132,8 +132,8 @@ function panel(i, st) {
     <p class="rp-meta">${deckOf(l).length} สไลด์ · ราว ${l.mins} นาที</p>
     <a class="btn btn-primary rp-go" href="#/theory/${l.id}">${s === 'done' ? 'ทบทวนบทนี้' : 'เริ่มบทนี้'} ${icon('next')}</a>
     <ul class="rp-key" aria-label="ความหมายของจุด"><li class="done"><i class="dm"></i>เรียนแล้ว</li><li class="next"><i class="dm"></i>ถัดไป</li><li class="fut"><i class="dm"></i>ยังไม่เรียน</li></ul>
-    <p class="note th-src">เรียบเรียงจากเอกสารเผยแพร่สาธารณะของ FAA, ICAO และ SKYbrary (ลิงก์อยู่ท้ายแต่ละบท)
-      ใช้ประกอบการบรีฟ ไม่แทนระเบียบหรือคำสั่งของหน่วย · ความคืบหน้าเก็บไว้ในเครื่องนี้เท่านั้น</p>`;
+    <p class="note th-src">ข้อความภาษาอังกฤษยกมาตรงตามต้นฉบับพร้อมเลขหน้า (เอกสารของรัฐบาลสหรัฐฯ เช่น FAA, NTSB, DoD)
+      ส่วนแหล่งอื่นเล่าความเป็นภาษาไทย · ใช้ประกอบการบรีฟ ไม่แทนระเบียบหรือคำสั่งของหน่วย · ความคืบหน้าเก็บไว้ในเครื่องนี้เท่านั้น</p>`;
 }
 
 // เลือกจุดบนแผนที่ → เปลี่ยนแผงข้าง ไม่วาดทั้งหน้าใหม่ (โฟกัสคีย์บอร์ดอยู่ที่เดิม)
@@ -262,7 +262,7 @@ function slide(s) {
       return `<div class="ls-hrow"><h2 class="ls-h">${esc(s.h)}</h2>
         ${s.flip ? `<button class="btn ls-all" data-lflip="all">${st.open.length === n ? 'พลิกกลับทั้งหมด' : 'เปิดทั้งหมด'}</button>` : ''}</div>
         ${s.cap ? `<p class="ls-cap">${esc(s.cap)}</p>` : ''}
-        <div class="ls-cards${n > 6 ? ' many' : ''}">${s.items.map(card).join('')}</div>`;
+        <div class="ls-cards${n > 6 ? ' many' : ''}${n === 8 ? ' c4' : ''}">${s.items.map(card).join('')}</div>`;
     }
 
     case 'widget': return `<h2 class="ls-h">${esc(s.h)}</h2>
@@ -283,6 +283,22 @@ function slide(s) {
     case 'brief': return `<p class="plab">นำไปใช้</p><h2 class="ls-h">${esc(s.h)}</h2>
       <ol class="pdo">${s.items.map((t, k) => `<li><span>${k + 1}</span>${esc(t)}</li>`).join('')}</ol>`;
 
+    // ข้อความต้นฉบับ (ภาษาอังกฤษ ไม่แปล) + คำอธิบายไทยสั้น ๆ ถ้ามี · ทุกคำพูดต้องมีเลขหน้าที่พิมพ์บนเอกสาร
+    case 'quote': return `${s.h ? `<p class="plab">${esc(s.h)}</p>` : ''}
+      <div class="ls-qs${s.qs.length > 1 ? ' two' : ''}">${s.qs.map((q) => `<figure class="ls-quote">
+        <blockquote lang="en"><p>${esc(q.q)}</p></blockquote>
+        ${q.th ? `<p class="th">${esc(q.th)}</p>` : ''}
+        <figcaption>${srcLink(q.src)}</figcaption></figure>`).join('')}</div>
+      ${s.note ? `<p class="ls-cap">${esc(s.note)}</p>` : ''}`;
+
+    case 'chart': return `<h2 class="ls-h">${esc(s.h)}</h2>${CHARTS[s.kind](s)}
+      <p class="ls-cap">${s.cap ? `${esc(s.cap)} · ` : ''}ที่มา ${srcLink(s.src)}</p>`;
+
+    // ตัวเลขใหญ่หลายตัว แต่ละตัวมีที่มาของตัวเอง
+    case 'stats': return `<h2 class="ls-h">${esc(s.h)}</h2>
+      <ul class="ls-stats">${s.items.map((x) => `<li><b>${esc(x.n)}</b><span>${esc(x.t)}</span>${x.q ? `<q lang="en">${esc(x.q)}</q>` : ''}<small>${srcLink(x.src)}</small></li>`).join('')}</ul>
+      ${s.cap ? `<p class="ls-cap">${esc(s.cap)}</p>` : ''}`;
+
     default: { // หน้าจบบท
       const qs = L.slides.map((x, k) => [x, k]).filter(([x]) => x.t === 'quiz');
       const got = qs.filter(([x, k]) => ws[`${L.id}:${k}`]?.pick === x.a).length;
@@ -291,6 +307,9 @@ function slide(s) {
       const i = LESSONS.indexOf(L);
       const done = doneSet();
       const nDone = LESSONS.filter((l) => done.has(l.id)).length;
+      // หมายเหตุของแหล่งอ้างอิง (n เช่น "เล่าความ ไม่ยกคำพูด") → เครื่องหมาย † ‡ ต่อท้ายชื่อ + คำอธิบายเครื่องหมายต่อท้ายหัว "แหล่งอ้างอิง"
+      const notes = [...new Set(L.refs.map((r) => r.n).filter(Boolean))];
+      const mark = (n) => '†‡§'[notes.indexOf(n)];
       return `<div class="ce">
         <figure class="ce-fig">
           <div class="ce-slice ${fresh ? 'closing' : 'closed'}" style="${holeMask(i)}" aria-hidden="true"><small>ชั้น ${two(i + 1)}</small><b>${esc(L.short)}</b></div>
@@ -300,14 +319,70 @@ function slide(s) {
         <div class="ce-sum">
           <p class="plab">สรุป ${L.take.length} ข้อ</p><h2 class="ls-h">${esc(L.title)}</h2>
           <ol class="pdo">${L.take.map((t, k) => `<li><span>${k + 1}</span>${esc(t)}</li>`).join('')}</ol>
+          <div class="ls-refs"><p class="k">แหล่งอ้างอิง${notes.map((n) => `<span class="nt">${mark(n)} ${esc(n)}</span>`).join('')}</p><ul${L.refs.length > 3 ? ' class="two"' : ''}>${L.refs.map((r) => `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span>${esc(r.t)}${r.n ? `<sup>${mark(r.n)}</sup>` : ''}</span>${icon('ext')}</a></li>`).join('')}</ul></div>
+        </div>
+        <div class="ce-act">
           ${tried ? `<p class="ls-score">ตอบคำถามทวนถูก ${got}/${qs.length} ข้อ</p>` : ''}
-          <div class="ls-refs"><p class="k">แหล่งอ้างอิง</p><ul>${L.refs.map((r) => `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span>${esc(r.t)}</span>${icon('ext')}</a></li>`).join('')}</ul></div>
           <button class="btn ls-again" data-lgo="restart">เริ่มบทนี้ใหม่</button>
         </div>
       </div>`;
     }
   }
 }
+
+/* ── ที่มาและกราฟ ─────────────────────────────────────────── */
+
+// src = { t: ชื่อเอกสารสั้น, p: เลขหน้าที่พิมพ์บนเอกสาร, u: ลิงก์ PDF พร้อม #page=<ลำดับหน้าใน PDF> }
+function srcLink(src) {
+  const { esc, icon } = H;
+  return `<a class="src" href="${esc(src.u)}" target="_blank" rel="noopener noreferrer"><span>${esc(src.t)}${src.p ? `, p. ${esc(src.p)}` : ''}</span>${icon('ext')}</a>`;
+}
+
+// กราฟไม่ต้องแตะ · พิมพ์ตัวเลขทุกค่าบนกราฟ · ชุดที่สองใช้ลายเส้นทแยง (ไม่พึ่งสีอย่างเดียว) · มีตารางให้โปรแกรมอ่านหน้าจอ
+const CHARTS = {
+  // แท่งแนวนอน: rows = [{ g?, l, th?, v: ตัวเลข | [ชุด 1, ชุด 2] }] · แถวที่ g เหมือนกันและติดกันรวมเป็นกลุ่ม
+  hbar(s) {
+    const { esc } = H;
+    const unit = s.unit ?? '%';
+    const vs = (r) => [].concat(r.v);
+    const max = s.max || Math.max(...s.rows.flatMap(vs));
+    const groups = [];
+    s.rows.forEach((r) => {
+      const g = groups[groups.length - 1];
+      if (g && g.g === r.g) g.rows.push(r); else groups.push({ g: r.g, rows: [r] });
+    });
+    const ser = s.series || [''];
+    const bar = (v, k) => `<span class="hb-b s${k}"><i style="--w:${(v / max).toFixed(4)}"></i><b>${v}${esc(unit)}</b></span>`;
+    const row = (r) => `<li class="hb-r"><span class="hb-l"><span lang="en">${esc(r.l)}</span>${r.th ? `<small>${esc(r.th)}</small>` : ''}</span>
+      <span class="hb-bs">${vs(r).map(bar).join('')}</span></li>`;
+    return `<figure class="hbc${ser.length > 1 ? ' multi' : ''}">
+      ${s.series ? `<ul class="hb-key" aria-hidden="true">${s.series.map((n, k) => `<li><i class="s${k}"></i>${esc(n)}</li>`).join('')}</ul>` : ''}
+      <div class="hb-gs" aria-hidden="true">${groups.map((g) => `<div class="hb-g${g.g ? '' : ' nog'}">
+        ${g.g ? `<p class="hb-gl" lang="en">${esc(g.g)}</p>` : ''}<ul>${g.rows.map(row).join('')}</ul></div>`).join('')}</div>
+      <table class="sr"><caption>${esc(s.h)}</caption>
+        <thead><tr><th scope="col">หมวด</th>${ser.map((n) => `<th scope="col">${esc(n || 'ค่า')}</th>`).join('')}</tr></thead>
+        <tbody>${s.rows.map((r) => `<tr><th scope="row">${r.g ? `${esc(r.g)} — ` : ''}${esc(r.l)}</th>${vs(r).map((v) => `<td>${v}${esc(unit)}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></figure>`;
+  },
+
+  // แถบ 24 ชั่วโมง (แผนภาพ ไม่ใช่ข้อมูลวัด): rows = [{ l, z: [{ a, b, t, k: 'bad' | 'warn' }] }]
+  // ช่วงบนแถบไม่มีตัวอักษร (แคบเกินบนมือถือ) ความหมายอยู่ในรายการใต้แถบ ซึ่งมีลายเดียวกับช่วงบนแถบ
+  clock(s) {
+    const { esc } = H;
+    const pc = (h) => `${((h / 24) * 100).toFixed(3)}%`;
+    const hh = (h) => `${String(h % 24).padStart(2, '0')}:00`;
+    const ticks = [0, 3, 6, 9, 12, 15, 18, 21, 24];
+    return `<figure class="ckc">
+      <div class="ck-r ck-top" aria-hidden="true"><span></span><div class="ck-ax">${ticks.map((h) => `<span style="left:${pc(h)}">${two(h % 24)}</span>`).join('')}</div></div>
+      ${s.rows.map((r) => `<div class="ck-r">
+        <p class="ck-l">${esc(r.l)}</p>
+        <div class="ck-band" aria-hidden="true">${ticks.slice(1, -1).map((h) => `<i class="ck-t" style="left:${pc(h)}"></i>`).join('')}
+          ${r.z.map((z) => `<span class="ck-z ${z.k}" style="left:${pc(z.a)};width:${pc(z.b - z.a)}"></span>`).join('')}</div>
+        <ul class="ck-d">${r.z.map((z) => `<li><i class="ck-sw ${z.k}" aria-hidden="true"></i><b>${hh(z.a)}–${hh(z.b)}</b> ${esc(z.t)}</li>`).join('')}</ul>
+      </div>`).join('')}
+    </figure>`;
+  },
+};
 
 /* ── ภาพโต้ตอบ ────────────────────────────────────────────── */
 
@@ -423,7 +498,8 @@ const LEANS = [
   { h: 'หยุดเลี้ยว', real: 0, felt: -20, t: 'ท่อหยุด แต่ของเหลวยังหมุนต่อ — รู้สึกว่าเลี้ยวไปอีกทาง ทั้งที่ปีกตรงแล้ว จึงอยากเอียงกลับ (the leans)' },
 ];
 
-// ตื่นติดต่อกัน: ตัวเลขจาก Dawson & Reid 1997 และ Williamson & Feyer 2000 · ช่วงตื่นตัวต่ำ (WOCL) ราว 02:00–05:59 ตาม SKYbrary
+// ตื่นติดต่อกัน: ตัวเลขจาก Dawson & Reid 1997 และ Williamson & Feyer 2000 (เล่าความ ไม่ยกคำพูด)
+// ช่วงตื่นตัวต่ำ (WOCL) ราว 03:00–05:00 และความเสี่ยงผิดพลาดเพิ่มมากช่วง 02:00–04:00 ตาม FAA AC 120-100 หน้า 2 และ 7
 const AW_WAKE = 6;
 const AW_MAX = 26;
 const bank = (d) => (d === 0 ? 'ตรง' : `เอียง${d > 0 ? 'ขวา' : 'ซ้าย'} ${Math.abs(d)}°`);
@@ -643,10 +719,10 @@ const WIDGETS = {
     return `<div class="aw">
         <div class="aw-track">
           <span class="aw-z wf" style="left:${pc(17)};width:${pc(2)}" title="Williamson &amp; Feyer 2000"></span>
-          <span class="aw-z wocl" style="left:${pc(20)};width:${pc(4)}" title="WOCL"></span>
+          <span class="aw-z wocl" style="left:${pc(21)};width:${pc(2)}" title="WOCL 03:00–05:00"></span>
           <input type="range" min="0" max="${AW_MAX}" step="1" value="${st.h}" data-lwr="aw" aria-label="ชั่วโมงที่ตื่นติดต่อกัน" aria-valuetext="${awText(st.h)}">
         </div>
-        <div class="aw-ax" aria-hidden="true"><span>ตื่น 06:00</span><span style="left:${pc(10)}">10 ชม.</span><span style="left:${pc(17)}">17</span><span style="left:${pc(20)}">02:00</span><span>26 ชม.</span></div>
+        <div class="aw-ax" aria-hidden="true"><span>ตื่น 06:00</span><span style="left:${pc(10)}">10 ชม.</span><span style="left:${pc(17)}">17</span><span style="left:${pc(21)}">03:00</span><span>26 ชม.</span></div>
         <div class="aw-live" aria-live="polite">${awLive(st.h)}</div>
       </div>`;
   },
@@ -659,7 +735,8 @@ function awLive(h) {
   const fx = [];
   if (h > 10) fx.push(['warn', `ประสิทธิภาพลดลงราว <b>${((h - 10) * 0.74).toFixed(1)}%</b> จากค่าตั้งต้น <small>Dawson &amp; Reid 1997 วัดได้ราว 0.74% ต่อชั่วโมง ระหว่างชั่วโมงที่ 10–26</small>`]);
   if (h >= 17) fx.push(['bad', `ผลทดสอบบางอย่าง <b>เท่ากับหรือแย่กว่า</b> คนที่มีแอลกอฮอล์ในเลือด 0.05% <small>Williamson &amp; Feyer 2000 · ตื่น 17–19 ชั่วโมง</small>`]);
-  if (hr >= 2 && hr < 6) fx.push(['bad', `อยู่ในช่วง <b>ตื่นตัวต่ำ (WOCL)</b> ราว 02:00–05:59 — ง่วงที่สุดของวัน แม้นอนพอ <small>SKYbrary</small>`]);
+  if (hr >= 3 && hr < 5) fx.push(['bad', `อยู่ในช่วง <b>ตื่นตัวต่ำ (WOCL)</b> ราว 03:00–05:00 — ง่วงที่สุดของวัน แม้นอนพอ <small>FAA AC 120-100, p. 2</small>`]);
+  if (hr >= 2 && hr < 4) fx.push(['bad', `ช่วง 02:00–04:00 <b>ความเสี่ยงผิดพลาดเพิ่มขึ้นมาก</b> กว่าช่วงบ่าย <small>FAA AC 120-100, p. 7</small>`]);
   return `<p class="aw-n"><b>${h}</b> ชม. <span>ตอนนี้ ${awClock(h)}</span></p>
     ${fx.length
       ? `<ul class="aw-fx">${fx.map(([c, t]) => `<li class="${c}">${H.icon('warn')}<span>${t}</span></li>`).join('')}</ul>`
