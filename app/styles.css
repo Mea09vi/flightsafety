@@ -474,6 +474,31 @@ details.opt .body { padding: 4px 16px 18px; display: grid; gap: 22px; }
 .case h1 { margin-bottom: 12px; font: 600 23px/1.38 var(--f-s); }
 .summary { margin-bottom: 18px; color: var(--text2); line-height: 1.72; }
 
+/* เนื้อเรื่องเคส (app.js storyHtml) — ย่อหน้าเปิด → หมวดตามรายงาน ICAO · สาเหตุเป็นกล่อง · ป้ายระดับความแน่นอน */
+.facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 24px;
+  margin: 0 0 20px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
+.facts dt { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.facts dd { margin: 2px 0 0; font-size: 14px; line-height: 1.5; color: var(--text); }
+.story { max-width: 46em; margin-bottom: 22px; color: var(--text2); line-height: 1.78; }
+.story p + p { margin-top: .9em; }
+.story .lede { font-size: 17px; line-height: 1.72; color: var(--text); }
+.st-g { margin-top: 24px; }
+.st-h { margin-bottom: 8px; font: 600 15.5px/1.4 var(--f-d); color: var(--text); }
+.st-cause { padding: 14px 16px 16px; border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface2); }
+.st-cause .st-h { color: var(--warn); }
+.st-cause p { color: var(--text); }
+.cf {
+  display: inline-block; margin: 0 .1em; padding: .02em .5em .08em; border: 1px solid var(--line2); border-radius: 4px;
+  font-size: .8em; font-weight: 600; line-height: 1.45; color: var(--text2); white-space: nowrap;
+}
+.cf-m { width: 1.15em; height: .78em; margin-right: .4em; vertical-align: -.03em; fill: currentColor; }
+.cf-m .off { opacity: .28; }
+.cf-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.5; color: var(--muted); }
+.cf-key .k { margin-right: 2px; }
+.cf-key .cf { margin: 0; font-size: 12.5px; }
+
 .fac-t {
   width: 100%; min-height: 52px; padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: none;
@@ -592,6 +617,11 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 }
 .brief h1 { margin-bottom: .5em; font: 600 clamp(24px, min(3.3vw, 5.6vh), 64px)/1.3 var(--f-s); }
 .brief .summary { margin: 0; font-size: clamp(16px, min(1.65vw, 2.9vh), 32px); line-height: 1.7; }
+.brief .story { max-width: none; margin: 0; line-height: inherit; }
+.brief .story .lede { font-size: inherit; line-height: inherit; }
+.brief .st-g { margin-top: .9em; }
+.brief .st-h { margin-bottom: .35em; font-size: .82em; }
+.brief .st-cause { padding: .7em .9em .8em; }
 .brief .ask { margin: 0 0 clamp(16px, 2.6vh, 32px); padding: clamp(16px, 2vw, 32px) clamp(18px, 2.4vw, 40px); border-radius: 16px; }
 .brief .ask-l { margin-bottom: .5em; font-size: clamp(13px, min(1.35vw, 2.4vh), 24px); }
 .brief .ask .q { font-size: clamp(19px, min(2.2vw, 3.9vh), 44px); line-height: 1.45; }
@@ -1130,6 +1160,7 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 
 .ls-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr)); gap: 10px; }
 .ls-cards.many { grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); }
+@media (orientation: landscape) { .ls-cards.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } } /* 8 ใบ: 4 × 2 บนจอแนวนอน */
 .ls-card {
   display: grid; align-content: start; gap: .25em; min-height: 56px; padding: .9em 1em;
   border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface); text-align: left; font-size: .95em;
@@ -1173,15 +1204,96 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 .ls-why p:not(.r) { color: var(--text2); }
 
 .ls-score { margin-top: 1.2em; font-weight: 600; color: var(--sky); }
-.ls-refs { margin-top: 1.4em; padding-top: 1em; border-top: 1px solid var(--line); }
-.ls-refs .k { margin-bottom: .4em; font-size: .85em; color: var(--muted); }
+.ls-refs { margin-top: 1em; padding-top: .8em; border-top: 1px solid var(--line); }
+.ls-refs .k { margin-bottom: .2em; font-size: .85em; color: var(--muted); }
 .ls-refs a { display: inline-flex; align-items: center; gap: .5em; min-height: 44px; padding: .2em 0; color: var(--sky); font-size: .92em; }
 .ls-refs a .ic { width: 1em; height: 1em; flex: none; }
 .ls-again { margin-top: 1em; min-height: 48px; }
+.ls-refs a > span { line-height: 1.4; }
+.ls-refs sup { margin-left: .15em; font: 600 .85em/1 var(--f-m); color: var(--text2); }
+.ls-refs .nt { margin-left: 1.2em; font-size: .92em; color: var(--muted); }
+@media (min-width: 900px) { .ls-refs ul.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.6em; } }
+
+/* ข้อความต้นฉบับ · ตัวเลขพร้อมที่มา · กราฟ (theory.js quote / stats / chart) — ทุกชิ้นลงท้ายด้วยลิงก์ที่มาพร้อมเลขหน้า */
+.ls a.src { display: inline-flex; align-items: center; gap: .4em; min-height: 44px; color: var(--sky); font: 500 .8em/1.35 var(--f-m); }
+.ls a.src .ic { width: 1em; height: 1em; flex: none; }
+.ls a.src:hover span { text-decoration: underline; text-underline-offset: 3px; }
+
+.ls-qs { display: grid; gap: clamp(14px, 2.4vw, 32px); }
+.ls-qs.two { grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); }
+.ls-quote { display: grid; align-content: start; gap: .45em; margin: 0; padding-left: 1.1em; border-left: 3px solid var(--gold); }
+.ls-quote blockquote { margin: 0; }
+.ls-quote blockquote p { max-width: 62ch; font-size: 1.06em; line-height: 1.6; color: var(--text); }
+.ls-qs:not(.two) blockquote p { font-size: 1.22em; }
+.ls-quote blockquote p::before { content: open-quote; margin-right: .08em; color: var(--gold); font-weight: 600; }
+.ls-quote blockquote p::after { content: close-quote; margin-left: .04em; color: var(--gold); font-weight: 600; }
+.ls-quote .th { max-width: 62ch; font-size: .88em; color: var(--text2); }
+.ls-quote figcaption { margin-top: -.2em; }
+
+.ls-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 12px; }
+.ls-stats li { display: grid; grid-template-rows: auto auto 1fr auto; gap: .3em; padding: .8em 1em .3em; border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface); }
+.ls-stats b { font: 600 clamp(28px, min(3.2vw, 5.4vh), 54px)/1.15 var(--f-d); color: var(--gold); font-variant-numeric: tabular-nums; }
+.ls-stats span { line-height: 1.5; color: var(--text); }
+.ls-stats q { font-size: .84em; line-height: 1.5; color: var(--text2); }
+
+/* แท่งแนวนอน: ชุด 1 ทึบสีฟ้า · ชุด 2 ลายทแยงสีทอง มีกรอบ — แยกได้แม้มองไม่เห็นสี · ค่าพิมพ์ต่อท้ายทุกแท่ง */
+.hbc { display: grid; gap: .6em; margin: 0; font-size: .86em; }
+.hb-key { display: flex; flex-wrap: wrap; gap: .2em 1.6em; color: var(--text2); }
+.hb-key li { display: inline-flex; align-items: center; gap: .5em; }
+.hb-key i { width: 1.8em; height: .85em; border-radius: 2px; flex: none; }
+.hbc .s0 i, .hb-key i.s0 { background: var(--sky); }
+.hbc .s1 i, .hb-key i.s1 { background: repeating-linear-gradient(135deg, var(--gold) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--gold); }
+.hb-gs { display: grid; gap: .5em; }
+.hb-g { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 0 1em; padding-top: .5em; border-top: 1px solid var(--line); }
+.hb-g.nog { grid-template-columns: minmax(0, 1fr); padding-top: 0; border-top: 0; }
+.hb-gl { padding-top: .1em; font: 600 .86em/1.35 var(--f-d); color: var(--text2); }
+.hb-g ul { display: grid; gap: .4em; }
+.hb-r { display: grid; grid-template-columns: minmax(9em, 18em) minmax(0, 1fr); gap: 1em; align-items: center; }
+.hb-l { line-height: 1.35; }
+.hb-l small { margin-left: .5em; font-size: .86em; color: var(--muted); }
+.hb-bs { display: grid; gap: 3px; }
+.hb-b { display: flex; align-items: center; gap: .45em; height: 1.2em; }
+.hb-b i { flex: none; width: calc(var(--w) * (100% - 4em)); min-width: 2px; height: .85em; border-radius: 0 3px 3px 0; }
+.hb-b b { font: 600 .86em/1 var(--f-m); font-variant-numeric: tabular-nums; color: var(--text); }
+.is-chart .ls-h { margin-bottom: .45em; }
+.hbc.multi { gap: .4em; }
+.hbc.multi .hb-r { grid-template-columns: minmax(9em, 24em) minmax(0, 1fr); }
+.hbc.multi .hb-gs { gap: .35em; }
+.hbc.multi .hb-g { grid-template-columns: 11.5em minmax(0, 1fr); padding-top: .35em; }
+.hbc.multi .hb-g ul { gap: .3em; }
+.hbc.multi .hb-bs { gap: 2px; }
+.hbc.multi .hb-b { height: .95em; }
+.hbc.multi .hb-b i { height: .72em; }
+.hbc:not(.multi) .hb-b { height: 1.7em; }
+.hbc:not(.multi) .hb-b i { height: 1.25em; }
+.hbc:not(.multi) .hb-r { grid-template-columns: minmax(12em, 26em) minmax(0, 1fr); }
+
+/* แถบ 24 ชั่วโมง (แผนภาพ) · ช่วงทึบ = มาก ลายทแยง = รองลงมา · ความหมายอยู่ในรายการใต้แถบเสมอ */
+.ckc { display: grid; gap: 1em; margin: 0; }
+.ck-r { display: grid; grid-template-columns: 10em minmax(0, 1fr); gap: .3em 1.2em; }
+.ck-l { grid-row: span 2; padding-top: .3em; font: 600 .95em/1.4 var(--f-d); }
+.ck-top { margin-bottom: -.6em; }
+.ck-ax { position: relative; height: 1.3em; font: 500 .74em/1 var(--f-m); color: var(--muted); }
+.ck-ax span { position: absolute; top: 0; transform: translateX(-50%); }
+.ck-ax span:first-child { transform: none; }
+.ck-ax span:last-child { transform: translateX(-100%); }
+.ck-band { position: relative; height: 2.2em; overflow: hidden; border: 1px solid var(--line2); border-radius: 6px; background: var(--surface2); }
+:root[data-theme="day"] .ck-band { background: var(--bg); }
+.ck-t { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line2); }
+.ck-z { position: absolute; top: 0; bottom: 0; }
+.ck-z.bad, .ck-sw.bad { background: var(--bad); }
+.ck-z.warn, .ck-sw.warn { background: repeating-linear-gradient(135deg, var(--warn) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--warn); }
+.ck-d { display: flex; flex-wrap: wrap; gap: .15em 1.6em; font-size: .88em; color: var(--text2); }
+.ck-d li { display: inline-flex; align-items: center; gap: .5em; }
+.ck-sw { flex: none; width: 1.3em; height: .85em; border-radius: 2px; }
+.ck-d b { font: 600 .92em/1.4 var(--f-m); color: var(--text); font-variant-numeric: tabular-nums; }
 
 /* หน้าจบบท: แผ่นชีสของบทนี้ รูหดจนปิด (theory.js holeMask) · แถวล่าง = 11 แผ่นของทั้งเส้นทาง */
 @property --hr { syntax: '<number>'; inherits: true; initial-value: 1; }
-.ce { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 2.4em; align-items: start; }
+.ce { display: grid; grid-template-columns: 10em minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 1.2em 2em; align-items: start; }
+.ce-sum { grid-column: 2; grid-row: 1 / span 2; }
+.ce-act { grid-column: 1; grid-row: 2; display: grid; justify-items: center; gap: .5em; text-align: center; }
+.ce-act .ls-score, .ce-act .ls-again { margin: 0; }
 .ce-fig { display: grid; justify-items: center; gap: .9em; margin: 0; padding-top: .4em; }
 .ce-slice {
   --hr: 0; position: relative; display: grid; align-content: end; gap: .1em; width: 9em; height: 12em; padding: .8em .9em;
@@ -1426,6 +1538,12 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 .at-b > .ic { grid-column: 2; grid-row: 1 / span 3; width: 18px; height: 18px; stroke-width: 2.8; color: var(--ok); }
 .at-b[aria-pressed="true"] { border-color: var(--gold); background: var(--gold-d); box-shadow: inset 3px 0 0 var(--gold); }
 .at-b.anti { line-height: 1.4; }
+@media (orientation: landscape) { /* จอแนวนอน: ชื่ออังกฤษต่อท้ายบรรทัดเดียวกับชื่อไทย ไม่ให้สไลด์ล้นจอ */
+  .at-b:not(.anti) { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .at-b:not(.anti) small { grid-column: 2; grid-row: 1; }
+  .at-b:not(.anti) q { grid-column: 1 / 3; }
+  .at-b:not(.anti) > .ic { grid-column: 3; grid-row: 1 / span 2; }
+}
 .at-b.anti:disabled:not(.ok) { opacity: .6; cursor: default; }
 .at-b.ok { border-color: var(--ok); background: var(--ok-d); cursor: default; }
 .at-b.no { border-color: var(--bad); background: var(--bad-d); animation: shake .3s var(--ease); }
@@ -1471,6 +1589,13 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 
 @media (orientation: portrait) and (max-width: 760px) {
   .ls-cmp, .sh, .gr, .ln, .sa { grid-template-columns: minmax(0, 1fr); }
+  .hb-g, .hb-r, .hbc.multi .hb-g, .hbc.multi .hb-r, .hbc:not(.multi) .hb-r, .ck-r { grid-template-columns: minmax(0, 1fr); }
+  .hb-g { gap: .3em; }
+  .hb-r { gap: .15em; }
+  .hb-gl { padding-top: 0; color: var(--gold); }
+  .ck-l { grid-row: auto; padding-top: 0; }
+  .ck-top > span { display: none; }
+  .ck-top { margin-bottom: -.8em; }
   .gr-v { max-height: 130px; }
   .ln-ai svg { max-height: 120px; }
   .sa-t { padding-top: 0; }
@@ -1490,6 +1615,8 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
   .brief.lsn .brief-foot .btn-primary { padding: 0 16px; font-size: 16px; }
   .lroute { margin: 0 6px; height: 28px; }
   .ce { grid-template-columns: minmax(0, 1fr); gap: 1.4em; }
+  .ce-sum, .ce-act { grid-column: auto; grid-row: auto; }
+  .ce-act { justify-items: start; text-align: left; }
   .ce-fig { grid-template-columns: auto minmax(0, 1fr); justify-items: start; align-items: center; gap: .4em 1em; padding: 0; }
   .ce-slice { grid-row: span 2; font-size: .7em; }
   .ce-fig figcaption { justify-items: start; text-align: left; }

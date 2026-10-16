@@ -655,6 +655,73 @@ function hfacsHtml(c) {
     `<span><b>${esc(h)}</b>${esc(label('hfacs', h))}</span>`).join('')}</div></section>`;
 }
 
+/* ── เนื้อเรื่องเคส (DECISIONS.md "เนื้อเรื่องเคส") ─────────────────
+   summary เก็บย่อหน้าละบรรทัด · บรรทัดที่ขึ้นต้นด้วย [หมวด] เริ่มหมวดใหม่ เรียงตามหัวข้อรายงาน ICAO Annex 13
+   ระดับความแน่นอนของ JTSB อยู่ในวงเล็บเป็นคำญี่ปุ่นตามต้นฉบับ (กฎ ฎ) แปลงเป็นป้ายไทยตอนแสดงเท่านั้น */
+const STORY_H = {
+  เหตุการณ์: 'ลำดับเหตุการณ์', การรอดชีวิต: 'การรอดชีวิตและการช่วยเหลือ', ผลการสอบสวน: 'ผลการวิเคราะห์',
+  นักบิน: 'ข้อมูลนักบิน', สาเหตุ: 'สาเหตุตามรายงาน', หลังเหตุ: 'การแก้ไขหลังเหตุ',
+};
+// [คำในรายงาน, ระดับ 0–4, ป้ายไทย, คำที่ JTSB ใช้ในฉบับอังกฤษ] — คำยาวต้องมาก่อน ไม่งั้น 可能性 จับก่อน
+const CONF = [
+  ['可能性が高いと考えられる', 2, 'มีโอกาสสูง', 'highly likely'],
+  ['可能性は低い', 0, 'ไม่น่าใช่', 'unlikely'],
+  ['否定できない', 1, 'ตัดออกไม่ได้', 'cannot be ruled out'],
+  ['認められる', 4, 'ยืนยันได้', 'certain'],
+  ['推定', 3, 'เกือบแน่', 'highly probable'],
+  ['考えられる', 2, 'น่าจะ', 'likely'],
+  ['思われる', 1, 'ดูเหมือน', 'it appears'],
+  ['可能性', 1, 'เป็นไปได้', 'possible'],
+];
+const CONF_RX = new RegExp(`\\(([^()]*?)(${CONF.map((x) => x[0]).join('|')})([^()]*)\\)`, 'g');
+const meter = (lv) => `<svg class="cf-m" viewBox="0 0 15 10" aria-hidden="true">${[0, 1, 2, 3].map((i) =>
+  `<rect x="${i * 4}" y="${7.5 - i * 2.5}" width="3" height="${2.5 + i * 2.5}" rx=".6"${i < lv ? '' : ' class="off"'}/>`).join('')}</svg>`;
+const chip = (lv, th, en) => `<span class="cf" title="ระดับความแน่นอนตามรายงาน: ${en}">${meter(lv)}${th}</span>`;
+// รับข้อความที่ esc แล้ว · "(ทั้งสองข้อ 可能性)" → ป้าย "ทั้งสองข้อ เป็นไปได้" · ส่วนท้ายหลัง ; ยังเป็นวงเล็บธรรมดา
+const conf = (h) => h.replace(CONF_RX, (_, pre, k, post) => {
+  const [, lv, th, en] = CONF.find((x) => x[0] === k);
+  const rest = post.replace(/^[\s;,]+/, '').trim();
+  return chip(lv, `${pre.trim() ? `${pre.trim()} ` : ''}${th}`, en) + (rest ? ` (${rest})` : '');
+});
+// คำอธิบายใต้เรื่อง: 4 ระดับหลัก จากแน่นอนที่สุดลงไป
+const CONF_KEY = `<p class="cf-key"><span class="k">ระดับความแน่นอนตามรายงาน</span>${['認められる', '推定', '考えられる', '可能性']
+  .map((k) => CONF.find((x) => x[0] === k)).map(([, lv, th, en]) => chip(lv, th, en)).join('')}</p>`;
+
+function storyParse(s) {
+  const gs = [];
+  for (const line of String(s ?? '').split('\n')) {
+    const t = line.trim();
+    if (!t) continue;
+    const m = /^\[([^\]]+)\]\s*(.*)$/.exec(t);
+    if (m || !gs.length) gs.push({ k: m ? m[1] : '', ps: [] });
+    if (m ? m[2] : t) gs.at(-1).ps.push(m ? m[2] : t);
+  }
+  return gs;
+}
+
+// เต็ม: ย่อหน้าเปิด (lede) → หมวดตามลำดับ · สาเหตุเป็นกล่อง · brief: ย่อหน้าเปิด + สาเหตุ (สำหรับจอบรีฟ)
+function storyHtml(c, { brief = false } = {}) {
+  const gs = storyParse(c.summary);
+  const p = (t) => `<p>${conf(esc(t))}</p>`;
+  const out = gs.map((g, gi) => {
+    if (!g.k) return g.ps.map((t, k) => (gi === 0 && k === 0 ? `<p class="lede">${conf(esc(t))}</p>` : brief ? '' : p(t))).join('');
+    if (brief && g.k !== 'สาเหตุ') return '';
+    const h = `<h2 class="st-h">${esc(STORY_H[g.k] ?? g.k)}</h2>`;
+    return `<section class="${g.k === 'สาเหตุ' ? 'st-g st-cause' : 'st-g'}">${h}${g.ps.map(p).join('')}</section>`;
+  }).join('');
+  return `<div class="story">${out}${!brief && out.includes('class="cf"') ? CONF_KEY : ''}</div>`;
+}
+
+// ข้อมูลเบื้องต้นแบบหัวรายงาน — แสดงเฉพาะช่องที่มีค่า
+// แถบข้อมูลย่อเป็นแท็กที่ใช้กรอง (ใช้กับแบบ ฮ. ไหนในฝูง) ไม่ใช่แบบของเครื่องที่เกิดเหตุ — แบบจริงอยู่ในหัวเรื่อง
+const ALL_TH = { aircraft: 'ทุกแบบ', mission: 'ทุกภารกิจ', environment: 'ทุกสภาพ' };
+function factsHtml(c) {
+  const labs = (kind) => (c[kind] || []).map((v) => (v === 'ALL' ? ALL_TH[kind] : label(kind, v))).join(' · ');
+  const rows = [['ใช้กับแบบ ฮ.', labs('aircraft')], ['ภารกิจ', labs('mission')],
+    ['ช่วงการบิน', labs('phase')], ['สภาพแวดล้อม', labs('environment')]].filter(([, v]) => v);
+  return rows.length ? `<dl class="facts">${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : '';
+}
+
 // ลำดับในหน้าเคส: สรุป → ปัจจัย (พับไว้) → ทำวันนี้ (เช็กลิสต์ 56px) → คำถามบรีฟ → HFACS → ต้นฉบับ
 // จอคอมฯ: ทำวันนี้ + คำถามบรีฟ ย้ายไปแผงด้านขวา และกางปัจจัยไว้ (ลำดับ DOM คงเดิมสำหรับมือถือ)
 function viewCase(id) {
@@ -679,11 +746,12 @@ function viewCase(id) {
         ${fromRes ? pickBtn(c, picks().includes(id)) : ''}
       </div>
       <h1>${esc(c.title)}</h1>
-      <p class="summary">${esc(c.summary)}</p>
+      ${factsHtml(c)}
+      ${storyHtml(c)}
 
       ${c.factors.length ? `<button class="fac-t" data-act="factors" aria-expanded="${facOpen}" aria-controls="fac">ปัจจัยที่เกี่ยวข้อง
         <span class="n">${c.factors.length} ข้อ ${icon('down')}</span></button>
-      <ul class="factors" id="fac"${facOpen ? '' : ' hidden'}>${c.factors.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+      <ul class="factors" id="fac"${facOpen ? '' : ' hidden'}>${c.factors.map((f) => `<li>${conf(esc(f))}</li>`).join('')}</ul>` : ''}
     </div>
 
     <div class="case-side">
@@ -764,8 +832,8 @@ function briefSet(id) {
 function pmain(c, key) {
   const pdo = `<ol class="pdo">${c.actions_today.map((a, k) => `<li><span>${k + 1}</span>${esc(a)}</li>`).join('')}</ol>`;
   switch (key) {
-    case 'sum': return `<h1 class="ptitle">${esc(c.title)}</h1><p class="ptext">${esc(c.summary)}</p>`;
-    case 'fac': return `<p class="plab">ปัจจัยที่เกี่ยวข้อง</p><ul class="pfac">${c.factors.slice(0, FAC_MAX).map((f) => `<li>${esc(f)}</li>`).join('')}</ul>`
+    case 'sum': return `<h1 class="ptitle">${esc(c.title)}</h1><div class="ptext">${storyHtml(c, { brief: true })}</div>`;
+    case 'fac': return `<p class="plab">ปัจจัยที่เกี่ยวข้อง</p><ul class="pfac">${c.factors.slice(0, FAC_MAX).map((f) => `<li>${conf(esc(f))}</li>`).join('')}</ul>`
       + (c.factors.length > FAC_MAX ? `<p class="ptext">และอีก ${c.factors.length - FAC_MAX} ข้อ ดูได้ในหน้าเคส</p>` : '');
     case 'do': return `<p class="plab">ทำวันนี้</p>${pdo}`;
     default: return `<p class="plab">คำถามบรีฟ — ถามลูกเรือ</p><p class="pq">${esc(c.brief_question)}</p>`;
@@ -866,7 +934,7 @@ function viewBrief(id, step) {
         ${pos}${next}</div>`
     : `<div class="brief-top"><div class="meta">${tags(c)}</div>${briefTools()}</div>
       <div class="brief-body">
-        <div><h1>${esc(c.title)}</h1><p class="summary">${esc(c.summary)}</p></div>
+        <div><h1>${esc(c.title)}</h1><div class="summary">${storyHtml(c, { brief: true })}</div></div>
         <div>
           <section class="ask"><p class="ask-l">คำถามบรีฟ</p><p class="q">${esc(c.brief_question)}</p></section>
           <h3>ทำวันนี้</h3>
@@ -1296,7 +1364,7 @@ function viewHome() {
     </section>
     <nav class="apps" aria-label="แอป">${apps.map(appTile).join('')}</nav>
     <section class="home-sec" aria-labelledby="lsn-h">
-      <h2 class="sec-h" id="lsn-h">ทฤษฎีนิรภัย <span>บทละ 5 นาที</span></h2>
+      <h2 class="sec-h" id="lsn-h">ทฤษฎีนิรภัย <span id="lsn-m"></span></h2>
       <div class="apps" id="lsn-row"></div>
       <a class="tip" id="tip" href="#/theory" hidden></a>
     </section>
@@ -1307,6 +1375,9 @@ function viewHome() {
     const row = $('#lsn-row');
     if (!row) return; // ผู้ใช้ไปหน้าอื่นแล้ว
     row.innerHTML = LESSONS.map((l) => appTile({ href: `#/theory/${l.id}`, ic: l.icon, th: l.short, c: l.color })).join('');
+    // อ่านเวลาจากบทเรียนจริง ไม่เขียนตายตัว (เดิมเขียน "บทละ 5 นาที" ค้างไว้หลังบทยาวขึ้น)
+    const mins = LESSONS.map((x) => x.mins);
+    $('#lsn-m').textContent = `บทละ ${Math.min(...mins)}–${Math.max(...mins)} นาที`;
     const l = LESSONS[dayNo() % LESSONS.length];
     const tip = $('#tip');
     tip.href = `#/theory/${l.id}`;
@@ -2089,8 +2160,15 @@ async function boot() {
   if (state.unitStatus === 'locked') await showGate();
 
   if ('serviceWorker' in navigator) {
+    // เวอร์ชันใหม่เข้ามาแทนตัวเดิม (sw.js เรียก skipWaiting + claim) → โหลดหน้าใหม่ 1 ครั้งให้เห็นของใหม่เลย
+    // ไม่งั้นหน้าที่เปิดอยู่ใช้ไฟล์เก่าต่อจนปิดแอป · เปิดครั้งแรก (ยังไม่มี SW) ไม่ต้องโหลดซ้ำ
+    // กุญแจอยู่ใน localStorage/sessionStorage จึงไม่ต้องใส่รหัสใหม่หลังโหลด
+    const hadSW = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err));
-    navigator.serviceWorker.addEventListener('controllerchange', updateNet);
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      updateNet();
+      if (hadSW && !document.querySelector('.gate')) location.reload();
+    });
   }
 }
 

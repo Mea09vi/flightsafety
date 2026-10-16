@@ -1,6 +1,6 @@
 // Service worker — app shell แบบ cache-first, ข้อมูลแบบ stale-while-revalidate
 // เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ใน SHELL เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = 'w2sb-2026-10-16h';
+const VERSION = 'w2sb-2026-10-16i';
 // ฟอนต์ฝังใน app/fonts/ (ชื่อไฟล์ <ฟอนต์>-<น้ำหนัก>-<ช่วงอักษร>.woff2) ต้องตรงกับ @font-face ใน styles.css
 const FONTS = ['baijamjuree-600', 'notoserifthai-600', 'plexsansthai-400', 'plexsansthai-500', 'plexsansthai-600']
   .flatMap((f) => ['thai', 'latin'].map((s) => `fonts/${f}-${s}.woff2`))
@@ -16,7 +16,8 @@ const HIST = 'data/history.enc.json';
 self.addEventListener('install', (e) => {
   e.waitUntil((async () => {
     const c = await caches.open(VERSION);
-    await c.addAll([...SHELL, ...DATA]);
+    // cache: 'reload' ข้าม HTTP cache ของเบราว์เซอร์ (Pages ตั้ง max-age=600) ไม่งั้นอาจได้ไฟล์เก่าใส่แคชเวอร์ชันใหม่
+    await c.addAll([...SHELL, ...DATA].map((u) => new Request(u, { cache: 'reload' })));
     // ไฟล์หน่วยอาจไม่มีในบางเวอร์ชัน — ไม่ให้ install ล้มเพราะ 404
     try {
       const r = await fetch(UNIT, { cache: 'no-store' });
