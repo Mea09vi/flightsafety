@@ -12,5 +12,10 @@
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "ประวัติเหตุ บน.2", "short_name": "ประวัติเหตุ", "url": "./#/history" },
+    { "name": "เลือกบทเรียนสำหรับบรีฟ", "short_name": "บรีฟ", "url": "./#/filter" },
+    { "name": "บทเรียนทฤษฎี", "short_name": "ทฤษฎี", "url": "./#/theory" }
   ]
 }
