@@ -415,8 +415,8 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // unlock(pass, remember) → Promise<boolean>
 // onEnter() เรียกทันทีที่ถอดรหัสได้ ให้แอปวาดหน้าใหม่ไว้ข้างหลังระหว่างแอนิเมชัน
-// onSkip() เรียกเมื่อเลือกดูเฉพาะเคสสากล · onClose() เรียกหลังเอาหน้าเข้าสู่ระบบออกแล้ว
-export function openGate({ iter, unlock, onEnter, onSkip, onClose }) {
+// onClose() เรียกหลังเอาหน้าเข้าสู่ระบบออกแล้ว · ไม่มีทางข้าม ต้องใส่รหัสถูกเท่านั้น (ผู้ใช้สั่ง 16 ต.ค. 2569)
+export function openGate({ iter, unlock, onEnter, onClose }) {
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const iterTxt = Number(iter || 0).toLocaleString('en-US');
   const gate = document.createElement('div');
@@ -444,7 +444,6 @@ export function openGate({ iter, unlock, onEnter, onSkip, onClose }) {
         <label class="g-rem"><input type="checkbox" id="g-rem" checked> จำไว้ในเครื่องนี้ <small>· เครื่องส่วนกลางให้เอาออก</small></label>
         <button class="g-go" type="submit"><span class="g-spin" aria-hidden="true"></span><span class="g-goT">ปลดล็อกและเข้าสู่บรีฟ</span></button>
         <p class="g-msg" id="g-msg" role="status" aria-live="polite"></p>
-        <a class="g-skip" href="#/">ดูเฉพาะเคสสากล (ไม่ต้องใช้รหัส) →</a>
         <dl class="g-foot">
           <dt>การเข้ารหัส</dt><dd class="g-m">AES-256-GCM</dd>
           <dt>กุญแจ</dt><dd><span class="g-m">PBKDF2-SHA256 · ${iterTxt}</span> รอบ</dd>
@@ -566,13 +565,6 @@ export function openGate({ iter, unlock, onEnter, onSkip, onClose }) {
     const [ok] = await Promise.all([unlock(v, rem.checked).catch(() => false), wait(MIN_BUSY_MS)]);
     setBusy(false);
     ok ? pass() : fail();
-  });
-  q('.g-skip').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (busy || done) return;
-    done = true;
-    onSkip?.();
-    close();
   });
 
   // เมาส์/คีย์บอร์ด: โฟกัสช่องรหัสเลย · จอสัมผัส: ไม่โฟกัส แป้นพิมพ์จะได้ไม่บังฉากตั้งแต่เปิด

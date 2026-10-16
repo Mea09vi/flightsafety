@@ -14,7 +14,7 @@ const LS = {
   set(k, v) { try { localStorage.setItem('w2sb.' + k, JSON.stringify(v)); } catch { /* private mode */ } },
   del(k) { try { localStorage.removeItem('w2sb.' + k); } catch { /* private mode */ } },
 };
-// อยู่แค่ในแท็บนี้ ปิดแท็บแล้วหาย: กุญแจตอนไม่ติ๊ก "จำไว้ในเครื่องนี้" และการเลือกดูเฉพาะเคสสากล
+// อยู่แค่ในแท็บนี้ ปิดแท็บแล้วหาย: กุญแจตอนไม่ติ๊ก "จำไว้ในเครื่องนี้"
 const SS = {
   get(k, d) { try { const v = sessionStorage.getItem('w2sb.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { sessionStorage.setItem('w2sb.' + k, JSON.stringify(v)); } catch { /* private mode */ } },
@@ -143,7 +143,6 @@ async function showGate() {
       iter: unitEnc.iter,
       unlock: async (pass, remember) => { try { await unlock(pass, remember); return true; } catch { return false; } },
       onEnter: route,
-      onSkip: () => SS.set('gateSkip', true),
       onClose: () => { applyTheme(LS.get('theme', 'night')); main.focus({ preventScroll: true }); },
     });
   } catch (err) {
@@ -1543,7 +1542,8 @@ main.addEventListener('click', (e) => {
       state.unit = [];
       state.unitStatus = unitEnc ? 'locked' : 'missing';
       if (state.sel.src === 'TH') { state.sel.src = 'ALL'; LS.set('sel', state.sel); }
-      viewAbout();
+      // ล้างแล้วเหมือนเครื่องใหม่: กลับหน้าหลักแล้วถามรหัสทันที
+      if (state.unitStatus === 'locked') { location.hash = '#/'; showGate(); } else viewAbout();
       break;
   }
 });
@@ -1576,8 +1576,11 @@ async function boot() {
   // ยังไม่ได้ปลดล็อก เลือก "กองทัพอากาศไทย" ไว้ไม่ได้ (จะไม่มีเคสเลย)
   if (state.sel.src === 'TH' && state.unitStatus !== 'unlocked') state.sel.src = 'ALL';
   updateNet();
+  // ยังล็อก: หลังใส่รหัสให้เข้าหน้าหลักเสมอ ไม่ว่าจะเปิดลิงก์หน้าไหนมา
+  if (state.unitStatus === 'locked' && location.hash && location.hash !== '#/') history.replaceState(null, '', '#/');
   route();
-  if (state.unitStatus === 'locked' && !SS.get('gateSkip', false)) await showGate();
+  // เครื่องที่ยังไม่มีกุญแจต้องใส่รหัสก่อนเข้าหน้าหลัก ไม่มีทางข้าม · เครื่องที่จำกุญแจไว้เข้าได้เลย
+  if (state.unitStatus === 'locked') await showGate();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err));

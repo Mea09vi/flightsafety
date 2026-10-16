@@ -1712,14 +1712,6 @@ body.gated > :not(.gate) { visibility: hidden; }
 .g-msg.bad { color: var(--bad); }
 .g-msg.ok { color: var(--ok); }
 
-.g-skip {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  min-height: 48px; margin-top: 2px;
-  color: var(--sky); text-decoration: none; font-size: 14.5px; font-weight: 500;
-  border-radius: var(--r);
-}
-.g-skip:hover { text-decoration: underline; text-underline-offset: 3px; }
-
 .g-foot {
   display: grid; grid-template-columns: auto 1fr; gap: 4px 14px;
   margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line);
