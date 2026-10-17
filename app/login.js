@@ -431,7 +431,7 @@ export function openGate({ iter, unlock, onEnter, onClose }) {
       <form class="g-box" novalidate autocomplete="off">
         <div class="g-cover">
           <img src="icon.svg" alt="" width="40" height="40">
-          <div class="g-who"><b>W2 Safety Brief</b><small>กองบิน 2 · ฝ่ายนิรภัยการบิน</small></div>
+          <div class="g-who"><b>Wing2 Safety</b><small>กองบิน 2 · ฝ่ายนิรภัยการบิน</small></div>
         </div>
         <p class="g-kick">บทเรียนจากเคสจริง ก่อนขึ้นบินทุกเที่ยว</p>
         <h1 id="g-h">บทเรียนนิรภัย<span>ก่อนบิน</span></h1>

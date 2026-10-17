@@ -1,4 +1,4 @@
-/* W2 Safety Brief — AWG Editorial (ข้อตกลงอยู่ใน docs/DECISIONS.md หัวข้อ "หน้าตาแอป")
+/* Wing2 Safety — AWG Editorial (ข้อตกลงอยู่ใน docs/DECISIONS.md หัวข้อ "หน้าตาแอป")
    พื้นเรียบ ไม่มีแสงเรือง ไม่มีแถบสีข้างการ์ด สีมีความหมายเท่านั้น:
    ทอง = ปุ่มหลัก (หน้าละปุ่มเดียว) · ฟ้า = ลิงก์และเลขลำดับ · แดง = อุบัติเหตุ
    ส้ม = อุบัติการณ์/ปัจจัย · เขียว = ทำแล้ว · ที่เลือกแล้ว = พื้นทึบ + ✓ */
@@ -399,6 +399,32 @@ details.opt .body { padding: 4px 16px 18px; display: grid; gap: 22px; }
 .hero h1 { font: 600 17px/1.4 var(--f-d); }
 .hero p { margin-top: 2px; font-size: 13px; color: var(--muted); }
 .hero.near .big { color: var(--text2); } /* ไม่มีกลุ่ม ก — ตัวเลขเป็นเคสใกล้เคียง ไม่ใช้สีทอง */
+/* แท็บบทเรียน / MOR/HR บน.2 ในหน้ารายการ */
+.r-tabs { display: flex; gap: 6px; margin: -6px 0 18px; border-bottom: 1px solid var(--line); }
+.r-tabs button { min-height: 48px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); font: 600 15px/1.2 var(--f-d); cursor: pointer; }
+@media (max-width: 480px) { .r-tabs { gap: 0; } .r-tabs button { flex: 1 1 0; justify-content: center; padding: 0 6px; gap: 6px; font-size: 14px; } .r-tabs .ic { display: none; } }
+.r-tabs button { white-space: nowrap; }
+.r-tabs button[aria-pressed="true"] { color: var(--text); border-bottom-color: var(--gold); }
+.r-tabs .n { padding: 1px 7px; border-radius: 10px; background: var(--line); color: var(--text2); font-size: 12px; font-variant-numeric: tabular-nums; }
+.r-tabs button[aria-pressed="true"] .n { background: var(--gold-d); color: var(--gold); }
+.morsum { margin: 4px 0 24px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; }
+.morsum .sec-h { justify-content: flex-start; align-items: center; margin-bottom: 4px; }
+.morsum .sec-h .ic { color: var(--sky); }
+.morsum .note { margin: 2px 0 12px; }
+.morsum-n { margin: 0 0 20px; }
+.ms-y { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+.ms-y li { display: grid; grid-template-columns: 64px 1fr 32px; align-items: center; gap: 4px 10px; font-size: 14px; }
+.ms-y .yr { color: var(--text2); font-variant-numeric: tabular-nums; }
+.ms-y .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.ms-y .bar i { display: block; height: 100%; border-radius: 4px; background: var(--sky); }
+.ms-y b { text-align: right; font-variant-numeric: tabular-nums; }
+.ms-y .by { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.ms-y .by span { display: inline-flex; align-items: center; gap: 5px; }
+.ms-tp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 10px; }
+.ms-tp .k { font-size: 12px; color: var(--muted); margin-right: 2px; }
+.ms-tp a { min-height: 36px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line2); border-radius: 4px; color: var(--text); font-size: 13px; text-decoration: none; }
+.ms-tp a b { color: var(--sky); font-variant-numeric: tabular-nums; }
+.morsum .evs { margin: 0 0 12px; padding: 0; }
 
 /* กลุ่มผลลัพธ์ ก/ข/ค (DECISIONS.md "การจัดกลุ่มผลลัพธ์") */
 .g-a { --gc: var(--gold); --gcd: var(--gold-d); }
@@ -1581,6 +1607,9 @@ html.ov-lock { overflow: hidden; }
 .ptag { display: inline-flex; align-items: center; height: 20px; margin-right: 8px; padding: 0 6px; border-radius: 4px; font: 600 11px/1 var(--f-b); vertical-align: 2px; }
 .ptag.fm { color: var(--sky); background: var(--sky-d); }
 .ptag.mt { color: var(--gold); background: var(--gold-d); }
+.h-orig { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.h-orig .note { flex: 1 1 260px; margin: 0; }
+.h-orig .btn { flex: none; }
 .hd-side { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
 .hd-side .kv { margin-top: 0; }
 .prov { margin-top: 16px; font-size: 13.5px; line-height: 1.6; color: var(--text2); }
@@ -1610,6 +1639,14 @@ html.ov-lock { overflow: hidden; }
 .histp > .note { margin-bottom: 4px; }
 .histp .evs li:last-child { border-bottom: 0; }
 .histp .more { margin-top: 8px; }
+.cmore { margin-top: 22px; }
+.cmore .sec-h .n { margin-left: auto; font: 500 12px/1 var(--f-b); color: var(--muted); }
+.cm { padding: 12px 0; border-top: 1px solid var(--line); }
+.cm-h { display: flex; flex-direction: column; gap: 3px; color: var(--sky); font-weight: 600; text-decoration: none; }
+.cm-h small { font-weight: 400; font-size: 12px; color: var(--muted); }
+.cm ul { margin: 8px 0 0; padding-left: 20px; }
+.cm li { font-size: 14.5px; line-height: 1.65; }
+.cm li + li { margin-top: 4px; }
 .h-hide {
   display: block; width: 100%; min-height: 48px; border: 0; background: none;
   font-size: 13px; color: var(--muted); text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px;
