@@ -1,6 +1,8 @@
 // W2 Safety Brief — vanilla JS, hash routing, ไม่มี build step
 // เส้นทาง: #/ (หน้าหลัก)  #/filter  #/results  #/case/:id  #/brief (หน้าปก)  #/brief/:id[/ประเด็น]  #/brief/end
-//          #/dashboard  #/areas  #/about  #/theory  #/theory/:บท[/สไลด์]  #/history  #/history/:id
+//          #/dashboard[?ตัวกรอง]  #/areas  #/about  #/theory  #/theory/:บท[/สไลด์]  #/history  #/history/:id
+
+import { mountOverview } from './overview.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -44,8 +46,6 @@ const SRC_OPT = [
 const srcOpt = (v) => SRC_OPT.find((o) => o.v === v) ?? SRC_OPT[2];
 
 const EMPTY_SEL = { src: 'ALL', aircraft: null, mission: null, environment: [], phase: [], hfacs: [], area: null };
-// ค่าเริ่มต้น 10 ปี: กราฟรายปีอ่านง่ายบนมือถือ และเป็นช่วงที่ยังเกี่ยวกับการบินปัจจุบัน
-const DASH0 = { src: 'ALL', ac: 'ALL', span: '10Y' };
 const state = {
   tax: null,
   intl: [],
@@ -55,10 +55,7 @@ const state = {
   unitStatus: 'missing', // missing | locked | unlocked
   sel: { ...EMPTY_SEL, ...LS.get('sel', {}) },
   open: {}, // กลุ่มผลลัพธ์ที่กด "ดูอีก" ไว้ { a, b, c }
-  dash: { ...DASH0, ...LS.get('dash', {}) },
-  drill: null, // { k, v, l } แท่งที่กดในหน้าภาพรวม
-  dashDeck: [],
-  from: '', // results | dashboard — หน้าที่เปิดเคสมา ใช้กับปุ่มย้อนกลับและก่อนหน้า/ถัดไป
+  from: '', // results — หน้าที่เปิดเคสมา ใช้กับปุ่มย้อนกลับและก่อนหน้า/ถัดไป
   hist: null, // ประวัติเหตุ บน.2 โหลดตอนเปิดหน้าครั้งแรก { status, data }
   // หน้าประวัติเหตุ: ปีงบที่เลือก · แหล่งที่กรองในปีนั้น · ฝูงของตารางหัวข้อ · ช่องที่กด { tp, fy }
   // back = หน้าที่เปิดรายละเอียดมา · ret = หน้านอก #/history ที่เข้ามา (เช่น หน้าเคส)
@@ -200,7 +197,6 @@ const allCases = () => [...state.unit, ...state.intl];
 const byId = (id) => allCases().find((c) => c.id === id);
 const label = (kind, code) => state.tax[kind].find((x) => x.code === code)?.label ?? code;
 const hfacsCat = (code) => state.tax.hfacs.find((h) => h.code === code)?.category ?? code;
-const hfacsTier = (code) => state.tax.hfacs.find((h) => h.code === code)?.tier ?? '';
 // แบบ ฮ. ที่ปลดประจำการแล้ว (active=0) ใช้ติดเคสย้อนหลัง แต่ไม่เป็นตัวเลือก
 const inService = (x) => x.active !== '0';
 
@@ -252,7 +248,6 @@ function deck() {
 }
 function deckFor(id) {
   if (state.caseBack) return [id];
-  if (state.from === 'dashboard') return state.dashDeck.includes(id) ? state.dashDeck : [id];
   if (!ready()) return [id];
   const d = deck();
   return d.includes(id) ? d : [id];
@@ -495,17 +490,6 @@ function matchLine({ c, m }) {
   return parts.join(' · ') + (opt.length ? ` <span class="opt">+ ${esc(opt.join(' '))}</span>` : '');
 }
 
-// การ์ดเคส (ใช้ในรายการของหน้าภาพรวม)
-function card(item) {
-  const c = item.c;
-  return `<a class="card" href="#/case/${encodeURIComponent(c.id)}">
-    <div class="meta">${tags(c)}</div>
-    <h3>${esc(c.title)}</h3>
-    <p class="ml">${item.line ?? matchLine(item)}</p>
-    ${icon('next', 'ic go')}
-  </a>`;
-}
-
 /* เรื่องที่เลือกเข้าบรีฟ (ปุ่ม +/✓): จำต่อชุดตัวกรอง เปลี่ยนตัวกรองแล้วกลับไปใช้ 3 อันดับแรก */
 function selKey(s = state.sel) {
   return JSON.stringify([s.src, s.aircraft, s.mission, [...s.environment].sort(), [...s.phase].sort(), [...s.hfacs].sort(), s.area]);
@@ -731,7 +715,7 @@ function viewCase(id) {
   const i = d.indexOf(id);
   const done = ticks().cases[id] || [];
   const ref = safeUrl(c.ref);
-  const fromRes = state.from !== 'dashboard' && ready() && !state.caseBack;
+  const fromRes = ready() && !state.caseBack;
   const facOpen = wide.matches;
   const href = (dir) => `#/case/${encodeURIComponent(d[nextIdx(d.length, i, dir)])}`;
   const nav = d.length > 1 ? `<a class="btn" data-replace href="${href(-1)}" aria-label="เคสก่อนหน้า">${icon('back')}<span>ก่อนหน้า</span></a>
@@ -740,7 +724,7 @@ function viewCase(id) {
   main.innerHTML = `<article class="view case">
     <div class="case-head">
       <div class="case-top">
-        <a class="back" href="${state.caseBack || (state.from === 'dashboard' ? '#/dashboard' : '#/results')}" aria-label="กลับไปรายการ">${icon('back')}</a>
+        <a class="back" href="${state.caseBack || '#/results'}" aria-label="กลับไปรายการ">${icon('back')}</a>
         <div class="meta">${tags(c)}</div>
         <span class="pos">${d.length > 1 ? `${i + 1}/${d.length}` : ''}</span>
         ${fromRes ? pickBtn(c, picks().includes(id)) : ''}
@@ -1030,300 +1014,27 @@ document.addEventListener('touchend', (e) => {
   if (Math.abs(dx) > 60) briefGo(dx < 0 ? 1 : -1);
 }, { passive: true });
 
-/* ── หน้าภาพรวม ───────────────────────────────────────────── */
+/* ── หน้าภาพรวม ─────────────────────────────────────────────── */
+// แดชบอร์ดกรองไขว้ของเคสสากล อยู่ใน overview.js (shadow DOM + overview.css)
+// ตัวกรองอยู่ใน # หลัง ? เช่น #/dashboard?ac=H225M&type=ACCIDENT — แอปส่งต่อให้ fromHash() โดยไม่วาดใหม่
 
-// เรื่องที่เกิดซ้ำ: จับจากคำทั่วไปในชื่อ/สรุปเคส ไม่ผูกกับ id ของเคสหน่วย (โค้ดนี้อยู่ใน repo สาธารณะ)
-const THEMES = [
-  { k: 'bird', th: 'นก / ค้างคาวชน', rx: /นกชน|ชนนก|ค้างคาว|bird ?strike/i },
-  { k: 'hyd', th: 'ระบบไฮดรอลิก', rx: /ไฮดรอลิก|\bHYD/i },
-  { k: 'mgb', th: 'กระปุกเฟืองหลัก (MGB)', rx: /\bMGB|gearbox/i },
-  { k: 'eng', th: 'เครื่องยนต์ / ไอเสีย', rx: /เครื่องยนต์(\s*\d)?\s*(ดับ|กำลังลด)|hot start|exhaust|ไอเสีย|borescope|คอมเพรสเซอร์|ไฟไหม้เครื่องยนต์/i },
-  { k: 'fod', th: 'FOD / downwash', rx: /FOD|downwash|เศษหิน|เศษผิว/i },
-  { k: 'tyre', th: 'ยาง / ล้อ', rx: /ล้อหลัก|ยางล้อ|\btyre|\btire/i },
-  { k: 'wire', th: 'สายไฟ / สิ่งกีดขวาง', rx: /(เกี่ยว|ชน|พัน)สายไฟ|\bwires?\b|สิ่งกีดขวาง|obstacle/i },
-  { k: 'wx', th: 'อากาศ / พายุ / เข้าเมฆ', rx: /\bIMC|เข้าเมฆ|ในเมฆ|พายุ|ฟ้าผ่า|ลมกระโชก/i },
-];
-const themeHit = (c, k) => THEMES.find((t) => t.k === k).rx.test(`${c.title} ${c.summary}`);
+let OV = null; // { host, inst, ready } ของหน้าภาพรวมที่กำลังแสดง
 
-const typeKey = (t) => (t === 'accident' ? 'a' : t === 'incident' ? 'i' : 'h');
-const DRILL = {
-  year: (c, v) => c.year === Number(v),
-  type: (c, v) => typeKey(c.type) === v,
-  acft: (c, v) => c.aircraft.includes(v),
-  phase: (c, v) => (v === '-' ? !c.phase.length : c.phase.includes(v)),
-  tier: (c, v) => c.hfacs.some((h) => hfacsTier(h) === v),
-  hfacs: (c, v) => (v === '-' ? !c.hfacs.length : c.hfacs.some((h) => hfacsCat(h) === v)),
-  theme: (c, v) => themeHit(c, v),
-};
-function dashCases() {
-  const d = state.dash;
-  const y0 = d.span === 'ALL' ? 0 : new Date().getFullYear() - (d.span === '5Y' ? 4 : 9);
-  return allCases().filter((c) => (d.src === 'ALL' || c.source === d.src)
-    && (d.ac === 'ALL' || c.aircraft.includes(d.ac)) && c.year >= y0);
-}
-
-function mix(list) {
-  const m = { a: 0, i: 0, h: 0, n: list.length };
-  for (const c of list) m[typeKey(c.type)]++;
-  return m;
-}
-
-// แท่งแบ่งตามชนิดเหตุ: แดง = อุบัติเหตุ, ส้ม = อุบัติการณ์, ส้มลายเส้น = ความเสี่ยง
-const segs = (m, max, dim) => ['a', 'i', 'h'].map((k) => (m[k]
-  ? `<span class="sg ${k}" style="${dim}:${(m[k] / max) * 100}%"></span>` : '')).join('');
-
-const isOn = (k, v) => String(state.drill?.k === k && state.drill.v === String(v));
-
-// ชื่อช่วงการบินแบบสั้นสำหรับหัวข่าวและโปรไฟล์ (ชื่อเต็มอยู่ใน taxonomy)
-const PH_S = { PREFLIGHT: 'ตรวจก่อนบิน', TAXI: 'Taxi', TAKEOFF: 'วิ่งขึ้น', ENROUTE: 'บินเดินทาง', APPROACH: 'Approach', LANDING: 'ลงสนาม', HOVER: 'Hover', AUTOROTATION: 'Autorotation', SHUTDOWN: 'หลังบิน', GROUND: 'ภาคพื้น' };
-// ความสูงสัมพัทธ์บนเส้นโปรไฟล์ (0 = พื้น, 1 = ระดับบินเดินทาง)
-const PROFILE = [['TAXI', 0], ['TAKEOFF', 0.52], ['ENROUTE', 1], ['APPROACH', 0.56], ['HOVER', 0.24], ['LANDING', 0]];
-const LOW = ['TAXI', 'TAKEOFF', 'APPROACH', 'HOVER', 'LANDING', 'AUTOROTATION'];
-const TIERS = [['Organizational Influences', 'องค์กร'], ['Supervision/Leadership', 'การกำกับดูแล'], ['Preconditions', 'สภาวะก่อนเกิดเหตุ'], ['Unsafe Acts', 'การกระทำที่ไม่ปลอดภัย']];
-const TYPE_TH = { a: 'อุบัติเหตุ', i: 'อุบัติการณ์', h: 'ความเสี่ยง' };
-const sp = (t) => (/^[A-Za-z]/.test(t) ? ` ${t}` : t); // เว้นวรรคก่อนคำอังกฤษในประโยคไทย
-const drillAttr = (k, v, l) => `data-drill="${k}" data-dv="${esc(v)}" data-dl="${esc(l)}" aria-pressed="${isOn(k, v)}"`;
-
-/* หน้าภาพรวมแบบหน้าข่าวข้อมูล (DECISIONS.md "หน้าตาแอป"):
-   หัวข่าวคำนวณจากข้อมูล · แตะตัวเลข/แถบใดก็ได้ = ไฮไลต์เคสนั้นทั้งหน้า (state.drill) แล้วดูรายการได้ท้ายหน้า */
-function viewDashboard() {
-  const d = state.dash;
-  const unlocked = state.unitStatus === 'unlocked';
-  const cs = dashCases();
-  const seg = (k, label, opts) => `<div class="dv-f"><span class="dv-fl" id="dvf-${k}">${label}</span><div class="dv-seg" role="group" aria-labelledby="dvf-${k}">${opts.map(([v, t, lock]) =>
-    `<button data-dash="${k}" data-v="${esc(v)}" aria-pressed="${d[k] === v}"${lock ? ' disabled title="ต้องปลดล็อกข้อมูลหน่วย"' : ''}>${lock ? icon('lock') : ''}${esc(t)}</button>`).join('')}</div></div>`;
-  const ys = cs.map((c) => c.year);
-  const y0 = cs.length ? Math.min(...ys) : 0, y1 = cs.length ? Math.max(...ys) : 0;
-  const span = y0 === y1 ? `${y0}` : `${y0}–${y1}`;
-
-  const head = `<header class="dv-top">
-    <h1 class="dv-kicker"><b>ภาพรวมเหตุการณ์</b><span>แนวโน้มนิรภัย บน.2${cs.length ? ` · ${span}` : ''}</span></h1>
-    <div class="dv-filters" aria-label="ตัวกรองภาพรวม">
-      ${seg('src', 'ข้อมูลจาก', [['ALL', 'ทั้งหมด'], ['W2', 'บน.2', !unlocked], ['RTAF', 'ทอ.', !unlocked], ['INTL', 'ต่างประเทศ']])}
-      ${seg('span', 'ช่วงปี', [['ALL', 'ทุกปี'], ['10Y', '10 ปี'], ['5Y', '5 ปี']])}
-      ${seg('ac', 'แบบ ฮ.', [['ALL', 'ทุกแบบ'], ...state.tax.aircraft.filter(inService).map((a) => [a.code, a.code])])}
-    </div>
-    ${unlocked ? '' : `<p class="dv-lock">${icon('lock')}<span>ข้อมูลหน่วย (บน.2 / ทอ.) ยังล็อกอยู่ ตอนนี้นับแค่เคสต่างประเทศ</span><button class="dv-link" data-act="unlock">ใส่รหัสหน่วย</button></p>`}
-    ${d.ac !== 'ALL' ? '<p class="dv-note">นับเฉพาะเคสที่เกิดกับแบบนี้ ไม่รวมเคสที่ระบุว่าใช้ได้ทุกแบบ</p>' : ''}
-  </header>`;
-
-  if (!cs.length) {
-    state.dashDeck = [];
-    main.innerHTML = `<div class="view dash">${head}<div class="empty">${icon('info')}<h2>ไม่มีเคสตามตัวกรองนี้</h2>
-      <p>ช่วงปีหรือแหล่งข้อมูลที่เลือกยังไม่มีเคส ลองขยายช่วงปีเป็น "ทุกปี" หรือเลือกแหล่งข้อมูลอื่น</p><div class="acts"><button class="btn" data-act="dashreset">ล้างตัวกรอง</button></div></div></div>`;
-    return;
-  }
-
-  const m = mix(cs);
-  const src = (s) => cs.filter((c) => c.source === s).length;
-
-  // หัวข่าว: สองช่วงการบินที่มีเคสมากที่สุด คำนวณจากข้อมูล ไม่ได้เขียนเอง
-  const phN = Object.keys(PH_S).map((p) => [p, cs.filter((c) => c.phase.includes(p)).length]).sort((a, b) => b[1] - a[1]);
-  const top2 = phN.slice(0, 2).filter(([, n]) => n);
-  const inTop = cs.filter((c) => top2.some(([p]) => c.phase.includes(p))).length;
-  const pct = Math.round((inTop / cs.length) * 100);
-  const mixTxt = `แบ่งเป็น <span class="t-a">อุบัติเหตุ ${m.a}</span> · <span class="t-i">อุบัติการณ์ ${m.i}</span> · <span class="t-h">ความเสี่ยง ${m.h}</span>`;
-  const headline = !top2.length ? `${cs.length} เคสในช่วงปี ${span}`
-    : top2.length === 1 ? `เหตุเกิดบ่อยที่สุดตอน<em>${sp(PH_S[top2[0][0]])}</em>`
-      : `เหตุเกิดบ่อยที่สุดตอน<em>${sp(PH_S[top2[0][0]])}</em> และตอน<em>${sp(PH_S[top2[1][0]])}</em>`;
-  const dek = top2.length
-    ? `${pct}% ของ ${cs.length} เคสช่วงปี ${span} เกิดใน${top2.length > 1 ? 'สองช่วงนี้' : 'ช่วงนี้'} ${mixTxt}`
-    : `ยังไม่มีเคสที่ระบุขั้นตอนการบิน ${mixTxt}`;
-
-  const wfBlock = (k) => {
-    const list = cs.filter((c) => typeKey(c.type) === k).sort((a, b) => b.year - a.year);
-    return `<div class="dv-wg"><button class="dv-wl" ${drillAttr('type', k, TYPE_TH[k])}${list.length ? '' : ' disabled'}><b class="t-${k}">${list.length}</b><span>${TYPE_TH[k]}</span></button>
-      ${list.length ? `<div class="dv-wf" aria-hidden="true">${list.map((c) => `<i class="sq-${k}" data-id="${esc(c.id)}" title="${c.year} · ${esc(c.title)}"></i>`).join('')}</div>`
-    : '<p class="dv-wempty">ยังไม่มีเคสในกลุ่มนี้</p>'}</div>`;
-  };
-
-  // HFACS 4 ชั้น ไล่จากองค์กรลงไปถึงการกระทำ
-  const withH = cs.filter((c) => c.hfacs.length).length;
-  const tiers = TIERS.map(([t, th], ix) => {
-    const n = cs.filter((c) => DRILL.tier(c, t)).length;
-    const cats = state.tax.hfacs.filter((h) => h.level === 'category' && h.tier === t)
-      .map((h) => ({ h, m: mix(cs.filter((c) => DRILL.hfacs(c, h.code))) })).filter((r) => r.m.n).sort((a, b) => b.m.n - a.m.n);
-    return { t, th, ix, n, cats };
+function viewOverview() {
+  main.innerHTML = '<div class="view dash" aria-busy="true"></div>';
+  const host = main.firstElementChild;
+  const ov = { host, inst: null };
+  OV = ov;
+  ov.ready = mountOverview(host, { state }).then((inst) => {
+    if (OV !== ov) { inst.destroy(); return; }
+    ov.inst = inst;
+    host.removeAttribute('aria-busy');
+  }).catch((err) => {
+    console.error(err);
+    if (OV === ov) main.innerHTML = `<div class="empty">${icon('info')}<h2>เปิดหน้าภาพรวมไม่สำเร็จ</h2>
+      <p>ลองโหลดหน้าใหม่อีกครั้ง</p><button class="btn" onclick="location.reload()"><span>ลองใหม่</span></button></div>`;
   });
-  const topTier = [...tiers].sort((a, b) => b.n - a.n)[0];
-  const maxCat = Math.max(1, ...tiers.flatMap((t) => t.cats.map((r) => r.m.n)));
-  const slice = (t) => `<div class="dv-slice">
-      <button class="dv-sh" ${drillAttr('tier', t.t, `ชั้น${t.th}`)}${t.n ? '' : ' disabled'}><span class="dv-sno">${t.ix + 1}</span>
-        <span class="dv-st">${t.th}<small>${t.t}</small></span><span class="dv-sn"><b>${t.n}</b><small>${Math.round((t.n / withH) * 100)}%</small></span></button>
-      <div class="dv-share" aria-hidden="true"><i style="width:${(t.n / withH) * 100}%"></i></div>
-      ${t.cats.map((r, j) => `<button class="dv-row${j > 2 ? ' dv-x' : ''}" ${drillAttr('hfacs', r.h.code, r.h.label)}><span class="rl">${esc(r.h.label)}</span><span class="rn">${r.m.n}</span><span class="tr" aria-hidden="true">${segs(r.m, maxCat, 'width')}</span></button>`).join('')}
-      ${t.cats.length > 3 ? `<button class="dv-more" data-act="dvmore" aria-expanded="false" data-n="${t.cats.length - 3}">ดูอีก ${t.cats.length - 3} หมวด</button>` : ''}
-    </div>`;
-  const noH = cs.length - withH;
-
-  // รายปี: หลายสิบปีแท่งจะแคบ ซ่อนตัวเลขยกเว้นปีสูงสุด และติดป้ายปีทุก 5/10 ปี
-  const yrs = [];
-  for (let y = y0; y <= y1; y++) yrs.push([y, mix(cs.filter((c) => c.year === y))]);
-  const maxY = Math.max(...yrs.map(([, x]) => x.n));
-  const peaks = yrs.filter(([, x]) => x.n === maxY).map(([y]) => y);
-  const dense = yrs.length > 16;
-  const tick = yrs.length > 30 ? 10 : yrs.length > 12 ? 5 : 1;
-  const yLab = (y) => (y % tick ? '' : `<span>${tick > 1 ? y : String(y).slice(2)}</span>`);
-
-  // แบบ ฮ.: เรียงตามจำนวน "ทุกแบบ / แบบอื่น" อยู่ท้าย
-  const acRows = [...state.tax.aircraft.map((a) => ({ v: a.code, l: a.label })), { v: 'ALL', l: 'ทุกแบบ / แบบอื่น' }]
-    .map((r) => ({ ...r, m: mix(cs.filter((c) => c.aircraft.includes(r.v))) })).filter((r) => r.m.n)
-    .sort((a, b) => (a.v === 'ALL') - (b.v === 'ALL') || b.m.n - a.m.n);
-  const acTop = acRows.find((r) => r.v !== 'ALL');
-  const acMax = Math.max(1, ...acRows.map((r) => r.m.n));
-
-  // เรื่องที่เกิดซ้ำ: แถบจุดรายปี
-  const th = THEMES.map((t) => {
-    const list = cs.filter((c) => themeHit(c, t.k));
-    const by = {};
-    for (const c of list) by[c.year] = (by[c.year] || 0) + 1;
-    const unitYears = new Set(list.filter((c) => c.source !== 'INTL').map((c) => c.year));
-    return { ...t, n: list.length, by, ny: Object.keys(by).length, rep: unitYears.size > 1 };
-  }).filter((t) => t.n > 1).sort((a, b) => b.ny - a.ny || b.n - a.n);
-  const thMax = Math.max(1, ...th.flatMap((t) => Object.values(t.by)));
-  const cols = `grid-template-columns:repeat(${yrs.length},minmax(0,1fr))`;
-  const dotSz = (n) => `${Math.round(6 + 10 * Math.sqrt(n / thMax))}px`;
-
-  main.innerHTML = `<div class="view dash">${head}
-  <section class="dv-hero" aria-label="สรุป">
-    <div class="dv-story">
-      <h2 class="dv-head">${headline}</h2>
-      <p class="dv-dek">${dek}</p>
-      <p class="dv-hint">แตะตัวเลขหรือแถบใดก็ได้ ช่องของเคสที่เกี่ยวข้องจะสว่างขึ้นทั้งหน้า</p>
-      <p class="dv-src">บน.2 <b>${src('W2')}</b> · ทอ. <b>${src('RTAF')}</b> · ต่างประเทศ <b>${src('INTL')}</b></p>
-    </div>
-    <div class="dv-waffle">
-      <div class="dv-big"><b>${cs.length}</b><span>เคส · 1 ช่อง = 1 เคส</span></div>
-      ${['a', 'i', 'h'].map(wfBlock).join('')}
-    </div>
-  </section>
-
-  <section class="dv-sec" aria-labelledby="dvh-prof">
-    <p class="dv-k">ขั้นตอนการบิน</p>
-    <h2 id="dvh-prof">${cs.filter((c) => c.phase.some((p) => LOW.includes(p))).length} จาก ${cs.length} เคสเกิดใกล้พื้น ต่ำกว่าระดับบินเดินทาง</h2>
-    <div class="dv-prof" id="dv-prof"></div>
-    <div class="dv-off" id="dv-off"></div>
-  </section>
-
-  <section class="dv-sec" aria-labelledby="dvh-hf">
-    <p class="dv-k">หมวดสาเหตุ (HFACS) · ไล่จากองค์กรลงไปถึงการกระทำ</p>
-    <h2 id="dvh-hf">${withH ? `ชั้น${topTier.th}พบในเคสมากที่สุด` : 'ยังไม่มีเคสที่ลงรหัส HFACS'}</h2>
-    <p class="dv-note">${withH} จาก ${cs.length} เคสลงรหัสแล้ว · เคสหนึ่งมีได้หลายชั้น · รหัสยังเป็นร่างที่รอทบทวน${noH ? ` <button class="dv-chip" ${drillAttr('hfacs', '-', 'ยังไม่ลงรหัส HFACS')}>ยังไม่ลงรหัส<b>${noH}</b></button>` : ''}</p>
-    ${withH ? `<div class="dv-slices">${tiers.map(slice).join('')}</div>` : ''}
-  </section>
-
-  <div class="dv-duo">
-    <section class="dv-sec" aria-labelledby="dvh-yr">
-      <p class="dv-k">รายปี</p>
-      <h2 id="dvh-yr">ปี ${peaks.join(' และ ')} มีเคสมากที่สุด ${maxY} เคส</h2>
-      <div class="dv-years${dense ? ' dense' : ''}">${yrs.map(([y, x]) => `<button class="dv-yc${x.n === maxY ? ' pk' : ''}" ${drillAttr('year', y, `ปี ${y}`)} aria-label="ปี ${y}: ${x.n} เคส"${x.n ? '' : ' disabled'}>
-        <span class="yn">${x.n && (!dense || x.n === maxY) ? x.n : ''}</span>
-        <span class="stk" style="height:${Math.max(x.n ? 3 : 0, (x.n / maxY) * 120)}px">${['a', 'i', 'h'].map((k) => (x[k] ? `<span class="sg ${k}" style="flex:${x[k]}"></span>` : '')).join('')}</span>
-        <span class="yl">${yLab(y)}</span></button>`).join('')}</div>
-      <div class="legend" aria-hidden="true"><span><i class="sg a"></i>อุบัติเหตุ</span><span><i class="sg i"></i>อุบัติการณ์</span><span><i class="sg h"></i>ความเสี่ยง</span></div>
-    </section>
-    <section class="dv-sec" aria-labelledby="dvh-ac">
-      <p class="dv-k">แบบ ฮ. · เคสหนึ่งนับได้หลายแบบ</p>
-      <h2 id="dvh-ac">${acTop ? `${esc(acTop.v)} มีเคสเทียบเคียงมากที่สุด` : 'ยังไม่มีเคสที่ระบุแบบ'}</h2>
-      ${acRows.map((r) => `<button class="dv-row" ${drillAttr('acft', r.v, r.l)}><span class="rl">${esc(r.l)}</span><span class="rn">${r.m.n}</span><span class="tr" aria-hidden="true">${segs(r.m, acMax, 'width')}</span></button>`).join('')}
-    </section>
-  </div>
-
-  <section class="dv-sec" aria-labelledby="dvh-th">
-    <p class="dv-k">เรื่องที่เกิดซ้ำ · จับจากคำในชื่อและสรุปเคส</p>
-    <h2 id="dvh-th">${th.length ? `${esc(th[0].th)} กลับมาซ้ำ ${th[0].ny} ปี` : 'ยังไม่พบเรื่องที่เกิดซ้ำตามตัวกรองนี้'}</h2>
-    ${th.length ? `<div class="dv-strips">
-      <div class="dv-strip axis" aria-hidden="true"><span class="lab"></span><span class="cells" style="${cols}">${yrs.map(([y]) => `<span>${yLab(y)}</span>`).join('')}</span><span class="cnt"></span></div>
-      ${th.map((t) => `<button class="dv-strip" ${drillAttr('theme', t.k, t.th)}>
-        <span class="lab">${esc(t.th)}<small>${t.ny} ปี · ${t.n} เคส${t.rep ? ' · <span class="tag rep">ซ้ำในหน่วย</span>' : ''}</small></span>
-        <span class="cells" style="${cols}" aria-hidden="true">${yrs.map(([y]) => `<span>${t.by[y] ? `<i style="width:${dotSz(t.by[y])}"></i>` : ''}</span>`).join('')}</span>
-        <span class="cnt">${t.n}</span></button>`).join('')}
-    </div>` : ''}
-  </section>
-
-  <section class="dv-sec dv-list" id="drill" aria-labelledby="dvh-list" hidden></section>
-
-  <footer class="dv-foot">ที่มา: เคสต่างประเทศจากรายงานสอบสวนที่เผยแพร่สาธารณะ ลิงก์ต้นฉบับอยู่ในแต่ละเคส${unlocked ? ' · เคสหน่วยจากไฟล์ที่เข้ารหัสของ บน.2' : ''} · ตัวเลขคำนวณใหม่ทุกครั้งที่เปลี่ยนตัวกรอง</footer>
-  </div>
-  <div class="dv-pill" id="dv-pill" role="status" aria-live="polite"></div>`;
-
-  drawProfile(cs);
-  dvApply();
 }
-
-function drawProfile(cs) {
-  const box = $('#dv-prof');
-  if (!box) return;
-  const W = box.clientWidth || 320, narrow = W < 560;
-  const H = narrow ? 196 : 184;
-  const top = 50, ground = H - 44, padX = narrow ? 30 : 64;
-  const counts = PROFILE.map(([p]) => cs.filter((c) => c.phase.includes(p)).length);
-  const max = Math.max(1, ...counts);
-  const pts = PROFILE.map(([p, h], i) => ({ p, n: counts[i], x: padX + (i * (W - 2 * padX)) / (PROFILE.length - 1), y: ground - h * (ground - top) }));
-  // เส้นโค้งผ่านทุกจุด (Catmull-Rom → Bezier) ไม่ให้ต่ำกว่าพื้น
-  let path = `M${pts[0].x - padX + 6},${ground} L${pts[0].x},${pts[0].y}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i], q1 = pts[i], q2 = pts[i + 1], p3 = pts[i + 2] || q2;
-    const c1x = q1.x + (q2.x - p0.x) / 6, c1y = q1.y + (q2.y - p0.y) / 6;
-    const c2x = q2.x - (p3.x - q1.x) / 6, c2y = q2.y - (p3.y - q1.y) / 6;
-    path += ` C${c1x},${Math.min(ground, c1y)} ${c2x},${Math.min(ground, c2y)} ${q2.x},${q2.y}`;
-  }
-  path += ` L${pts.at(-1).x + padX - 6},${ground}`;
-  const best = pts.reduce((a, b) => (b.n > a.n ? b : a));
-  const node = (q) => {
-    const r = q.n ? 5 + (narrow ? 10 : 14) * Math.sqrt(q.n / max) : 3;
-    const ly = q.y >= ground - 1 ? ground + 26 : q.y + r + 18;
-    return `<g class="p-node${q === best && q.n ? ' best' : ''}" role="button" tabindex="0" ${drillAttr('phase', q.p, PH_S[q.p])} aria-label="${PH_S[q.p]}: ${q.n} เคส">
-      <circle class="hit" cx="${q.x}" cy="${q.y}" r="24"/><circle class="ring" cx="${q.x}" cy="${q.y}" r="${r + 5}"/>
-      <circle class="dot" cx="${q.x}" cy="${q.y}" r="${r}"/>
-      <text class="p-n" x="${q.x}" y="${q.y - r - 8}">${q.n}</text><text class="p-l" x="${q.x}" y="${ly}">${PH_S[q.p]}</text></g>`;
-  };
-  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="group" aria-label="โปรไฟล์การบินกับจำนวนเคสแต่ละช่วง">
-    <line class="p-ground" x1="0" y1="${ground}" x2="${W}" y2="${ground}"/>
-    <path class="p-path" d="${path}"/>${pts.map(node).join('')}</svg>`;
-
-  const others = Object.keys(PH_S).filter((p) => !PROFILE.some(([q]) => q === p))
-    .map((p) => [p, cs.filter((c) => c.phase.includes(p)).length]).filter(([, n]) => n);
-  const none = cs.filter((c) => !c.phase.length).length;
-  $('#dv-off').innerHTML = others.length || none ? `<span>นอกเส้นโปรไฟล์</span>${others.map(([p, n]) =>
-    `<button class="dv-chip" ${drillAttr('phase', p, PH_S[p])}>${PH_S[p]}<b>${n}</b></button>`).join('')}${none ? `<button class="dv-chip" ${drillAttr('phase', '-', 'ไม่ระบุช่วง')}>ไม่ระบุช่วง<b>${none}</b></button>` : ''}` : '';
-}
-
-// ไฮไลต์เคสที่เลือกทั้งหน้าโดยไม่วาดใหม่ (ตำแหน่งเลื่อนไม่หาย) + รายการเคสท้ายหน้า
-function dvApply() {
-  const box = $('#drill');
-  if (!box) return;
-  const dr = state.drill;
-  const list = dr ? dashCases().filter((c) => DRILL[dr.k](c, dr.v))
-    .sort((a, b) => b.year - a.year || SRC_RANK[a.source] - SRC_RANK[b.source]) : [];
-  const ids = new Set(list.map((c) => c.id));
-  state.dashDeck = list.map((c) => c.id);
-  const view = $('.view.dash');
-  view.classList.toggle('has-sel', !!dr);
-  for (const i of $$('.dv-wf i')) i.classList.toggle('on', ids.has(i.dataset.id));
-  for (const y of $$('.dv-yc')) y.classList.toggle('on', !!dr && list.some((c) => c.year === Number(y.dataset.dv)));
-  for (const b of $$('[data-drill]', view)) b.setAttribute('aria-pressed', isOn(b.dataset.drill, b.dataset.dv));
-  box.hidden = !dr;
-  const meta = (c) => [c.aircraft.join('/'), c.phase.join('/'), c.hfacs.join(' ')].filter(Boolean).join(' · ');
-  box.innerHTML = dr ? `<p class="dv-k">เคสที่ไฮไลต์</p><h2 id="dvh-list">${esc(dr.l)} · ${list.length} เคส</h2>
-    <div class="list">${list.map((c) => card({ c, line: `<span class="opt">${esc(meta(c))}</span>` })).join('')}</div>` : '';
-  const pill = $('#dv-pill');
-  pill.classList.toggle('on', !!dr);
-  pill.innerHTML = dr ? `<span class="pl"><b>${esc(dr.l)}</b> · ${list.length} เคส</span><button data-act="dvlist">ดูรายการ</button>
-    <button class="px" data-act="undrill" aria-label="ล้างไฮไลต์">${icon('x')}</button>` : '';
-}
-
-let dvResize;
-addEventListener('resize', () => {
-  clearTimeout(dvResize);
-  dvResize = setTimeout(() => { if ($('#dv-prof')) { drawProfile(dashCases()); dvApply(); } }, 120);
-});
-document.addEventListener('keydown', (e) => {
-  if (!$('#dv-prof')) return;
-  if (e.key === 'Escape' && state.drill) { state.drill = null; dvApply(); return; }
-  const g = e.target.closest?.('.p-node');
-  if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); g.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
-});
 
 /* ── หน้าหลัก ─────────────────────────────────────────────── */
 // หน้าแรกหลังเข้าสู่ระบบ: ไอคอนแอปแบบหน้าจอโทรศัพท์ (DECISIONS.md หัวข้อ "หน้าหลัก")
@@ -1965,10 +1676,15 @@ const scrollMemo = {};
 let lastPath = null;
 
 function route() {
-  const path = location.hash.replace(/^#/, '') || '/';
+  const path = location.hash.replace(/^#/, '').split('?')[0] || '/';
   const parts = path.split('/').filter(Boolean);
   const page = parts[0] || '';
   const arg = parts[1] ? decodeURIComponent(parts[1]) : '';
+
+  // อยู่หน้าภาพรวมแล้ว เปลี่ยนแค่ตัวกรองใน # (ย้อนกลับ/พิมพ์เอง) → ให้หน้านั้นอ่านค่าใหม่เอง
+  if (page === 'dashboard' && lastPath === path && OV?.host.isConnected) { OV.inst?.fromHash(); return; }
+  if (OV) { OV.inst?.destroy(); OV = null; }
+  document.body.classList.toggle('ov', page === 'dashboard');
 
   if (lastPath) scrollMemo[lastPath] = scrollY;
   const briefing = page === 'brief';
@@ -1981,8 +1697,7 @@ function route() {
   }
   if (!briefing && !lesson) releaseAwake();
 
-  if (page === 'dashboard') state.from = 'dashboard';
-  else if (page === 'filter' || page === 'results') state.from = 'results';
+  if (page === 'filter' || page === 'results') state.from = 'results';
   // เปิดการ์ดจากหน้าประวัติเหตุ → ปุ่มย้อนกลับของหน้าเคสกลับไปหน้านั้น
   // (ยกเว้นกำลังย้อนกลับไปเคสที่เปิดแผงประวัติมา — เก็บค่าเดิมของเคสนั้นไว้)
   if (page === 'case' && lastPath?.startsWith('/history') && '#' + path !== state.hv.ret) state.caseBack = '#' + lastPath;
@@ -1993,7 +1708,7 @@ function route() {
     case 'results': viewResults(); break;
     case 'case': viewCase(arg); break;
     case 'brief': drawBrief(arg, parts[2]); break;
-    case 'dashboard': viewDashboard(); break;
+    case 'dashboard': viewOverview(); break;
     case 'areas': viewAreas(); break;
     case 'about': viewAbout(); break;
     case 'theory': viewTheory(arg, parts[2], lastPath); break;
@@ -2002,7 +1717,6 @@ function route() {
   }
 
   const tab = page === 'case' && state.caseBack ? 'home'
-    : ['case', 'brief'].includes(page) && state.from === 'dashboard' ? 'dashboard'
     : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
       : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
   for (const a of $$('.tabbar a')) {
@@ -2010,12 +1724,14 @@ function route() {
   }
   const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
+  // หน้าภาพรวมวาดหลังโหลด CSS เสร็จ — คืนตำแหน่งเลื่อนอีกครั้งเมื่อเนื้อหามาแล้ว
+  if (keep && page === 'dashboard') { const y = scrollMemo[path]; OV.ready.then(() => scrollTo(0, y)); }
   if (lastPath !== null && !briefing && !lesson) main.focus({ preventScroll: true });
   lastPath = path;
 }
 
 main.addEventListener('click', (e) => {
-  const t = e.target.closest('button, a, .p-node');
+  const t = e.target.closest('button, a');
   if (!t) return;
   if (t.dataset.step) { scrollToStep(t.dataset.step, false); return; }
   if (t.dataset.k) { toggleSel(t.dataset.k, t.dataset.v); return; }
@@ -2033,19 +1749,6 @@ main.addEventListener('click', (e) => {
     LS.set('theme', t.dataset.themeSet);
     applyTheme(t.dataset.themeSet);
     for (const b of $$('[data-theme-set]')) b.setAttribute('aria-pressed', String(b === t));
-    return;
-  }
-  if (t.dataset.dash) {
-    state.dash[t.dataset.dash] = t.dataset.v;
-    state.drill = null;
-    LS.set('dash', state.dash);
-    viewDashboard();
-    return;
-  }
-  if (t.dataset.drill) {
-    const { drill: k, dv: v, dl: l } = t.dataset;
-    state.drill = state.drill?.k === k && state.drill.v === v ? null : { k, v, l };
-    dvApply();
     return;
   }
   // ประวัติเหตุ: data-hb = ลิงก์ที่ต้องจำหน้าที่มา เพื่อให้ปุ่มย้อนกลับในหน้ารายละเอียดกลับมาถูกที่
@@ -2082,15 +1785,6 @@ main.addEventListener('click', (e) => {
   if (t.hasAttribute('data-replace')) { e.preventDefault(); location.replace(t.getAttribute('href')); return; }
   switch (t.dataset.act) {
     case 'grp': state.open[t.dataset.g] = !state.open[t.dataset.g]; viewResults(); break;
-    case 'undrill': state.drill = null; dvApply(); break;
-    case 'dvlist': $('#drill')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' }); break;
-    case 'dvmore': {
-      const open = t.closest('.dv-slice').classList.toggle('open');
-      t.setAttribute('aria-expanded', String(open));
-      t.textContent = open ? 'ย่อ' : `ดูอีก ${t.dataset.n} หมวด`;
-      break;
-    }
-    case 'dashreset': state.dash = { ...DASH0 }; state.drill = null; LS.set('dash', state.dash); viewDashboard(); break;
     case 'factors': {
       const f = $('#fac');
       f.hidden = !f.hidden;
