@@ -1963,23 +1963,30 @@ async function boot() {
   // ยังไม่ได้ปลดล็อก เลือก "กองทัพอากาศไทย" ไว้ไม่ได้ (จะไม่มีเคสเลย)
   if (state.sel.src === 'TH' && state.unitStatus !== 'unlocked') state.sel.src = 'ALL';
   updateNet();
+  // ลงทะเบียน SW ก่อนหน้าใส่รหัส — ไม่งั้นเครื่องที่ค้างหน้าใส่รหัสจะไม่ตรวจเวอร์ชันใหม่และเห็นไฟล์เก่า (เช่นชื่อแอปเดิม)
+  let stale = false;
+  if ('serviceWorker' in navigator) {
+    // เวอร์ชันใหม่เข้ามาแทนตัวเดิม (sw.js เรียก skipWaiting + claim) → โหลดหน้าใหม่ 1 ครั้งให้เห็นของใหม่เลย
+    // ไม่งั้นหน้าที่เปิดอยู่ใช้ไฟล์เก่าต่อจนปิดแอป · เปิดครั้งแรก (ยังไม่มี SW) ไม่ต้องโหลดซ้ำ
+    // กุญแจอยู่ใน localStorage/sessionStorage จึงไม่ต้องใส่รหัสใหม่หลังโหลด · ระหว่างใส่รหัสรอให้เสร็จก่อนค่อยโหลด
+    const hadSW = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      // แท็บที่เปิดค้างไว้นาน: กลับมาที่แท็บเมื่อไรให้ตรวจเวอร์ชันใหม่
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch((err) => console.warn('SW', err));
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      updateNet();
+      if (!hadSW) return;
+      if (document.querySelector('.gate')) stale = true;
+      else location.reload();
+    });
+  }
   // ยังล็อก: หลังใส่รหัสให้เข้าหน้าหลักเสมอ ไม่ว่าจะเปิดลิงก์หน้าไหนมา
   if (state.unitStatus === 'locked' && location.hash && location.hash !== '#/') history.replaceState(null, '', '#/');
   route();
   // เครื่องที่ยังไม่มีกุญแจต้องใส่รหัสก่อนเข้าหน้าหลัก ไม่มีทางข้าม · เครื่องที่จำกุญแจไว้เข้าได้เลย
   if (state.unitStatus === 'locked') await showGate();
-
-  if ('serviceWorker' in navigator) {
-    // เวอร์ชันใหม่เข้ามาแทนตัวเดิม (sw.js เรียก skipWaiting + claim) → โหลดหน้าใหม่ 1 ครั้งให้เห็นของใหม่เลย
-    // ไม่งั้นหน้าที่เปิดอยู่ใช้ไฟล์เก่าต่อจนปิดแอป · เปิดครั้งแรก (ยังไม่มี SW) ไม่ต้องโหลดซ้ำ
-    // กุญแจอยู่ใน localStorage/sessionStorage จึงไม่ต้องใส่รหัสใหม่หลังโหลด
-    const hadSW = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err));
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      updateNet();
-      if (hadSW && !document.querySelector('.gate')) location.reload();
-    });
-  }
+  if (stale) location.reload();
 }
 
 boot();
