@@ -1149,7 +1149,137 @@ const appTile = (a) => {
 // เลขวันตามเวลาเครื่อง ใช้หมุนทฤษฎีวันนี้ (ทุกเครื่องในวันเดียวกันได้บทเดียวกัน)
 const dayNo = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
 
+// นับเลขขึ้นจาก 0 สำหรับ [data-count] · ปิดการเคลื่อนไหวแล้วแสดงค่าสุดท้ายเลย
+function countUp(root) {
+  root.querySelectorAll('[data-count]').forEach((el, i) => {
+    const to = +el.dataset.count, fmt = (n) => n.toLocaleString('en-US');
+    if (reduced.matches) { el.textContent = fmt(to); return; }
+    const t0 = performance.now() + 250 + i * 60;
+    el.textContent = '0';
+    const step = (t) => {
+      const p = Math.min(1, Math.max(0, (t - t0) / 1100));
+      el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+// หน้าหลักจอคอมฯ (≥1024px): ปก + ทฤษฎีวันนี้ + ตัวเลข 4 ช่อง + บทเรียน + หัวข้อที่พบบ่อย · ตัวเลขทุกตัวมาจากข้อมูลจริง
+function viewHomeDesk() {
+  const st = state.unitStatus;
+  const kpi = (i, tone, ic, lab, v, d, extra = '', href = '') => {
+    const tag = href ? 'a' : 'div';
+    return `<${tag} class="d-card dh-kpi d-rise${href ? ' d-lift' : ''}${tone ? ' t-' + tone : ''}" style="--i:${i}"${href ? ` href="${href}"` : ''}>
+      <span class="lab"><span class="d-itile${tone ? ' t-' + tone : ''}">${icon(ic)}</span>${lab}</span>
+      <span class="v"${typeof v === 'number' ? ` data-count="${v}"` : ''}>${typeof v === 'number' ? v.toLocaleString('en-US') : v}</span>
+      <span class="d">${d}</span>${extra}</${tag}>`;
+  };
+  const locked = st === 'locked';
+  main.innerHTML = `<div class="view dh">
+    <div class="dh-row1">
+      <section class="d-card dh-hero d-rise" style="--i:0" aria-label="เริ่มบรีฟ">
+        <div class="bg" aria-hidden="true"></div>
+        <p class="eyebrow">Preflight Brief · กองบิน 2 · ${esc(thDate())}</p>
+        <h1>พร้อม<span class="d-grad">บรีฟ</span>ก่อนบิน</h1>
+        <p class="sub">เลือกแบบ ฮ. ภารกิจ และสภาพอากาศของเที่ยวบินวันนี้ แล้วรับบทเรียนจากเหตุจริงทั้งในหน่วยและต่างประเทศ</p>
+        <div class="acts">
+          <a class="d-btn pri" href="#/filter">${icon('brief')}เริ่มบรีฟเที่ยวบินวันนี้</a>
+          ${locked ? `<button class="d-btn" data-act="unlock">${icon('lock')}ปลดล็อกข้อมูลหน่วย</button>`
+            : `<a class="d-btn" href="#/history">${icon('hist')}ดูประวัติเหตุ บน.2</a>`}
+        </div>
+      </section>
+      <a class="d-card d-lift dh-tip d-rise" style="--i:1" id="dh-tip" href="#/theory">
+        <p class="eyebrow">ทฤษฎีวันนี้</p><h2>ทฤษฎีนิรภัย</h2><p></p>
+        <span class="go"><span id="dh-prog-l"></span><b>อ่านต่อ${icon('next')}</b></span>
+      </a>
+    </div>
+    <div class="dh-kpis">
+      ${kpi(2, '', 'chart', 'เคสต่างประเทศ', state.intl.length, 'รายงานสอบสวนสาธารณะ', '', '#/dashboard')}
+      ${kpi(3, 'gold', 'card', 'การ์ดบทเรียนของหน่วย', st === 'unlocked' ? state.unit.length : '—',
+        locked ? 'ล็อกอยู่ · ใส่รหัสหน่วยเพื่อดู' : st === 'missing' ? 'ยังไม่มีในเวอร์ชันนี้' : 'จากเหตุของ บน.2 และ ทอ.')}
+      <div id="dh-hist-kpi" style="display:contents">${kpi(4, 'green', 'hist', 'ประวัติเหตุ บน.2', '—', locked ? 'ล็อกอยู่' : 'กำลังโหลด…')}</div>
+      ${kpi(5, 'violet', 'book', 'ทฤษฎีนิรภัย', '—', '', '', '#/theory').replace('class="d"', 'class="d" id="dh-th-d"').replace('class="v"', 'class="v" id="dh-th-v"')}
+    </div>
+    <div class="dh-row3">
+      <section class="d-card d-rise" style="--i:6" aria-labelledby="dh-les-h">
+        <div class="dh-ch"><span class="d-itile t-violet">${icon('book')}</span><h2 id="dh-les-h">บทเรียนทฤษฎีนิรภัย</h2>
+          <a class="more" href="#/theory">ดูทั้งหมด${icon('next')}</a></div>
+        <div class="dh-les" id="dh-les"></div>
+      </section>
+      <section class="d-card d-rise" style="--i:7" aria-labelledby="dh-tp-h">
+        <div class="dh-ch"><span class="d-itile t-gold">${icon('grid3')}</span><h2 id="dh-tp-h">หัวข้อที่พบบ่อยใน บน.2</h2>
+          <a class="more" href="#/history/topics">ดูตาราง${icon('next')}</a></div>
+        <div id="dh-tp"><p class="dh-empty">${locked ? 'ข้อมูลของหน่วยล็อกอยู่ ใส่รหัสหน่วยเพื่อดูหัวข้อ' : 'กำลังโหลด…'}</p></div>
+      </section>
+    </div>
+  </div>`;
+  countUp(main);
+
+  import('./lessons.js').then(({ LESSONS }) => {
+    if (!$('.dh')) return; // ผู้ใช้ไปหน้าอื่นแล้ว
+    const done = new Set(LS.get('theoryDone', []));
+    const nDone = LESSONS.filter((l) => done.has(l.id)).length;
+    const next = LESSONS.find((l) => !done.has(l.id));
+    const l = LESSONS[dayNo() % LESSONS.length];
+    const tip = $('#dh-tip');
+    tip.href = `#/theory/${l.id}`;
+    tip.querySelector('h2').textContent = l.title;
+    tip.querySelector('p:not(.eyebrow)').textContent = l.tip;
+    tip.querySelector('.eyebrow').textContent = `ทฤษฎีวันนี้ · ${l.short} · ${l.mins} นาที`;
+    $('#dh-prog-l').innerHTML = `เรียนแล้ว ${nDone}/${LESSONS.length} บท<span class="dh-prog"><i style="width:${Math.round(nDone / LESSONS.length * 100)}%"></i></span>`;
+    const v = $('#dh-th-v');
+    v.dataset.count = LESSONS.length;
+    $('#dh-th-d').textContent = `บท · เรียนแล้ว ${nDone}`;
+    countUp(v.parentNode);
+    $('#dh-les').innerHTML = LESSONS.map((x, i) => {
+      const cls = done.has(x.id) ? ' done' : x === next ? ' next' : '';
+      const s = done.has(x.id) ? 'เรียนแล้ว' : x === next ? 'บทถัดไป' : `${x.mins} นาที`;
+      return `<a class="dh-le${cls}" href="#/theory/${x.id}"><span class="n">${done.has(x.id) ? '✓' : String(i + 1).padStart(2, '0')}</span>`
+        + `<span><b>${esc(x.short)}</b><small>${s}</small></span></a>`;
+    }).join('');
+  }).catch((err) => {
+    const el = $('#dh-les');
+    if (el) el.innerHTML = '<p class="dh-empty">โหลดบทเรียนไม่สำเร็จ ลองเปิดหน้านี้อีกครั้งตอนมีสัญญาณ</p>';
+    console.warn('lessons', err);
+  });
+
+  if (locked) return;
+  loadHistory().then((h) => {
+    if (!$('.dh')) return;
+    const box = $('#dh-hist-kpi'), tp = $('#dh-tp');
+    if (h.status !== 'ok') {
+      box.innerHTML = kpi(4, 'green', 'hist', 'ประวัติเหตุ บน.2', '—', 'ยังไม่มีในเวอร์ชันนี้');
+      tp.innerHTML = '<p class="dh-empty">ยังไม่มีข้อมูลประวัติเหตุในเวอร์ชันนี้</p>';
+      return;
+    }
+    const items = h.data.items;
+    const fys = [...new Set(items.map((x) => x.fy))].sort((a, b) => a - b);
+    const per = fys.map((y) => items.filter((x) => x.fy === y).length);
+    const mx = Math.max(...per), bw = (100 - (per.length - 1) * 2) / per.length;
+    const spark = `<svg class="spark" viewBox="0 0 100 44" width="100" height="44" aria-hidden="true">${per.map((n, i) => {
+      const hh = Math.max(2, n / mx * 44);
+      return `<rect x="${(i * (bw + 2)).toFixed(2)}" y="${(44 - hh).toFixed(2)}" width="${bw.toFixed(2)}" height="${hh.toFixed(2)}" rx="1.5"><title>ปีงบ ${fys[i]}: ${n}</title></rect>`;
+    }).join('')}</svg>`;
+    box.innerHTML = kpi(4, 'green', 'hist', 'ประวัติเหตุ บน.2', items.length, `เรื่อง · ปีงบ ${fySpan(items)}`, spark, '#/history');
+    countUp(box);
+    // นับเหมือนตารางหัวข้อ (ไม่รวมเหตุของหน่วยอื่น r)
+    const { topics, short } = h.data;
+    const tot = topics.map(() => 0);
+    const pool = items.filter((x) => x.src !== 'r');
+    for (const it of pool) for (const t of it.tp || []) if (t in tot) tot[t]++;
+    const top = topics.map((_, t) => t).filter((t) => tot[t]).sort((a, b) => tot[b] - tot[a]).slice(0, 9);
+    if (!top.length) { tp.innerHTML = '<p class="dh-empty">ยังไม่มีการจัดหัวข้อ</p>'; return; }
+    const m = tot[top[0]];
+    tp.innerHTML = `<div class="dh-topics">${top.map((t, i) => `<a class="dh-bar" href="#/history/topic/${t}" title="${esc(topics[t])}">`
+      + `<span>${esc(short[t])}</span><span class="tk"><span class="tr d-grow" style="--i:${i};width:${(tot[t] / m * 100).toFixed(1)}%"></span></span>`
+      + `<span class="num">${nTh(tot[t])}</span></a>`).join('')}</div>
+      <p class="dh-note">นับจาก ${nTh(pool.length)} เรื่องของ บน.2 ปีงบ ${fySpan(pool)} · เรื่องเดียวอยู่ได้หลายหัวข้อ</p>`;
+  }).catch((err) => console.warn('history', err));
+}
+
 function viewHome() {
+  if (wide.matches) return viewHomeDesk();
   const st = state.unitStatus;
   const unitLine = {
     missing: `${dot('hollow')}ยังไม่มีข้อมูลของหน่วยในเวอร์ชันนี้`,
@@ -1280,7 +1410,7 @@ function hGroups(list, by, here = null) {
 // หัวหน้าประวัติเหตุ + แท็บ รายปี/ตามหัวข้อ · คืน <div> ที่ยังไม่ปิด ผู้เรียกปิดเอง
 function hvHead(h, tab, still) {
   const items = h.data.items;
-  return `<div class="view hv${still ? ' still' : ''}">
+  return `<div class="view hv${still ? ' still' : ''}"><div class="hv-top">
     <p class="eyebrow">ประวัติเหตุ บน.2</p>
     <h1 class="page-h">เคยเกิดใน<em>บน.2</em></h1>
     <p class="lede">${nTh(items.length)} เรื่อง ปีงบ ${fySpan(items)} · จากแบบฟอร์ม MOR/HR และบันทึกการประชุมนิรภัย จับคู่กันเมื่อเป็นเรื่องเดียวกัน</p>
@@ -1288,7 +1418,7 @@ function hvHead(h, tab, still) {
     <nav class="h-tabs" aria-label="มุมมอง">
       <a data-replace href="#/history"${tab === 'y' ? ' aria-current="page"' : ''}>${icon('chart')}รายปี</a>
       <a data-replace href="#/history/topics"${tab === 't' ? ' aria-current="page"' : ''}>${icon('grid3')}ตามหัวข้อ</a>
-    </nav>`;
+    </nav></div>`;
 }
 
 // แบบ B: เส้นเวลารายปีงบ แท่งซ้อนตามแหล่ง · แตะปีเพื่อดูรายการของปีนั้น
@@ -1769,6 +1899,7 @@ function applyTheme(pref) {
   const t = pref === 'auto' ? (lightMq.matches ? 'day' : 'night') : pref;
   document.documentElement.dataset.theme = t;
   $('meta[name="theme-color"]').content = t === 'day' ? '#f4efe4' : '#0b1120';
+  syncThemeBtns();
 }
 lightMq.addEventListener('change', () => { if (LS.get('theme', 'night') === 'auto') applyTheme('auto'); });
 
@@ -1783,6 +1914,31 @@ function updateNet() {
 }
 addEventListener('online', updateNet);
 addEventListener('offline', updateNet);
+
+/* ── แถบเมนูจอคอมฯ ────────────────────────────────────────── */
+
+// ตัวเลขข้างเมนู (ซ่อนบนมือถือ) · ประวัติเหตุแสดงเมื่อปลดล็อกแล้วเท่านั้น
+function setBadges() {
+  if (!wide.matches) return;
+  const put = (k, n) => { const b = $(`[data-badge="${k}"]`); if (b) b.textContent = n ? n.toLocaleString('en-US') : ''; };
+  put('intl', state.intl.length);
+  import('./lessons.js').then(({ LESSONS }) => put('theory', LESSONS.length)).catch(() => {});
+  if (state.unitStatus !== 'unlocked') { put('history', 0); return; }
+  loadHistory().then((h) => put('history', h.status === 'ok' ? h.data.items.length : 0)).catch(() => {});
+}
+function syncThemeBtns() {
+  const cur = document.documentElement.dataset.theme;
+  for (const b of $$('.annun [data-theme-set]')) b.setAttribute('aria-pressed', String(b.dataset.themeSet === cur));
+}
+$('.annun').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-theme-set]');
+  if (!t) return;
+  LS.set('theme', t.dataset.themeSet);
+  applyTheme(t.dataset.themeSet);
+  for (const b of $$('main [data-theme-set]')) b.setAttribute('aria-pressed', String(b.dataset.themeSet === t.dataset.themeSet));
+});
+// หมุนจอ/ปรับหน้าต่างข้าม 1024px ขณะอยู่หน้าหลัก → วาดใหม่ให้ตรงขนาด
+wide.addEventListener('change', () => { if (!location.hash.replace(/^#\/?/, '')) route(); else setBadges(); });
 
 /* ── Router ───────────────────────────────────────────────── */
 
@@ -1833,9 +1989,12 @@ function route() {
   const tab = page === 'case' && state.caseBack ? 'home'
     : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
       : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
+  // แถบเมนูจอคอมฯ มีลิงก์ประวัติเหตุ/ทฤษฎีของตัวเอง
+  const dtab = ['history', 'theory'].includes(page) ? page : null;
   for (const a of $$('.tabbar a')) {
-    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    if (a.dataset.tab === tab || a.dataset.tab === dtab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
+  setBadges();
   const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
   // หน้าภาพรวมวาดหลังโหลด CSS เสร็จ — คืนตำแหน่งเลื่อนอีกครั้งเมื่อเนื้อหามาแล้ว
@@ -1863,7 +2022,7 @@ main.addEventListener('click', (e) => {
   if (t.dataset.themeSet) {
     LS.set('theme', t.dataset.themeSet);
     applyTheme(t.dataset.themeSet);
-    for (const b of $$('[data-theme-set]')) b.setAttribute('aria-pressed', String(b === t));
+    for (const b of $$('main [data-theme-set]')) b.setAttribute('aria-pressed', String(b === t));
     return;
   }
   // ประวัติเหตุ: data-hb = ลิงก์ที่ต้องจำหน้าที่มา เพื่อให้ปุ่มย้อนกลับในหน้ารายละเอียดกลับมาถูกที่

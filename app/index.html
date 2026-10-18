@@ -11,6 +11,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preload" href="fonts/plexsansthai-400-thai.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="desk.css" media="(min-width: 1024px)">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -52,6 +53,17 @@
     <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h6"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
   </defs>
+    <!-- ไอคอนสองโทนของจอคอมฯ (desk.css) -->
+    <symbol id="d-home" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M5 10.5 12 5l7 5.5V20h-4.5v-5.5h-5V20H5z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h4.5v-5.5h5V20H19V10"/></g></symbol>
+    <symbol id="d-brief" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M3 11.5 21 4l-5.5 16-4-6.5z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 21 4l-5.5 16-4-6.5z"/><path d="M11.5 13.5 21 4"/></g></symbol>
+    <symbol id="d-hist" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><circle cx="12" cy="12" r="8.5"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3 4.5V9h4.5"/><path d="M12 7.5V12l3.2 2"/></g></symbol>
+    <symbol id="d-chart" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="9" width="4" height="11" rx="1"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="9" width="4" height="11" rx="1"/></g></symbol>
+    <symbol id="d-book" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5V20"/></g></symbol>
+    <symbol id="d-cases" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M3.5 8h17v11a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="8" width="17" height="12.5" rx="1.5"/><path d="M9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8M3.5 13h17M11 13v2h2v-2"/></g></symbol>
+    <symbol id="d-info" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><circle cx="12" cy="12" r="9"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.2"/></g></symbol>
+    <symbol id="d-shield" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></g></symbol>
+    <symbol id="d-pin" viewBox="0 0 24 24"><g fill="currentColor" fill-opacity=".28" stroke="none"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/></g><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.5"/></g></symbol>
+    <symbol id="d-arrow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></g></symbol>
 </svg>
 
 <a class="skip" href="#main">ข้ามไปเนื้อหา</a>
@@ -59,17 +71,26 @@
 <header class="annun" role="banner">
   <a class="brand" href="#/" aria-label="Wing2 Safety หน้าแรก">
     <span class="logo"><svg class="ic" aria-hidden="true"><use href="#i-wing"/></svg></span>
-    <b>Wing2 Safety</b>
+    <img class="emblem" src="img/emblem.webp" width="54" height="57" alt="" loading="lazy">
+    <span class="b-t"><b>Wing<em>2</em> Safety</b><small class="d-only">บทเรียนนิรภัย กองบิน 2</small></span>
   </a>
-  <!-- จอแคบ: แถบล่างแบบ fixed · จอคอมฯ (≥1024px): เมนูอยู่ในแถบบน -->
+  <!-- จอแคบ: แถบล่างแบบ fixed · จอคอมฯ (≥1024px): แถบเมนูซ้าย (desk.css) ลิงก์ .d-only เห็นเฉพาะจอคอมฯ -->
   <nav class="tabbar" aria-label="เมนูหลัก">
-    <a href="#/" data-tab="home"><i class="pill"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></i><span>หน้าหลัก</span></a>
-    <a href="#/filter" data-tab="brief"><i class="pill"><svg class="ic" aria-hidden="true"><use href="#i-brief"/></svg></i><span>บรีฟ</span></a>
-    <a href="#/dashboard" data-tab="dashboard"><i class="pill"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg></i><span>ภาพรวม</span></a>
-    <a href="#/areas" data-tab="areas"><i class="pill"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></i><span>พื้นที่</span></a>
-    <a href="#/about" data-tab="about"><i class="pill"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></i><span>ข้อมูล</span></a>
+    <a href="#/" data-tab="home"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-home"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-home"/></svg></i><span>หน้าหลัก</span></a>
+    <a href="#/filter" data-tab="brief"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-brief"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-brief"/></svg></i><span>บรีฟ<span class="d-only">ก่อนบิน</span></span></a>
+    <span class="d-navsec d-only" aria-hidden="true">ข้อมูล</span>
+    <a href="#/history" data-tab="history" class="d-only"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-hist"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-hist"/></svg></i><span>ประวัติเหตุ บน.2</span><b class="d-badge" data-badge="history"></b></a>
+    <a href="#/dashboard" data-tab="dashboard"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-chart"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-chart"/></svg></i><span>ภาพรวม<span class="d-only"> INTL</span></span><b class="d-badge d-only" data-badge="intl"></b></a>
+    <a href="#/areas" data-tab="areas"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-pin"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-pin"/></svg></i><span>พื้นที่<span class="d-only">บิน</span></span></a>
+    <span class="d-navsec d-only" aria-hidden="true">เรียนรู้</span>
+    <a href="#/theory" data-tab="theory" class="d-only"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-book"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-book"/></svg></i><span>ทฤษฎีนิรภัย</span><b class="d-badge" data-badge="theory"></b></a>
+    <a href="#/about" data-tab="about"><i class="pill"><svg class="ic m-ic" aria-hidden="true"><use href="#i-info"/></svg><svg class="ic d-ic" aria-hidden="true"><use href="#d-info"/></svg></i><span><span class="m-only">ข้อมูล</span><span class="d-only">เกี่ยวกับแอป</span></span></a>
   </nav>
   <span id="net" class="net" role="status" aria-live="polite"></span>
+  <div class="d-foot d-only">
+    <span>ธีม</span>
+    <span class="d-toggle" role="group" aria-label="ธีม"><button type="button" data-theme-set="night" aria-pressed="false">กลางคืน</button><button type="button" data-theme-set="day" aria-pressed="false">กระดาษ</button></span>
+  </div>
 </header>
 
 <main id="main" tabindex="-1"></main>

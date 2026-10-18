@@ -1,0 +1,313 @@
+/* จอคอมฯ ≥1024px — โหลดผ่าน <link media="(min-width: 1024px)"> จึงไม่ต้องห่อ @media
+   ที่มาของดีไซน์: review/desktop_mock (home / brief / history) · แถบเมนูซ้าย + ตรากองบิน 2 + หัวเรื่อง Kanit
+   จอแคบ (มือถือ) ใช้ styles.css อย่างเดียว ไม่โดนไฟล์นี้ */
+
+/* ── Kanit (SIL OFL, fonts/OFL-Kanit.txt) ─────────────────── */
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/kanit-500-thai.woff2) format('woff2'); unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC; }
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/kanit-500-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/kanit-600-thai.woff2) format('woff2'); unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC; }
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/kanit-600-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/kanit-700-thai.woff2) format('woff2'); unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC; }
+@font-face { font-family: 'Kanit'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/kanit-700-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* ── Tokens: primitive (HSL triplet) → semantic ───────────── */
+:root {
+  --head-h: 0px; --side-w: 256px;
+  --f-k: 'Kanit', var(--f-d);
+  --d-navy-1000: 222 52% 5%; --d-navy-950: 222 49% 8%; --d-navy-900: 220 45% 11%; --d-navy-850: 220 42% 13%; --d-navy-800: 219 40% 16%; --d-navy-700: 218 36% 22%;
+  --d-slate-50: 216 40% 96%; --d-slate-300: 218 29% 79%; --d-slate-500: 219 18% 63%; --d-slate-700: 219 15% 44%;
+  --d-sky-200: 200 100% 84%; --d-sky-400: 201 100% 71%; --d-sky-600: 206 68% 51%; --d-sky-900: 208 70% 20%;
+  --d-gold-200: 41 100% 82%; --d-gold-400: 40 84% 69%; --d-gold-600: 37 58% 51%; --d-gold-950: 40 100% 5%;
+  --d-red-400: 354 100% 74%; --d-orange-400: 28 88% 65%; --d-green-400: 151 57% 60%; --d-violet-400: 264 100% 77%;
+  --d-flag: linear-gradient(90deg, hsl(355 74% 53%) 0 16.6%, hsl(220 33% 97%) 0 33.3%, hsl(231 51% 36%) 0 66.6%, hsl(220 33% 97%) 0 83.3%, hsl(355 74% 53%) 0);
+  --d-ease: cubic-bezier(.16, 1, .3, 1);
+
+  --d-card-bg: linear-gradient(180deg, hsl(var(--d-navy-850)), hsl(var(--d-navy-900)));
+  --d-card-solid: hsl(var(--d-navy-850));
+  --d-card-sh: 0 1px 0 hsl(var(--d-slate-50) / .04) inset, 0 10px 30px -18px hsl(var(--d-navy-1000) / .9);
+  --d-card-sh-h: 0 1px 0 hsl(var(--d-slate-50) / .06) inset, 0 22px 44px -20px hsl(var(--d-navy-1000)), 0 0 0 1px hsl(var(--d-sky-400) / .18);
+  --d-band-bg: radial-gradient(60% 120% at 92% -10%, hsl(var(--d-sky-600) / .38), transparent 60%),
+               radial-gradient(40% 90% at 0% 120%, hsl(var(--d-gold-400) / .13), transparent 70%),
+               linear-gradient(135deg, hsl(var(--d-navy-800)), hsl(var(--d-navy-900)) 55%, hsl(var(--d-navy-950)));
+  --d-grid: hsl(var(--d-slate-300) / .05);
+  --d-sunk: hsl(var(--d-navy-950) / .55);
+  --d-track: hsl(var(--d-slate-300) / .06);
+  --d-sel-bg: linear-gradient(160deg, hsl(var(--d-slate-50)), hsl(var(--d-sky-200)) 160%);
+  --d-sel-fg: hsl(var(--d-navy-950));
+  --d-pri-bg: linear-gradient(180deg, hsl(var(--d-gold-200)), hsl(var(--d-gold-400)) 55%, hsl(var(--d-gold-600)) 140%);
+  --d-pri-sh: 0 8px 22px -10px hsl(var(--d-gold-400) / .7), inset 0 1px 0 hsl(0 0% 100% / .45);
+  --d-on-pri: hsl(var(--d-gold-950));
+  --d-tile-bg: linear-gradient(180deg, hsl(var(--d-navy-850) / .9), hsl(var(--d-navy-950) / .9));
+  --d-tile-on: radial-gradient(90% 70% at 50% 0%, hsl(var(--d-gold-400) / .22), transparent 70%), linear-gradient(180deg, hsl(var(--d-navy-800)), hsl(var(--d-navy-950)));
+  --d-glow: var(--d-gold-400);
+  --d-accent-t: var(--d-sky-400);
+  --d-gt: linear-gradient(90deg, hsl(var(--d-slate-50)), hsl(var(--d-sky-200)));
+  --d-hero-img: url(img/hero-night.webp);
+  --d-hero-ov: linear-gradient(90deg, hsl(var(--d-navy-1000) / .97) 0%, hsl(var(--d-navy-1000) / .8) 42%, hsl(var(--d-navy-1000) / .1) 100%),
+               linear-gradient(0deg, hsl(var(--d-navy-1000) / .7), transparent 50%);
+}
+:root[data-theme="day"] {
+  --d-card-bg: linear-gradient(180deg, #fdfaf3, #f6f0e3);
+  --d-card-solid: #fbf7ee;
+  --d-card-sh: 0 1px 0 #fff inset, 0 10px 26px -18px rgb(60 45 20 / .35);
+  --d-card-sh-h: 0 1px 0 #fff inset, 0 22px 40px -22px rgb(60 45 20 / .45), 0 0 0 1px rgb(13 100 166 / .22);
+  --d-band-bg: radial-gradient(60% 120% at 92% -10%, rgb(13 100 166 / .16), transparent 60%),
+               radial-gradient(40% 90% at 0% 120%, rgb(186 130 20 / .16), transparent 70%),
+               linear-gradient(135deg, #fbf7ee, #f1e9d8 55%, #ebe2cf);
+  --d-grid: rgb(40 35 25 / .05);
+  --d-sunk: rgb(255 255 255 / .55);
+  --d-track: rgb(40 35 25 / .08);
+  --d-sel-bg: linear-gradient(160deg, hsl(var(--d-navy-700)), hsl(var(--d-navy-950)));
+  --d-sel-fg: #fff;
+  --d-pri-sh: 0 8px 22px -12px rgb(150 100 10 / .7), inset 0 1px 0 hsl(0 0% 100% / .55);
+  --d-tile-bg: linear-gradient(180deg, #fdfaf3, #f3ecdd);
+  --d-tile-on: radial-gradient(90% 70% at 50% 0%, rgb(214 160 40 / .28), transparent 70%), linear-gradient(180deg, #fffaf0, #f5ecd8);
+  --d-glow: 37 70% 45%;
+  --d-accent-t: 206 85% 35%;
+  --d-gt: linear-gradient(90deg, hsl(var(--d-navy-800)), hsl(206 85% 35%));
+  --d-hero-img: url(img/hero-day.webp);
+  --d-hero-ov: linear-gradient(90deg, rgb(244 239 228 / .97) 0%, rgb(244 239 228 / .85) 42%, rgb(244 239 228 / .1) 100%),
+               linear-gradient(0deg, rgb(244 239 228 / .7), transparent 50%);
+}
+:root:not([data-theme="day"]) body { background: radial-gradient(900px 500px at 70% -200px, hsl(var(--d-sky-900) / .55), transparent 70%) fixed, var(--bg); }
+
+/* ── แถบเมนูซ้าย (ใช้ .annun + .tabbar เดิม) — มืดทั้งสองธีม ─── */
+.annun {
+  --text: #eef2f8; --text2: #b9c4d8; --muted: #8d9ab3; --sky: #6cc9ff; --gold: #f2c66d;
+  --ok: #5fd39a; --warn: #f4a259; --bad: #ff7a85; --bg: #0b1120; --surface: #121b2e; --surface2: #172238;
+  --line: rgb(160 185 230 / .14); --line2: rgb(160 185 230 / .3);
+  position: fixed; inset: 0 auto 0 0; width: var(--side-w); height: 100vh;
+  flex-direction: column; align-items: stretch; gap: 2px; padding: 0 14px 18px;
+  color: var(--text);
+  background: linear-gradient(180deg, hsl(var(--d-navy-850)) 0%, hsl(var(--d-navy-950)) 60%);
+  border-right: 1px solid var(--line); border-bottom: 0; overflow-y: auto; scrollbar-width: thin;
+}
+.annun::before { content: ''; display: block; flex: none; height: 4px; margin: 0 -14px; background: var(--d-flag); }
+.annun .logo { display: none; }
+.annun .brand { flex: none; gap: 12px; padding: 18px 6px; margin-bottom: 6px; border-bottom: 1px solid var(--line); min-height: 0; color: var(--text); }
+.annun .emblem { display: block; flex: none; width: 54px; height: 57px; filter: drop-shadow(0 6px 12px hsl(var(--d-navy-1000) / .8)); animation: d-pop .7s var(--d-ease) both; }
+.annun .b-t { display: block; min-width: 0; }
+.annun .brand b { display: block; font: 600 19px/1.15 var(--f-k); }
+.annun .brand b em { color: var(--gold); }
+.annun .brand small { display: block; margin-top: 3px; font: 400 12.5px/1.3 var(--f-k); color: var(--muted); }
+
+.annun .tabbar { flex-direction: column; align-items: stretch; gap: 2px; margin: 0; }
+.annun .tabbar span.d-only { display: inline; }
+.annun .tabbar span.d-navsec { display: block; padding: 16px 12px 6px; font: 500 11.5px/1 var(--f-k); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+.annun .tabbar .m-only, .annun .tabbar .m-ic { display: none; }
+.annun .tabbar a {
+  display: flex; flex: none; max-width: none; flex-direction: row; align-items: center; justify-content: flex-start;
+  min-height: 46px; gap: 12px; padding: 7px 10px; border-radius: 11px;
+  font: 500 14.5px/1.3 var(--f-b); color: var(--text2); transition: background .2s, color .2s;
+}
+.annun .tabbar a:hover { background: hsl(var(--d-slate-300) / .05); color: var(--text); }
+.annun .tabbar .pill {
+  display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 9px;
+  background: hsl(var(--d-slate-300) / .06); border: 1px solid var(--line); color: var(--text2);
+  transition: transform .25s var(--d-ease), background .2s, box-shadow .2s;
+}
+.annun .tabbar svg.d-ic { display: block; width: 19px; height: 19px; }
+.annun .tabbar a:hover .pill { transform: translateY(-1px) scale(1.06); }
+:root .annun .tabbar a[aria-current="page"] { background: linear-gradient(90deg, hsl(var(--d-sky-400) / .16), hsl(var(--d-sky-400) / .02)); color: var(--text); box-shadow: none; font-weight: 600; }
+:root .annun .tabbar a[aria-current="page"] .pill { background: var(--d-pri-bg); border-color: transparent; color: var(--d-on-pri); box-shadow: var(--d-pri-sh); }
+/* หน้าที่มีลิงก์เฉพาะจอคอมฯ (ประวัติเหตุ ทฤษฎี) ไม่ต้องเน้น "หน้าหลัก" ซ้ำ */
+:root .annun .tabbar:has(a.d-only[aria-current]) a:not(.d-only)[aria-current] { background: none; color: var(--text2); font-weight: 500; }
+:root .annun .tabbar:has(a.d-only[aria-current]) a:not(.d-only)[aria-current] .pill { background: hsl(var(--d-slate-300) / .06); border-color: var(--line); color: var(--text2); box-shadow: none; }
+.annun .tabbar b.d-badge { display: inline-block; margin-left: auto; padding: 1px 7px; border-radius: 999px; font: 500 11.5px/1.5 var(--f-m); color: var(--muted); background: hsl(var(--d-slate-300) / .07); font-variant-numeric: tabular-nums; }
+.annun .tabbar b.d-badge:empty { display: none; }
+
+.annun .net { flex: none; flex-wrap: wrap; margin: auto 0 0; padding: 14px 10px 0; border-top: 1px solid var(--line); font-size: 13px; white-space: normal; }
+.annun .net .lamp { height: auto; padding: 0; border: 0; }
+.annun .net .ver { width: 100%; font-size: 12px; }
+.annun .d-foot { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 10px 0; font-size: 13px; color: var(--muted); }
+.d-toggle { display: inline-flex; border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; }
+.d-toggle button { padding: 4px 10px; border: 0; background: none; font: 500 12px/1.4 var(--f-b); color: var(--muted); cursor: pointer; }
+.d-toggle button:hover { color: var(--text); }
+.d-toggle button[aria-pressed="true"] { background: hsl(var(--d-navy-700)); color: var(--text); }
+
+/* ── พื้นที่เนื้อหา ───────────────────────────────────────── */
+main { margin-left: max(var(--side-w), calc(var(--side-w) + (100% - var(--side-w) - 1340px) / 2)); margin-right: 0; max-width: 1340px; padding: 28px 36px 64px; }
+body.briefing main, body.lesson main { margin-left: 0; }
+body.ov main { margin-left: var(--side-w); max-width: none; }
+.side, .hd-side { top: 24px; }
+.side { max-height: calc(100vh - 48px); }
+
+/* ตัวอักษรหัวเรื่อง */
+.page-h { font: 600 38px/1.25 var(--f-k); letter-spacing: -.005em; }
+.page-h em { color: var(--gold); }
+.eyebrow { display: inline-flex; align-items: center; gap: 10px; font: 500 12.5px/1.3 var(--f-k); letter-spacing: .2em; text-transform: uppercase; color: var(--sky); }
+.eyebrow::before { content: ''; width: 22px; height: 2px; background: currentColor; flex: none; }
+.step-h h2, .sec-h, .side-h { font-family: var(--f-k); font-weight: 500; }
+.d-grad { background: var(--d-gt); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ส่วนประกอบร่วม */
+.d-card { background: var(--d-card-bg); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--d-card-sh); }
+.d-lift { transition: transform .3s var(--d-ease), box-shadow .3s, border-color .3s; }
+.d-lift:hover { transform: translateY(-3px); box-shadow: var(--d-card-sh-h); border-color: var(--line2); }
+.d-itile { --tone: var(--d-accent-t); display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 10px; color: hsl(var(--tone));
+  background: linear-gradient(145deg, hsl(var(--tone) / .26), hsl(var(--tone) / .06)); border: 1px solid hsl(var(--tone) / .32); }
+.d-itile .ic { width: 19px; height: 19px; }
+.d-itile.t-gold { --tone: var(--d-glow); }
+.d-itile.t-green { --tone: var(--d-green-400); }
+.d-itile.t-violet { --tone: var(--d-violet-400); }
+:root[data-theme="day"] .d-itile.t-green { --tone: 153 67% 27%; }
+:root[data-theme="day"] .d-itile.t-violet { --tone: 264 50% 45%; }
+.d-btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 48px; padding: 0 22px; border-radius: 12px;
+  border: 1px solid var(--line2); background: hsl(var(--d-slate-300) / .05); color: var(--text); font: 500 15.5px/1 var(--f-k); text-decoration: none;
+  transition: transform .25s var(--d-ease), box-shadow .25s, background .2s; }
+.d-btn:hover { transform: translateY(-2px); background: hsl(var(--d-slate-300) / .1); }
+.d-btn .ic { width: 18px; height: 18px; }
+.d-btn.pri { background: var(--d-pri-bg); border-color: transparent; color: var(--d-on-pri); font-weight: 600; box-shadow: var(--d-pri-sh); }
+.d-btn.pri:hover { box-shadow: 0 14px 30px -12px hsl(var(--d-gold-400) / .85), inset 0 1px 0 hsl(0 0% 100% / .45); }
+.d-btn.pri::after, .btn-primary:not(.pending):not(:disabled)::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; pointer-events: none;
+  background: linear-gradient(90deg, transparent, hsl(0 0% 100% / .45), transparent);
+  transform: translateX(-120%) skewX(-20deg); animation: d-sweep 3.6s 1.4s ease-in-out infinite;
+}
+
+/* ── หน้าหลัก ─────────────────────────────────────────────── */
+main > .view.dh:not(#_) { max-width: none; }
+.dh-row1 { display: grid; grid-template-columns: 1.75fr 1fr; gap: 20px; }
+.dh-hero { position: relative; overflow: hidden; min-height: 340px; padding: 40px 44px; display: flex; flex-direction: column; justify-content: flex-end; border-color: var(--line2); }
+.dh-hero .bg { position: absolute; inset: 0; background: var(--d-hero-img) center / cover; animation: d-zoom 2.4s var(--d-ease) both; }
+.dh-hero::before { content: ''; position: absolute; inset: 0; z-index: 1; background: var(--d-hero-ov); }
+.dh-hero::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 2; background: var(--d-flag); opacity: .9; }
+.dh-hero > :not(.bg) { position: relative; z-index: 2; }
+.dh-hero h1 { font: 700 50px/1.2 var(--f-k); margin: 12px 0 10px; letter-spacing: -.01em; }
+.dh-hero .sub { max-width: 540px; font-size: 16.5px; line-height: 1.6; color: var(--text2); }
+.dh-hero .acts { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+.dh-tip { padding: 24px; display: flex; flex-direction: column; position: relative; overflow: hidden; color: var(--text); text-decoration: none;
+  background: radial-gradient(80% 60% at 100% 0%, hsl(var(--d-glow) / .14), transparent 70%), var(--d-card-bg); }
+.dh-tip .eyebrow { color: var(--gold); }
+.dh-tip h2 { font: 600 26px/1.3 var(--f-k); margin: 14px 0 8px; }
+.dh-tip p { color: var(--text2); margin: 0 0 16px; line-height: 1.6; }
+.dh-tip .go { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.dh-tip .go b { display: inline-flex; gap: 8px; align-items: center; color: var(--sky); font: 500 15px var(--f-k); }
+.dh-tip .go .ic { width: 16px; height: 16px; transition: transform .25s var(--d-ease); }
+.dh-tip:hover .go .ic { transform: translateX(4px); }
+.dh-prog { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--d-track); overflow: hidden; width: 140px; }
+.dh-prog i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, hsl(var(--d-green-400) / .6), var(--ok)); }
+
+.dh-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 20px; }
+.dh-kpi { --tone: var(--d-accent-t); position: relative; overflow: hidden; padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 6px 12px; color: var(--text); text-decoration: none; }
+.dh-kpi::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: hsl(var(--tone)); opacity: .85; }
+.dh-kpi.t-gold { --tone: var(--d-glow); }
+.dh-kpi.t-green { --tone: var(--d-green-400); }
+.dh-kpi.t-violet { --tone: var(--d-violet-400); }
+:root[data-theme="day"] .dh-kpi.t-green { --tone: 153 67% 27%; }
+:root[data-theme="day"] .dh-kpi.t-violet { --tone: 264 50% 45%; }
+.dh-kpi .lab { grid-column: 1 / -1; color: var(--text2); font-size: 13.5px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.dh-kpi .v { font: 600 38px/1 var(--f-k); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.dh-kpi .d { grid-column: 1; color: var(--muted); font-size: 12.5px; }
+.dh-kpi .spark { grid-row: 2 / 4; grid-column: 2; overflow: visible; }
+.dh-kpi .spark rect { fill: hsl(var(--tone) / .45); }
+.dh-kpi .spark rect:last-child { fill: hsl(var(--d-glow)); }
+
+.dh-row3 { display: grid; grid-template-columns: 1.45fr 1fr; gap: 20px; margin-top: 20px; }
+.dh-ch { display: flex; align-items: center; gap: 12px; padding: 18px 20px 0; }
+.dh-ch h2 { font: 500 19px/1.35 var(--f-k); }
+.dh-ch .more { width: auto; flex: none; margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 6px; font: 500 14px var(--f-k); color: var(--sky); text-decoration: none; }
+.dh-ch .more .ic { width: 15px; height: 15px; }
+.dh-ch .more:hover { text-decoration: underline; }
+.dh-les { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 16px 20px 20px; }
+.dh-le { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--d-sunk); color: var(--text); text-decoration: none;
+  transition: transform .25s var(--d-ease), border-color .2s, background .2s; }
+.dh-le:hover { transform: translateY(-2px); border-color: hsl(var(--d-accent-t) / .4); background: hsl(var(--d-accent-t) / .06); }
+.dh-le .n { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 8px; font: 600 12px var(--f-m); color: var(--sky);
+  background: hsl(var(--d-accent-t) / .1); border: 1px solid hsl(var(--d-accent-t) / .25); }
+.dh-le.done .n { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); border-color: color-mix(in srgb, var(--ok) 30%, transparent); }
+.dh-le.next { border-color: hsl(var(--d-glow) / .45); background: linear-gradient(135deg, hsl(var(--d-glow) / .12), transparent 70%); }
+.dh-le.next .n { color: var(--d-on-pri); background: var(--d-pri-bg); border-color: transparent; }
+.dh-le b { display: block; font-weight: 500; font-size: 14px; line-height: 1.4; }
+.dh-le small { color: var(--muted); font-size: 12px; }
+.dh-le.done small { color: var(--ok); }
+.dh-le.next small { color: var(--gold); }
+.dh-topics { padding: 12px 20px 20px; }
+.dh-bar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: 6px 0; font-size: 13.5px; }
+.dh-bar > span:first-child { color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dh-bar .tk { height: 10px; border-radius: 0 5px 5px 0; background: var(--d-track); }
+.dh-bar .tr { display: block; height: 100%; border-radius: 0 5px 5px 0; background: linear-gradient(90deg, hsl(var(--d-sky-600) / .55), var(--sky)); box-shadow: 0 0 12px -2px hsl(var(--d-accent-t) / .5); }
+.dh-bar:first-child .tr { background: linear-gradient(90deg, hsl(var(--d-gold-600) / .7), var(--gold)); }
+.dh-bar .num { text-align: right; font: 500 13px var(--f-m); color: var(--text); font-variant-numeric: tabular-nums; }
+.dh-note { padding: 0 20px 18px; font-size: 12.5px; color: var(--muted); }
+.dh-empty { padding: 18px 20px 22px; color: var(--muted); font-size: 14px; }
+
+/* ── หน้าบรีฟ (เลือกเที่ยวบิน) ──────────────────────────────── */
+.filter .step { padding: 20px 22px 22px; margin-bottom: 18px; background: var(--d-card-bg); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--d-card-sh); }
+.filter .step-h { align-items: center; gap: 12px; margin-bottom: 16px; }
+.filter .step-h .num { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 9px; font: 600 12.5px/1 var(--f-m);
+  color: var(--sky); background: hsl(var(--d-accent-t) / .1); border: 1px solid hsl(var(--d-accent-t) / .3); }
+.filter .step-h h2 { font: 500 18px/1.35 var(--f-k); }
+.filter .tile, .filter .chip { transition: transform .25s var(--d-ease), border-color .2s, box-shadow .25s, background .2s; }
+.filter .tile { border-radius: 14px; background: var(--d-tile-bg); }
+.filter .tile:hover { transform: translateY(-3px); border-color: hsl(var(--d-accent-t) / .45); }
+.filter .tile .code { font: 600 17px/1.2 var(--f-k); }
+.filter .tile[aria-pressed="true"] { background: var(--d-tile-on); color: var(--text); border-color: hsl(var(--d-glow) / .75);
+  box-shadow: 0 0 0 1px hsl(var(--d-glow) / .35), 0 16px 30px -16px hsl(var(--d-glow) / .6); }
+.filter .tile[aria-pressed="true"] .code { color: var(--gold); }
+.filter .tile[aria-pressed="true"] .lab { color: var(--text2); }
+.filter .tile .ck { top: 10px; right: 10px; transform: none; width: 22px; height: 22px; padding: 4px; border-radius: 50%; background: var(--d-pri-bg); color: var(--d-on-pri); stroke-width: 3; }
+.filter .tile[aria-pressed="true"] .ck { animation: d-pop .45s var(--d-ease) both; }
+.filter .chip { border-radius: 12px; background: var(--d-tile-bg); }
+.filter .chip:hover { border-color: hsl(var(--d-accent-t) / .45); }
+.filter .chip[aria-pressed="true"] { background: var(--d-sel-bg); color: var(--d-sel-fg); border-color: transparent; font-weight: 600; box-shadow: 0 6px 16px -10px hsl(var(--d-accent-t) / .9); }
+.side-sum { position: relative; overflow: hidden; padding: 22px; border-color: var(--line2); border-radius: 16px; box-shadow: var(--d-card-sh);
+  background: radial-gradient(100% 50% at 100% 0%, hsl(var(--d-accent-t) / .14), transparent 70%), var(--d-card-bg); }
+.side-sum::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--d-flag); }
+.side-h { font: 500 17px/1.35 var(--f-k); }
+.side-n b { font: 700 64px/1 var(--f-k); background: var(--d-gt); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.side .btn-primary { min-height: 52px; }
+.btn-primary:not(.pending):not(:disabled) { position: relative; overflow: hidden; background: var(--d-pri-bg); border-color: transparent; color: var(--d-on-pri); font-family: var(--f-k); font-weight: 600; box-shadow: var(--d-pri-sh); transition: transform .25s var(--d-ease), box-shadow .25s; }
+.btn-primary:not(.pending):not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px hsl(var(--d-gold-400) / .85), inset 0 1px 0 hsl(0 0% 100% / .45); }
+
+/* ── ประวัติเหตุ บน.2 ──────────────────────────────────────── */
+.hv-top { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 32px; align-items: end;
+  margin-bottom: 26px; padding: 26px 30px; border: 1px solid var(--line2); border-radius: 20px; background: var(--d-band-bg); }
+.hv-top::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(var(--d-grid) 1px, transparent 1px), linear-gradient(90deg, var(--d-grid) 1px, transparent 1px); background-size: 32px 32px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%); mask-image: linear-gradient(90deg, transparent, #000 60%); }
+.hv-top > * { position: relative; grid-column: 1; }
+.hv-top .page-h { margin-bottom: 6px; }
+.hv-top .lede { margin-bottom: 0; max-width: 680px; }
+.hv-top > .h-tabs { grid-column: 2; grid-row: 1 / span 9; align-self: end; display: inline-flex; gap: 3px; margin: 0; padding: 3px; border: 1px solid var(--line2); border-radius: 11px; background: var(--d-sunk); }
+.hv-top > .h-tabs a { min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; font: 500 14px var(--f-k); color: var(--text2); transition: background .2s, color .2s; }
+.hv-top > .h-tabs a:hover { color: var(--text); background: hsl(var(--d-slate-300) / .06); }
+.hv-top > .h-tabs a[aria-current="page"] { background: var(--d-sel-bg); color: var(--d-sel-fg); font-weight: 600; box-shadow: 0 6px 16px -10px hsl(var(--d-accent-t) / .9); }
+.hv-grid > .hv-l, .hv-grid > .hv-r { padding: 20px 22px 22px; background: var(--d-card-bg); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--d-card-sh); }
+.hv .sec-h { font: 500 19px/1.35 var(--f-k); }
+.h-tl { border-radius: 8px; transition: background .2s, box-shadow .2s; }
+.h-tl:hover { background: hsl(var(--d-accent-t) / .05); }
+.h-tl .seg-k + .seg-k { border-left-color: var(--d-card-solid); }
+.h-tl[aria-pressed="true"] { background: linear-gradient(90deg, hsl(var(--d-glow) / .14), transparent 80%); box-shadow: inset 3px 0 0 var(--gold); }
+.h-tl[aria-pressed="true"] .seg-k + .seg-k { border-left-color: var(--d-card-solid); }
+.h-ystat button { border-radius: 12px; background: var(--d-sunk); transition: transform .25s var(--d-ease), border-color .2s; }
+.h-ystat button:hover { transform: translateY(-2px); border-color: hsl(var(--d-accent-t) / .45); }
+.h-ystat b { font: 600 26px/1 var(--f-k); }
+.h-ystat button[aria-pressed="true"] { background: var(--d-sel-bg); color: var(--d-sel-fg); border-color: transparent; }
+.h-ystat button[aria-pressed="true"] span { color: inherit; }
+.yh { background: var(--d-card-solid); font-family: var(--f-k); font-weight: 500; }
+.ev li, .hv-r li { transition: background .2s; }
+.hv-r .ev:hover { background: hsl(var(--d-accent-t) / .05); }
+.hm-wrap { border-radius: 12px; background: var(--d-sunk); }
+.hm td button { transition: transform .2s var(--d-ease), box-shadow .2s; }
+.hm td button:hover { position: relative; z-index: 1; transform: scale(1.12); box-shadow: 0 0 0 1px hsl(var(--d-accent-t) / .8), 0 6px 14px -6px hsl(var(--d-accent-t) / .8); }
+.hm td button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--gold), 0 0 14px hsl(var(--d-glow) / .6); }
+.hd-side { position: sticky; overflow: hidden; border-radius: 16px; background: var(--d-card-bg); box-shadow: var(--d-card-sh); }
+.hd-side::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--d-flag); }
+
+/* ── การเคลื่อนไหว ────────────────────────────────────────── */
+.d-rise { animation: d-rise .7s var(--d-ease) both; animation-delay: calc(var(--i, 0) * 65ms); }
+.d-grow { transform-origin: left; animation: d-growx .9s var(--d-ease) both; animation-delay: calc(300ms + var(--i, 0) * 60ms); }
+.d-growy { transform-origin: bottom; transform-box: fill-box; animation: d-growy .8s var(--d-ease) both; animation-delay: calc(300ms + var(--i, 0) * 40ms); }
+@keyframes d-rise { from { opacity: 0; transform: translateY(16px); } }
+@keyframes d-growx { from { transform: scaleX(0); } }
+@keyframes d-growy { from { transform: scaleY(0); } }
+@keyframes d-pop { from { opacity: 0; transform: scale(.55); } }
+@keyframes d-zoom { from { transform: scale(1.12); } }
+@keyframes d-sweep { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(260%) skewX(-20deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .d-rise, .d-grow, .d-growy, .annun .emblem, .dh-hero .bg, .filter .tile .ck { animation: none !important; }
+  .d-btn.pri::after, .btn-primary::after { display: none; }
+}
+a.dh-bar { color: inherit; text-decoration: none; border-radius: 6px; }
+a.dh-bar:hover > span:first-child { color: var(--text); }
