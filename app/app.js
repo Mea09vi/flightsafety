@@ -1419,6 +1419,7 @@ function hvHead(h, tab, still) {
     <nav class="h-tabs" aria-label="มุมมอง">
       <a data-replace href="#/history"${tab === 'y' ? ' aria-current="page"' : ''}>${icon('chart')}รายปี</a>
       <a data-replace href="#/history/topics"${tab === 't' ? ' aria-current="page"' : ''}>${icon('grid3')}ตามหัวข้อ</a>
+      <a data-replace href="#/history/months"${tab === 'm' ? ' aria-current="page"' : ''}>${icon('cal')}รายเดือน</a>
       ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}
     </nav>${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
 }
@@ -1529,6 +1530,154 @@ function hvTopics(h) {
       </div>
       <p class="note">นับทั้งแบบฟอร์มและบันทึกประชุม ไม่รวมเหตุของ ทอ. · หัวข้อติดด้วยคำค้นอัตโนมัติ อาจติดผิดบ้าง · เรื่องหนึ่งอยู่ได้หลายหัวข้อ${formOnly.length ? ` · ปีงบ ${yrRuns(formOnly)} มีแต่แบบฟอร์ม` : ''}</p>
       ${untagged ? `<button class="btn more" data-htp="-1" aria-pressed="${sel?.tp === -1}">${nTh(untagged)} เรื่องยังไม่เข้าหัวข้อใด</button>` : ''}
+    </section>
+    <section class="hv-r" id="hlist" aria-labelledby="h-l-h">${listHtml}</section>
+  </div>`;
+}
+
+// เดือนและฤดูจาก meta.date ("16 ธ.ค. 2558" หรือ "พ.ย. 2559") · ฤดูตามกรมอุตุนิยมวิทยา
+// เรื่องที่รู้แค่เดือนและตกเดือนเปลี่ยนฤดู (ก.พ. พ.ค. ต.ค.) ไม่นับเข้าฤดูใด
+const HMON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+const HMON_FULL = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+const HMON_FY = [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const HSEA = { cool: ['ฤดูหนาว', '16 ต.ค.–15 ก.พ.', 123], hot: ['ฤดูร้อน', '16 ก.พ.–15 พ.ค.', 89], rain: ['ฤดูฝน', '16 พ.ค.–15 ต.ค.', 153] };
+const HSEA_KEYS = Object.keys(HSEA);
+const monSea = (m) => (m >= 11 || m === 1 ? 'cool' : m === 3 || m === 4 ? 'hot' : m >= 6 && m <= 9 ? 'rain' : 'x');
+const hW = new WeakMap();
+function hWhen(it) {
+  if (hW.has(it)) return hW.get(it);
+  const s = it.meta?.date || '';
+  const i = HMON.findIndex((k) => s.includes(k));
+  let w = null;
+  if (i >= 0) {
+    const m = i + 1, d = +(s.match(/^(\d{1,2})\s/)?.[1] || 0);
+    let sea = null;
+    if (d || ![2, 5, 10].includes(m)) { const v = m * 100 + (d || 1); sea = v >= 216 && v <= 515 ? 'hot' : v >= 516 && v <= 1015 ? 'rain' : 'cool'; }
+    w = { m, s: sea };
+  }
+  hW.set(it, w);
+  return w;
+}
+
+// แบ่งกลุ่มตามเดือน เรียงแบบปีงบ (ต.ค. → ก.ย.)
+function hGroupsMon(list) {
+  return HMON_FY.filter((m) => list.some((x) => hWhen(x)?.m === m)).map((m) => {
+    const rows = list.filter((x) => hWhen(x)?.m === m).sort(byFyDesc);
+    return `<section class="hg"><h3 class="yh">${HMON_FULL[m - 1]}<span class="n">${nTh(rows.length)} เรื่อง</span></h3><ul class="evs">${rows.map((x) => hRow(x, { fy: true })).join('')}</ul></section>`;
+  }).join('');
+}
+
+// แบบ E: รายเดือนและฤดู (รวมทุกปีงบ) · ไม่รวมเหตุของหน่วยอื่น (r) · เปิดมาครั้งแรกเลือกเดือนปัจจุบันไว้
+function hvMonths(h) {
+  const hv = state.hv;
+  const { topics, short } = h.data;
+  const now = new Date().getMonth() + 1;
+  if (hv.ms === undefined) hv.ms = `m.${now}`;
+  const pool = h.data.items.filter((x) => x.src !== 'r' && (hv.sq === 'ALL' || x.sq === hv.sq));
+  const dated = pool.filter((x) => hWhen(x));
+  const z = () => ({ accident: 0, incident: 0, hazard: 0, n: 0 });
+  const per = new Map(HMON_FY.map((m) => [m, z()]));
+  const sea = Object.fromEntries(HSEA_KEYS.map((k) => [k, { ...z(), tp: new Map() }]));
+  const tpSea = new Map();
+  const grid = topics.map(() => new Map());
+  const tot = topics.map(() => 0);
+  let nSea = 0;
+  for (const it of dated) {
+    const w = hWhen(it), ty = HTYPE_ORDER.includes(it.type) ? it.type : 'hazard';
+    const c = per.get(w.m); c[ty]++; c.n++;
+    for (const t of it.tp || []) { if (grid[t]) { grid[t].set(w.m, (grid[t].get(w.m) || 0) + 1); tot[t]++; } }
+    if (!w.s) continue;
+    const s = sea[w.s]; s[ty]++; s.n++; nSea++;
+    for (const t of it.tp || []) { s.tp.set(t, (s.tp.get(t) || 0) + 1); tpSea.set(t, (tpSea.get(t) || 0) + 1); }
+  }
+  const tyLine = (c) => HTYPE_ORDER.filter((k) => c[k]).map((k) => `${typeOf({ type: k })[0]} ${nTh(c[k])}`).join(' · ');
+
+  // ฤดู: เทียบอัตราต่อวันกับค่าเฉลี่ยทั้งปี เพราะฤดูยาวไม่เท่ากัน · หัวข้อเด่น = สัดส่วนในฤดูสูงกว่าสัดส่วนวันของฤดู
+  const avg = nSea / 365;
+  const seaHtml = HSEA_KEYS.map((k) => {
+    const s = sea[k], [nm, rg, days] = HSEA[k];
+    const d = avg ? Math.round((s.n / days / avg - 1) * 100) : 0;
+    const cmp = Math.abs(d) < 3 ? 'ใกล้ค่าเฉลี่ย' : `${d > 0 ? 'สูง' : 'ต่ำ'}กว่าค่าเฉลี่ย ${Math.abs(d)}%`;
+    const lift = [...s.tp].filter(([t, n]) => grid[t] && n >= 5 && tpSea.get(t) >= 8)
+      .map(([t, n]) => [t, n, n / tpSea.get(t) / (days / 365)]).filter((r) => r[2] >= 1.15)
+      .sort((a, b) => b[2] - a[2]).slice(0, 3);
+    const chips = lift.map(([t, n, x]) => `<button class="chip" data-hms="ts.${t}.${k}" aria-pressed="${hv.ms === `ts.${t}.${k}`}" aria-label="${esc(short[t])} ใน${nm} ${n} เรื่อง ${x.toFixed(1)} เท่าของที่คาด">${esc(short[t])} <b>×${x.toFixed(1)}</b></button>`).join('');
+    return `<div class="h-sea ${k}">
+      <button class="h-sea-b" data-hms="s.${k}" aria-pressed="${hv.ms === `s.${k}`}">
+        <span class="nm">${nm}</span><span class="rg">${rg}</span>
+        <span class="v"><b>${nTh(s.n)}</b> เรื่อง</span>
+        <span class="cmp${d >= 3 ? ' up' : ''}">${s.n ? cmp : 'ไม่มีเรื่อง'}</span>
+        <span class="ty">${tyLine(s)}</span>
+      </button>
+      ${chips ? `<p class="lb">พบบ่อยกว่าปกติในฤดูนี้</p><div class="chips">${chips}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // แท่งรายเดือน ซ้อนตามประเภท · แถบฤดูด้านล่างแบ่งครึ่งเดือนตรงเดือนเปลี่ยนฤดู
+  const max = Math.max(1, ...[...per.values()].map((c) => c.n));
+  const bars = HMON_FY.map((m) => {
+    const c = per.get(m);
+    const segs = HTYPE_ORDER.filter((k) => c[k]).map((k) => `<i class="sg ${typeOf({ type: k })[1]}" style="height:${(c[k] / max * 100).toFixed(2)}%"></i>`).join('');
+    const al = `${HMON_FULL[m - 1]}: ${c.n} เรื่อง${c.n ? ` — ${tyLine(c)}` : ''}${m === now ? ' (เดือนนี้)' : ''}`;
+    return `<button class="h-mb s-${monSea(m)}${m === now ? ' now' : ''}" data-hms="m.${m}" aria-pressed="${hv.ms === `m.${m}`}" aria-label="${esc(al)}"${c.n ? '' : ' disabled'}>`
+      + `<span class="n">${nTh(c.n)}</span><span class="col">${segs}</span><span class="mn">${HMON[m - 1]}</span></button>`;
+  }).join('');
+  const band = `<div class="h-band" aria-hidden="true"><i class="rain" style="grid-column:1/2"></i>`
+    + `<i class="cool" style="grid-column:2/10">หนาว</i><i class="hot" style="grid-column:10/16">ร้อน</i><i class="rain" style="grid-column:16/25">ฝน</i></div>`;
+  const keys = HTYPE_ORDER.map((k) => { const [th, cls] = typeOf({ type: k }); return `<span><i class="sg ${cls}"></i>${th}</span>`; }).join('');
+
+  // ตารางหัวข้อ × เดือน
+  const rows = topics.map((_, t) => t).filter((t) => tot[t]).sort((a, b) => tot[b] - tot[a]);
+  const hmax = Math.max(1, ...rows.flatMap((t) => [...grid[t].values()]));
+  const lvl = (n) => { const r = n / hmax; return r <= 0.1 ? 1 : r <= 0.25 ? 2 : r <= 0.45 ? 3 : r <= 0.7 ? 4 : 5; };
+  const body = rows.map((t) => {
+    const cells = HMON_FY.map((m) => {
+      const n = grid[t].get(m);
+      if (!n) return '<td><span class="z" aria-hidden="true">·</span></td>';
+      return `<td><button class="l${lvl(n)}" data-hms="tm.${t}.${m}" aria-pressed="${hv.ms === `tm.${t}.${m}`}" aria-label="${esc(short[t])} ${HMON_FULL[m - 1]}: ${n} เรื่อง">${n}</button></td>`;
+    }).join('');
+    return `<tr><th class="tp" scope="row"><button data-hms="t.${t}" aria-pressed="${hv.ms === `t.${t}`}" title="${esc(topics[t])}">${esc(short[t])}</button></th>${cells}<td class="tot">${nTh(tot[t])}</td></tr>`;
+  }).join('');
+
+  // รายการตามที่เลือก
+  const [k, a, b] = (hv.ms || '').split('.');
+  const sqTxt = hv.sq === 'ALL' ? 'ทุกฝูง' : `ฝูง ${hv.sq}`;
+  let L = null, name = '', sub = '', by = 'fy';
+  if (k === 'm' && per.has(+a)) { L = dated.filter((x) => hWhen(x).m === +a); name = HMON_FULL[a - 1]; sub = 'ทุกปีงบ'; }
+  else if (k === 's' && HSEA[a]) { L = dated.filter((x) => hWhen(x).s === a); name = HSEA[a][0]; sub = HSEA[a][1]; by = 'mon'; }
+  else if ((k === 'ts' || k === 'tm' || k === 't') && grid[+a]) {
+    const t = +a;
+    L = dated.filter((x) => x.tp?.includes(t));
+    name = topics[t];
+    if (k === 'ts' && HSEA[b]) { L = L.filter((x) => hWhen(x).s === b); sub = `${HSEA[b][0]} ${HSEA[b][1]}`; }
+    else if (k === 'tm' && per.has(+b)) { L = L.filter((x) => hWhen(x).m === +b); sub = HMON_FULL[b - 1]; }
+    else { sub = 'ทุกเดือน'; by = 'mon'; }
+  }
+  const listHtml = L
+    ? `<h2 class="sec-h" id="h-l-h">${esc(name)} <span>${esc(sub)} · ${sqTxt} · ${nTh(L.length)} เรื่อง</span></h2>
+      ${k === 'm' && +a === now ? '<p class="note">เดือนนี้ในปีก่อน ๆ เคยเกิดเรื่องเหล่านี้ ใช้เตรียมบรีฟก่อนบินได้</p>' : ''}
+      ${L.length ? (by === 'mon' ? hGroupsMon(L) : hGroups(L.sort(byFyDesc), 'fy')) : '<p class="note">ไม่มีเรื่องในฝูงที่เลือก</p>'}`
+    : `<h2 class="sec-h" id="h-l-h">รายการเรื่อง</h2><p class="note">แตะฤดู เดือน หรือตัวเลขในตาราง เพื่อดูรายการ</p>`;
+
+  const chipsSq = HSQ.map((q) => `<button class="chip" data-hsq="${q}" aria-pressed="${hv.sq === q}">${icon('check', 'ic ck')}${q === 'ALL' ? 'ทุกฝูง' : `ฝูง ${q}`}</button>`).join('');
+  const noM = pool.length - dated.length, noS = dated.length - nSea;
+  return `<div class="hv-grid t">
+    <section class="hv-l" aria-labelledby="h-se-h">
+      <h2 class="sec-h" id="h-se-h">ตามฤดู <span>${nTh(dated.length)} เรื่องที่ระบุเดือน · รวมทุกปีงบ</span></h2>
+      <div class="chips h-sq" role="group" aria-label="ฝูงบิน">${chipsSq}</div>
+      <div class="h-seas">${seaHtml}</div>
+      <h2 class="sec-h">รายเดือน <span>ต.ค. → ก.ย. ตามปีงบ</span></h2>
+      <div class="h-mos" role="group" aria-label="จำนวนเรื่องรายเดือน">${bars}</div>
+      ${band}
+      <div class="h-keys">${keys}</div>
+      <h2 class="sec-h">หัวข้อ × เดือน</h2>
+      <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × เดือน เลื่อนซ้ายขวาได้">
+        <table class="hm mo">
+          <thead><tr><th class="tp" scope="col">หัวข้อ</th>${HMON_FY.map((m) => `<th scope="col" class="s-${monSea(m)}">${HMON[m - 1].replace(/\.$/, '')}</th>`).join('')}<th class="tot" scope="col">รวม</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+      <p class="note">ฤดูตามกรมอุตุนิยมวิทยา · เทียบต่อวันเพราะฤดูยาวไม่เท่ากัน · “×1.5” = พบในฤดูนั้นมากกว่าที่คาดจากความยาวฤดู 1.5 เท่า (นับเฉพาะหัวข้อที่มีอย่างน้อย 8 เรื่อง) · จำนวนเรื่องขึ้นกับชั่วโมงบินและการรายงานของแต่ละช่วงด้วย ไม่ได้มาจากอากาศอย่างเดียว · หัวข้อติดด้วยคำค้นอัตโนมัติ${noM ? ` · ไม่มีวันที่ ${nTh(noM)} เรื่อง` : ''}${noS ? ` · รู้แค่เดือนที่เปลี่ยนฤดู ${nTh(noS)} เรื่อง (ไม่นับเข้าฤดู)` : ''} · ไม่รวมเหตุของ ทอ.</p>
     </section>
     <section class="hv-r" id="hlist" aria-labelledby="h-l-h">${listHtml}</section>
   </div>`;
@@ -1707,6 +1856,7 @@ function renderHist(arg, sub, still = false) {
   const hf = state.hv.img ? { ...h, data: { ...h.data, items: h.data.items.filter((x) => himgs(x).length) } } : h;
   if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
   else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(hf) + '</div>';
+  else if (arg === 'months') html = hvHead(h, 'm', still) + hvMonths(hf) + '</div>';
   else if (arg === 'case' && sub) html = hvCard(h, decodeURIComponent(sub), s);
   else if (arg === 'topic' && sub) html = hvTopic(h, +decodeURIComponent(sub), s);
   else html = hvItem(h, arg, s);
@@ -1727,7 +1877,7 @@ function redrawHist() {
   const a = document.activeElement;
   let sel = null;
   if (a && main.contains(a)) {
-    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg'].filter((x) => a.dataset[x] != null);
+    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hms'].filter((x) => a.dataset[x] != null);
     if (k.length) sel = k.map((x) => `[data-${x}="${CSS.escape(a.dataset[x])}"]`).join('');
   }
   const parts = location.hash.replace(/^#\/?/, '').split('/');
@@ -2053,6 +2203,12 @@ main.addEventListener('click', (e) => {
     state.hv.cell = c && c.tp === tp && c.fy === fy ? null : { tp, fy };
     redrawHist();
     if (state.hv.cell && !wide.matches) $('#hlist')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
+  if (t.dataset.hms) {
+    state.hv.ms = state.hv.ms === t.dataset.hms ? null : t.dataset.hms;
+    redrawHist();
+    if (state.hv.ms && !wide.matches) $('#hlist')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
     return;
   }
   if (t.dataset.hmode) { LS.set('histMode', t.dataset.hmode); redrawHist(); return; }

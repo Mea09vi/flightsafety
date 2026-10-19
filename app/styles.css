@@ -1608,6 +1608,65 @@ html.ov-lock { overflow: hidden; }
 .hm .z { color: var(--line2); font: 12px/1 var(--f-m); }
 .hm .tot { padding: 0 8px 0 6px; font: 600 12.5px/1 var(--f-m); color: var(--text2); text-align: right; }
 .hm-wrap + .note { margin-top: 10px; }
+
+/* รายเดือน/ฤดู: สีฤดู ร้อน = ทอง ฝน = ฟ้า หนาว = ม่วง */
+.h-seas { display: grid; gap: 10px; margin: 14px 0 28px; }
+.h-sea { --sc: var(--gold); padding: 0 0 2px; border: 1px solid var(--line); border-left: 4px solid var(--sc); border-radius: var(--r-l); background: var(--surface); }
+.h-sea.rain { --sc: var(--sky); }
+.h-sea.cool { --sc: var(--seg-r); }
+.h-sea-b {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; width: 100%; padding: 12px 14px;
+  border: 0; border-radius: var(--r-l); background: none; text-align: left; color: var(--text);
+}
+.h-sea-b:hover { background: var(--surface2); }
+.h-sea-b[aria-pressed="true"] { background: color-mix(in srgb, var(--sc) 14%, var(--surface)); }
+.h-sea-b .nm { font: 600 16px/1.3 var(--f-d); }
+.h-sea-b .rg { font: 500 12px/1.6 var(--f-m); color: var(--muted); text-align: right; }
+.h-sea-b .v { font-size: 14px; color: var(--text2); }
+.h-sea-b .v b { font: 600 22px/1.1 var(--f-m); color: var(--text); font-variant-numeric: tabular-nums; }
+.h-sea-b .cmp { align-self: end; font: 500 12.5px/1.4 var(--f-b); color: var(--muted); text-align: right; }
+.h-sea-b .cmp.up { color: var(--warn); font-weight: 600; }
+.h-sea-b .ty { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
+.h-sea .lb { margin: 2px 14px 6px; font-size: 12px; color: var(--muted); }
+.h-sea .chips { gap: 6px; margin: 0 12px 10px; }
+.h-sea .chip { min-height: 36px; padding: 4px 10px; font-size: 13px; }
+.h-sea .chip b { font: 600 12px/1 var(--f-m); color: var(--sc); }
+.h-sea .chip[aria-pressed="true"] b { color: inherit; }
+
+.h-mos { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; height: 190px; margin-top: 8px; }
+.h-mb {
+  display: flex; flex-direction: column; align-items: stretch; min-width: 0; padding: 0 1px 4px;
+  border: 0; border-radius: 6px; background: none; color: var(--text2);
+}
+.h-mb:hover:not([disabled]) { background: var(--surface2); }
+.h-mb[aria-pressed="true"] { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text); }
+.h-mb[disabled] { cursor: default; }
+.h-mb .n { padding: 4px 0 3px; font: 600 11.5px/1 var(--f-m); text-align: center; font-variant-numeric: tabular-nums; }
+.h-mb .col { flex: 1; display: flex; flex-direction: column-reverse; gap: 2px; margin: 0 18%; }
+.h-mb .col .sg:last-child { border-radius: 4px 4px 0 0; }
+.h-mb .mn { padding-top: 5px; font: 500 11px/1 var(--f-b); text-align: center; white-space: nowrap; }
+.h-mb.now .mn { color: var(--gold); font-weight: 700; }
+.h-mb .mn::after { content: ""; display: block; width: 5px; height: 5px; margin: 3px auto 0; border-radius: 50%; }
+.h-mb.now .mn::after { background: var(--gold); }
+.sg { display: block; flex: none; min-height: 2px; background: var(--muted); }
+.sg.bad { background: var(--bad); }
+.sg.warn { background: var(--warn); }
+.sg.ring { background: color-mix(in srgb, var(--warn) 32%, var(--surface2)); }
+.h-band { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 0; margin: 6px 0 0; }
+.h-band i {
+  height: 18px; font: 600 10.5px/18px var(--f-b); font-style: normal; text-align: center; overflow: hidden;
+  border-top: 3px solid; color: var(--muted);
+}
+.h-band .hot { border-color: var(--gold); }
+.h-band .rain { border-color: var(--sky); }
+.h-band .cool { border-color: var(--seg-r); }
+.h-keys { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0 28px; font-size: 12.5px; color: var(--muted); }
+.h-keys span { display: inline-flex; align-items: center; gap: 6px; }
+.h-keys .sg { width: 10px; height: 10px; border-radius: 2px; }
+.hm.mo thead th { border-bottom: 3px solid transparent; }
+.hm.mo thead th.s-hot { border-color: var(--gold); }
+.hm.mo thead th.s-rain { border-color: var(--sky); }
+.hm.mo thead th.s-cool { border-color: var(--seg-r); }
 .btn.more[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 
 /* รายละเอียดหนึ่งเรื่อง */
