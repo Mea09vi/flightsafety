@@ -1819,6 +1819,12 @@ function viewAbout() {
     <p class="eyebrow">ระบบ</p>
     <h1 class="page-h">ข้อมูลและการตั้งค่า</h1>
 
+    <figure class="team-photo">
+      <img src="img/team.webp" srcset="img/team-s.webp 838w, img/team.webp 1674w" sizes="(min-width: 1024px) 900px, 100vw"
+        width="1674" height="939" alt="ทีมงานนิรภัยการบิน กองบิน 2: นภบ.บน.2 นภบ.ฝูง.201 นภบ.ฝูง.202 และ นภบ.ฝูง.203" decoding="async">
+      <figcaption>ทีมงานนิรภัยการบิน กองบิน 2 · Safety · Standard · Teamwork · Mission</figcaption>
+    </figure>
+
     <section class="panel">
       <h2>${icon('lock')} ข้อมูลของหน่วย (บน.2 / ทอ.)</h2>
       <p>เคสของหน่วยถูกเข้ารหัสไว้ ใส่รหัสผ่านครั้งเดียว เครื่องนี้จะจำกุญแจไว้และใช้ได้แม้ไม่มีสัญญาณ</p>

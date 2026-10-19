@@ -765,6 +765,9 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
 .panel h2 { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font: 600 17px/1.35 var(--f-d); }
 .panel h2 .ic { width: 18px; height: 18px; color: var(--text2); }
 .panel > p { margin-bottom: 14px; font-size: 14px; line-height: 1.65; color: var(--text2); }
+.team-photo { margin: 0 0 16px; border: 1px solid var(--line); border-radius: var(--r-l); overflow: hidden; background: var(--surface); }
+.team-photo img { display: block; width: 100%; height: auto; }
+.team-photo figcaption { padding: 10px 16px; font-size: 13px; line-height: 1.5; color: var(--text2); }
 .field label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
 .field .row { display: flex; gap: 8px; }
 .field input {
