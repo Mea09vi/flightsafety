@@ -1389,6 +1389,7 @@ function hRow(it, { fy = false, here = null } = {}) {
   const cid = hCardOf(it);
   if (cid && cid !== here) m.push(`<span class="card-l">${icon('card')}มีการ์ดบทเรียน</span>`);
   if (himgs(it).length) m.push(`<span class="img-n">${icon('image')}${himgs(it).length} ภาพ</span>`);
+  if (it.nt) m.push(`<span class="nt-n">${icon('moon')}${HNT[it.nt]}</span>`);
   return `<li><a class="ev" data-hb href="#/history/${encodeURIComponent(it.id)}"><span class="t">${hTxt(it.t)}</span>`
     + `<span class="m">${m.join('')}</span>${icon('next', 'ic go')}</a></li>`;
 }
@@ -1411,6 +1412,11 @@ function hGroups(list, by, here = null) {
 function hvHead(h, tab, still) {
   const items = h.data.items;
   const nImg = items.filter((x) => himgs(x).length).length;
+  const nNt = { a: 0, f: 0, g: 0 };
+  for (const x of items) if (x.nt) { nNt.a++; nNt[x.nt]++; }
+  const nt = state.hv.nt;
+  const ntSub = nt ? `<div class="chips h-ntsub" role="group" aria-label="ชนิดเหตุกลางคืน">${['a', 'f', 'g'].map((k) => `<button class="chip" data-hnt="${k}" aria-pressed="${nt === k}">${icon('check', 'ic ck')}${k === 'a' ? 'ทั้งหมด' : HNT[k]} <b>${nTh(nNt[k])}</b></button>`).join('')}</div>`
+    + `<p class="note h-imgnote">ติดป้ายทีละเรื่องจากเวลาในบันทึกและเนื้อเรื่อง (หลังสิ้นแสงสนธยาถึงก่อนรุ่งสาง) · เรื่องที่บันทึกไม่ระบุเวลาอาจตกหล่น</p>` : '';
   return `<div class="view hv${still ? ' still' : ''}"><div class="hv-top">
     <p class="eyebrow">ประวัติเหตุ บน.2</p>
     <h1 class="page-h">เคยเกิดใน<em>บน.2</em></h1>
@@ -1420,8 +1426,9 @@ function hvHead(h, tab, still) {
       <a data-replace href="#/history"${tab === 'y' ? ' aria-current="page"' : ''}>${icon('chart')}รายปี</a>
       <a data-replace href="#/history/topics"${tab === 't' ? ' aria-current="page"' : ''}>${icon('grid3')}ตามหัวข้อ</a>
       <a data-replace href="#/history/months"${tab === 'm' ? ' aria-current="page"' : ''}>${icon('cal')}รายเดือน</a>
-      ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}
-    </nav>${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
+      <span class="h-tgs">${nNt.a ? `<button class="h-imgtg" data-hnt="" aria-pressed="${!!nt}">${icon('check', 'ic ck')}${icon('moon')}กลางคืน <b>${nTh(nNt.a)}</b></button>` : ''}
+      ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}</span>
+    </nav>${ntSub}${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
 }
 
 // แบบ B: เส้นเวลารายปีงบ แท่งซ้อนตามแหล่ง · แตะปีเพื่อดูรายการของปีนั้น
@@ -1559,6 +1566,17 @@ function hWhen(it) {
   return w;
 }
 
+// ชั่วโมงจาก meta.time ("09.30 น." หรือ "2130") · บางเรื่องเป็นเวลาที่พบหรือรายงาน ไม่ใช่เวลาเกิด
+const HNT = { f: 'บินกลางคืน', g: 'ภาคพื้นกลางคืน' };
+const hHour = (it) => {
+  const s = it.meta?.time || '';
+  const m = s.match(/(\d{1,2})[.:]\d{2}/) || s.match(/^(\d{2})\d{2}$/);
+  const v = m ? +m[1] : NaN;
+  return v >= 0 && v <= 23 ? v : null;
+};
+// ช่วงมืดที่ลพบุรี: สิ้นแสงสนธยาราว 18.20–19.15 น. รุ่งสางราว 05.30–06.20 น. → 19–05 มืด, 18 และ 06 คาบเกี่ยว
+const hDark = (r) => (r >= 19 || r <= 5 ? 'dk' : r === 18 || r === 6 ? 'tw' : '');
+
 // แบ่งกลุ่มตามเดือน เรียงแบบปีงบ (ต.ค. → ก.ย.)
 function hGroupsMon(list) {
   return HMON_FY.filter((m) => list.some((x) => hWhen(x)?.m === m)).map((m) => {
@@ -1626,6 +1644,20 @@ function hvMonths(h) {
     + `<i class="cool" style="grid-column:2/10">หนาว</i><i class="hot" style="grid-column:10/16">ร้อน</i><i class="rain" style="grid-column:16/25">ฝน</i></div>`;
   const keys = HTYPE_ORDER.map((k) => { const [th, cls] = typeOf({ type: k }); return `<span><i class="sg ${cls}"></i>${th}</span>`; }).join('');
 
+  // รายชั่วโมง 00–23 ซ้อนตามประเภท · พื้นหลังเข้ม = ช่วงมืด
+  const timed = pool.filter((x) => hHour(x) != null);
+  const perH = Array.from({ length: 24 }, z);
+  for (const it of timed) { const c = perH[hHour(it)]; c[HTYPE_ORDER.includes(it.type) ? it.type : 'hazard']++; c.n++; }
+  const hmx = Math.max(1, ...perH.map((c) => c.n));
+  const nDark = perH.reduce((a, c, r) => a + (hDark(r) === 'dk' ? c.n : 0), 0);
+  const hbars = perH.map((c, r) => {
+    const segs = HTYPE_ORDER.filter((k) => c[k]).map((k) => `<i class="sg ${typeOf({ type: k })[1]}" style="height:${(c[k] / hmx * 100).toFixed(2)}%"></i>`).join('');
+    const hh = String(r).padStart(2, '0');
+    const al = `${hh}.00–${hh}.59 น.: ${c.n} เรื่อง${c.n ? ` — ${tyLine(c)}` : ''}${hDark(r) === 'dk' ? ' (ช่วงมืด)' : hDark(r) ? ' (ช่วงสนธยา)' : ''}`;
+    return `<button class="h-hb ${hDark(r)}" data-hms="h.${r}" aria-pressed="${hv.ms === `h.${r}`}" aria-label="${esc(al)}" title="${esc(al)}"${c.n ? '' : ' disabled'}>`
+      + `<span class="n">${c.n || ''}</span><span class="col">${segs}</span><span class="mn">${r % 3 ? '' : hh}</span></button>`;
+  }).join('');
+
   // ตารางหัวข้อ × เดือน
   const rows = topics.map((_, t) => t).filter((t) => tot[t]).sort((a, b) => tot[b] - tot[a]);
   const hmax = Math.max(1, ...rows.flatMap((t) => [...grid[t].values()]));
@@ -1644,6 +1676,10 @@ function hvMonths(h) {
   const sqTxt = hv.sq === 'ALL' ? 'ทุกฝูง' : `ฝูง ${hv.sq}`;
   let L = null, name = '', sub = '', by = 'fy';
   if (k === 'm' && per.has(+a)) { L = dated.filter((x) => hWhen(x).m === +a); name = HMON_FULL[a - 1]; sub = 'ทุกปีงบ'; }
+  else if (k === 'h' && a !== '' && +a >= 0 && +a <= 23) {
+    L = timed.filter((x) => hHour(x) === +a); const hh = String(a).padStart(2, '0');
+    name = `เวลา ${hh}.00–${hh}.59 น.`; sub = hDark(+a) === 'dk' ? 'ช่วงมืด · ทุกปีงบ' : 'ทุกปีงบ';
+  }
   else if (k === 's' && HSEA[a]) { L = dated.filter((x) => hWhen(x).s === a); name = HSEA[a][0]; sub = HSEA[a][1]; by = 'mon'; }
   else if ((k === 'ts' || k === 'tm' || k === 't') && grid[+a]) {
     const t = +a;
@@ -1670,6 +1706,10 @@ function hvMonths(h) {
       <div class="h-mos" role="group" aria-label="จำนวนเรื่องรายเดือน">${bars}</div>
       ${band}
       <div class="h-keys">${keys}</div>
+      <h2 class="sec-h">รายชั่วโมง <span>${nTh(timed.length)} เรื่องที่ระบุเวลา · ช่วงมืด ${nTh(nDark)} เรื่อง</span></h2>
+      <div class="h-hrs" role="group" aria-label="จำนวนเรื่องตามชั่วโมงของวัน">${hbars}</div>
+      <div class="h-keys"><span><i class="sw dk"></i>ช่วงมืด 19.00–05.59 น.</span><span><i class="sw tw"></i>สนธยา 18 และ 06 น.</span></div>
+      <p class="note h-hnote">เวลาตามที่บันทึกไว้ บางเรื่องเป็นเวลาที่พบหรือรายงาน ไม่ใช่เวลาเกิด · ป้าย “กลางคืน” ด้านบนตรวจทีละเรื่องแล้ว แม่นกว่ากราฟนี้</p>
       <h2 class="sec-h">หัวข้อ × เดือน</h2>
       <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × เดือน เลื่อนซ้ายขวาได้">
         <table class="hm mo">
@@ -1771,7 +1811,9 @@ function hvItem(h, id, s) {
   if (it.ac || it.acc) kv.push(['อากาศยาน', it.ac && it.acc && it.ac !== it.acc ? `${esc(it.ac)} (${esc(it.acc)})` : esc(it.ac || it.acc)]);
   if (it.mis) kv.push(['ภารกิจ', esc(it.mis)]);
   if (it.kind && it.kind !== 'None') kv.push(['แบบรายงาน', esc(it.kind)]);
-  if (it.tb) kv.push(['ช่วงเวลา', it.tb === 'night' ? 'กลางคืน' : 'กลางวัน']);
+  // ป้าย nt ตรวจทีละเรื่องแล้ว ใช้แทน tb ของแบบฟอร์ม (tb กลางคืน 6 เรื่องที่ตรวจแล้วไม่ใช่ ไม่แสดง)
+  if (it.nt) kv.push(['ช่วงเวลา', `${icon('moon', 'ic nt-ic')}${HNT[it.nt]}`]);
+  else if (it.tb === 'day') kv.push(['ช่วงเวลา', 'กลางวัน']);
   if (it.gnd) kv.push(['ที่เกิด', 'ภาคพื้น']);
   const prov = {
     m: `แบบฟอร์ม MOR/HR และบันทึกการประชุมนิรภัย<span class="auto">จับคู่อัตโนมัติ · ยังไม่ได้ตรวจด้วยคน</span>`,
@@ -1851,9 +1893,11 @@ function renderHist(arg, sub, still = false) {
   hCards = new Set(allCases().map((c) => c.id));
   const s = still ? ' still' : '';
   let html;
-  // ปุ่ม "เฉพาะที่มีภาพ" กรองทั้งเส้นเวลาและตารางหัวข้อ (หน้าเรื่อง/หัวข้อเดี่ยวไม่กรอง)
+  // ปุ่ม "กลางคืน" และ "เฉพาะที่มีภาพ" กรองทั้งเส้นเวลาและตารางหัวข้อ (หน้าเรื่อง/หัวข้อเดี่ยวไม่กรอง)
   if (state.hv.img && !h.data.items.some((x) => himgs(x).length)) state.hv.img = false;
-  const hf = state.hv.img ? { ...h, data: { ...h.data, items: h.data.items.filter((x) => himgs(x).length) } } : h;
+  if (state.hv.nt && !h.data.items.some((x) => x.nt)) state.hv.nt = null;
+  const nt = state.hv.nt, keep = (x) => (!state.hv.img || himgs(x).length) && (!nt || (nt === 'a' ? x.nt : x.nt === nt));
+  const hf = state.hv.img || nt ? { ...h, data: { ...h.data, items: h.data.items.filter(keep) } } : h;
   if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
   else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(hf) + '</div>';
   else if (arg === 'months') html = hvHead(h, 'm', still) + hvMonths(hf) + '</div>';
@@ -1877,7 +1921,7 @@ function redrawHist() {
   const a = document.activeElement;
   let sel = null;
   if (a && main.contains(a)) {
-    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hms'].filter((x) => a.dataset[x] != null);
+    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hnt', 'hms'].filter((x) => a.dataset[x] != null);
     if (k.length) sel = k.map((x) => `[data-${x}="${CSS.escape(a.dataset[x])}"]`).join('');
   }
   const parts = location.hash.replace(/^#\/?/, '').split('/');
@@ -2194,6 +2238,7 @@ main.addEventListener('click', (e) => {
     return;
   }
   if (t.hasAttribute('data-himg')) { state.hv.img = !state.hv.img; redrawHist(); return; }
+  if (t.dataset.hnt != null) { state.hv.nt = t.dataset.hnt ? t.dataset.hnt : state.hv.nt ? null : 'a'; redrawHist(); return; }
   if (t.dataset.hsrc) { state.hv.src = state.hv.src === t.dataset.hsrc ? null : t.dataset.hsrc; redrawHist(); return; }
   // เปลี่ยนฝูงแล้วคงช่องที่เลือกไว้ ถ้าฝูงใหม่ไม่มีเรื่องในช่องนั้น hvTopics ล้างให้เอง
   if (t.dataset.hsq) { state.hv.sq = t.dataset.hsq; redrawHist(); return; }

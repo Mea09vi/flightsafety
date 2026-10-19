@@ -2017,3 +2017,47 @@ body.gated > :not(.gate) { visibility: hidden; }
   .g-box, .g-box.shake { animation: none; }
   .gate.flash .g-flash { animation: none; opacity: 1; background: var(--app-bg); }
 }
+
+/* กลางคืน: ปุ่มกรอง ป้ายในรายการ กราฟรายชั่วโมง */
+.h-tgs { margin-left: auto; display: inline-flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; align-self: center; }
+.h-tgs .h-imgtg { margin: 0 0 6px; }
+.h-imgtg .ic:not(.ck) { width: 16px; height: 16px; }
+.h-ntsub { gap: 6px; margin: -12px 0 6px; justify-content: flex-end; }
+.h-ntsub .chip { min-height: 36px; padding: 4px 12px; font-size: 13px; }
+.h-ntsub .chip b { font: 600 12px/1 var(--f-m); font-variant-numeric: tabular-nums; }
+.h-ntsub + .h-imgnote { margin-top: 2px; text-align: right; }
+.ev .m .nt-n { display: inline-flex; align-items: center; gap: 4px; color: var(--sky); }
+.ev .m .nt-n .ic { width: 13px; height: 13px; }
+.nt-ic { width: 15px; height: 15px; margin-right: 5px; vertical-align: -2px; color: var(--sky); }
+
+.h-hrs { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; height: 170px; margin-top: 8px; }
+.h-hb {
+  display: flex; flex-direction: column; align-items: stretch; min-width: 0; padding: 0 0 4px;
+  border: 0; border-radius: 5px; background: none; color: var(--text2);
+}
+.h-hb.dk { background: color-mix(in srgb, var(--sky) 11%, transparent); }
+.h-hb.tw { background: color-mix(in srgb, var(--sky) 5%, transparent); }
+.h-hb:hover:not([disabled]) { background: var(--surface2); }
+.h-hb[aria-pressed="true"] { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
+.h-hb[disabled] { cursor: default; }
+.h-hb .n { padding: 4px 0 3px; font: 600 10.5px/1 var(--f-m); text-align: center; font-variant-numeric: tabular-nums; }
+.h-hb .col { flex: 1; display: flex; flex-direction: column-reverse; gap: 2px; margin: 0 14%; }
+.h-hb .col .sg:last-child { border-radius: 3px 3px 0 0; }
+.h-hb .mn { height: 16px; padding-top: 5px; font: 500 10.5px/1 var(--f-m); text-align: center; white-space: nowrap; color: var(--muted); }
+.h-keys .sw { width: 12px; height: 12px; border-radius: 3px; }
+.h-keys .sw.dk { background: color-mix(in srgb, var(--sky) 22%, transparent); }
+.h-keys .sw.tw { background: color-mix(in srgb, var(--sky) 10%, transparent); }
+.h-hnote { margin: -18px 0 28px; }
+@media (max-width: 480px) {
+  .h-hrs { gap: 1px; height: 150px; }
+  .h-hb .n { font-size: 9px; }
+  .h-hb .col { margin: 0 8%; }
+  .h-tabs:has(.h-tgs) { flex-wrap: wrap; }
+  .h-tgs { order: -1; margin-left: 0; flex-basis: 100%; justify-content: flex-end; }
+  .h-ntsub { justify-content: flex-start; flex-wrap: nowrap; }
+  .h-ntsub .chip { padding: 4px 10px; font-size: 12.5px; }
+  .h-ntsub + .h-imgnote { text-align: left; }
+}
+/* กราฟรายชั่วโมงในคอลัมน์แคบ (แถบข้างจอคอมฯ) ตัวเลขชนกัน ซ่อนไว้ ดูจากป้ายเมื่อชี้ */
+.h-hrs { container-type: inline-size; }
+@container (max-width: 300px) { .h-hb .n { visibility: hidden; } .h-hb .col { margin: 0 6%; } }
