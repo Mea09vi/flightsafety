@@ -1497,6 +1497,8 @@ html.ov-lock { overflow: hidden; }
 .h-imgtg[aria-pressed="true"] .ck { display: inline; }
 .h-imgnote { margin: -12px 0 18px; }
 @media (max-width: 480px) { .h-imgtg { padding: 0 10px; font-size: 13px; } .h-tabs a { padding: 0 10px; } }
+/* 4 แถบในบรรทัดเดียวบนมือถือ: ซ่อนไอคอน */
+@media (max-width: 440px) { .h-tabs { gap: 0; } .h-tabs a { padding: 0 8px; font-size: 14.5px; } .h-tabs a .ic { display: none; } }
 
 /* ป้ายแหล่ง: m แบบฟอร์ม+ประชุม · e ประชุมอย่างเดียว · r เหตุ ทอ. · f แบบฟอร์มอย่างเดียว (ประชุม = เส้นประ) */
 .h-src {
@@ -2047,9 +2049,14 @@ body.gated > :not(.gate) { visibility: hidden; }
 .h-keys .sw { width: 12px; height: 12px; border-radius: 3px; }
 .h-keys .sw.dk { background: color-mix(in srgb, var(--sky) 22%, transparent); }
 .h-keys .sw.tw { background: color-mix(in srgb, var(--sky) 10%, transparent); }
-.h-hnote { margin: -18px 0 28px; }
+.h-hrs.big { height: 230px; }
+.h-sea.p-dk { --sc: var(--sky); }
+.h-sea.p-tw { --sc: color-mix(in srgb, var(--sky) 50%, var(--gold)); }
+.hm.hr thead th { border-bottom: 3px solid transparent; }
+.hm.hr thead th.p-dk { border-color: var(--sky); }
 @media (max-width: 480px) {
   .h-hrs { gap: 1px; height: 150px; }
+  .h-hrs.big { height: 180px; }
   .h-hb .n { font-size: 9px; }
   .h-hb .col { margin: 0 8%; }
   .h-tabs:has(.h-tgs) { flex-wrap: wrap; }
@@ -2061,3 +2068,5 @@ body.gated > :not(.gate) { visibility: hidden; }
 /* กราฟรายชั่วโมงในคอลัมน์แคบ (แถบข้างจอคอมฯ) ตัวเลขชนกัน ซ่อนไว้ ดูจากป้ายเมื่อชี้ */
 .h-hrs { container-type: inline-size; }
 @container (max-width: 300px) { .h-hb .n { visibility: hidden; } .h-hb .col { margin: 0 6%; } }
+/* แท็บรายชั่วโมงบนมือถือ: เลข 3 หลักกว้างกว่าแท่ง แสดงเฉพาะแท่งที่เลือก */
+@container (max-width: 480px) { .h-hrs.big .h-hb .n { visibility: hidden; } .h-hrs.big .h-hb[aria-pressed="true"] .n { visibility: visible; overflow: visible; } }

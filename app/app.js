@@ -1426,6 +1426,7 @@ function hvHead(h, tab, still) {
       <a data-replace href="#/history"${tab === 'y' ? ' aria-current="page"' : ''}>${icon('chart')}รายปี</a>
       <a data-replace href="#/history/topics"${tab === 't' ? ' aria-current="page"' : ''}>${icon('grid3')}ตามหัวข้อ</a>
       <a data-replace href="#/history/months"${tab === 'm' ? ' aria-current="page"' : ''}>${icon('cal')}รายเดือน</a>
+        <a data-replace href="#/history/hours"${tab === 'h' ? ' aria-current="page"' : ''}>${icon('clock')}รายชั่วโมง</a>
       <span class="h-tgs">${nNt.a ? `<button class="h-imgtg" data-hnt="" aria-pressed="${!!nt}">${icon('check', 'ic ck')}${icon('moon')}กลางคืน <b>${nTh(nNt.a)}</b></button>` : ''}
       ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}</span>
     </nav>${ntSub}${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
@@ -1644,20 +1645,6 @@ function hvMonths(h) {
     + `<i class="cool" style="grid-column:2/10">หนาว</i><i class="hot" style="grid-column:10/16">ร้อน</i><i class="rain" style="grid-column:16/25">ฝน</i></div>`;
   const keys = HTYPE_ORDER.map((k) => { const [th, cls] = typeOf({ type: k }); return `<span><i class="sg ${cls}"></i>${th}</span>`; }).join('');
 
-  // รายชั่วโมง 00–23 ซ้อนตามประเภท · พื้นหลังเข้ม = ช่วงมืด
-  const timed = pool.filter((x) => hHour(x) != null);
-  const perH = Array.from({ length: 24 }, z);
-  for (const it of timed) { const c = perH[hHour(it)]; c[HTYPE_ORDER.includes(it.type) ? it.type : 'hazard']++; c.n++; }
-  const hmx = Math.max(1, ...perH.map((c) => c.n));
-  const nDark = perH.reduce((a, c, r) => a + (hDark(r) === 'dk' ? c.n : 0), 0);
-  const hbars = perH.map((c, r) => {
-    const segs = HTYPE_ORDER.filter((k) => c[k]).map((k) => `<i class="sg ${typeOf({ type: k })[1]}" style="height:${(c[k] / hmx * 100).toFixed(2)}%"></i>`).join('');
-    const hh = String(r).padStart(2, '0');
-    const al = `${hh}.00–${hh}.59 น.: ${c.n} เรื่อง${c.n ? ` — ${tyLine(c)}` : ''}${hDark(r) === 'dk' ? ' (ช่วงมืด)' : hDark(r) ? ' (ช่วงสนธยา)' : ''}`;
-    return `<button class="h-hb ${hDark(r)}" data-hms="h.${r}" aria-pressed="${hv.ms === `h.${r}`}" aria-label="${esc(al)}" title="${esc(al)}"${c.n ? '' : ' disabled'}>`
-      + `<span class="n">${c.n || ''}</span><span class="col">${segs}</span><span class="mn">${r % 3 ? '' : hh}</span></button>`;
-  }).join('');
-
   // ตารางหัวข้อ × เดือน
   const rows = topics.map((_, t) => t).filter((t) => tot[t]).sort((a, b) => tot[b] - tot[a]);
   const hmax = Math.max(1, ...rows.flatMap((t) => [...grid[t].values()]));
@@ -1676,10 +1663,6 @@ function hvMonths(h) {
   const sqTxt = hv.sq === 'ALL' ? 'ทุกฝูง' : `ฝูง ${hv.sq}`;
   let L = null, name = '', sub = '', by = 'fy';
   if (k === 'm' && per.has(+a)) { L = dated.filter((x) => hWhen(x).m === +a); name = HMON_FULL[a - 1]; sub = 'ทุกปีงบ'; }
-  else if (k === 'h' && a !== '' && +a >= 0 && +a <= 23) {
-    L = timed.filter((x) => hHour(x) === +a); const hh = String(a).padStart(2, '0');
-    name = `เวลา ${hh}.00–${hh}.59 น.`; sub = hDark(+a) === 'dk' ? 'ช่วงมืด · ทุกปีงบ' : 'ทุกปีงบ';
-  }
   else if (k === 's' && HSEA[a]) { L = dated.filter((x) => hWhen(x).s === a); name = HSEA[a][0]; sub = HSEA[a][1]; by = 'mon'; }
   else if ((k === 'ts' || k === 'tm' || k === 't') && grid[+a]) {
     const t = +a;
@@ -1706,10 +1689,6 @@ function hvMonths(h) {
       <div class="h-mos" role="group" aria-label="จำนวนเรื่องรายเดือน">${bars}</div>
       ${band}
       <div class="h-keys">${keys}</div>
-      <h2 class="sec-h">รายชั่วโมง <span>${nTh(timed.length)} เรื่องที่ระบุเวลา · ช่วงมืด ${nTh(nDark)} เรื่อง</span></h2>
-      <div class="h-hrs" role="group" aria-label="จำนวนเรื่องตามชั่วโมงของวัน">${hbars}</div>
-      <div class="h-keys"><span><i class="sw dk"></i>ช่วงมืด 19.00–05.59 น.</span><span><i class="sw tw"></i>สนธยา 18 และ 06 น.</span></div>
-      <p class="note h-hnote">เวลาตามที่บันทึกไว้ บางเรื่องเป็นเวลาที่พบหรือรายงาน ไม่ใช่เวลาเกิด · ป้าย “กลางคืน” ด้านบนตรวจทีละเรื่องแล้ว แม่นกว่ากราฟนี้</p>
       <h2 class="sec-h">หัวข้อ × เดือน</h2>
       <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × เดือน เลื่อนซ้ายขวาได้">
         <table class="hm mo">
@@ -1718,6 +1697,121 @@ function hvMonths(h) {
         </table>
       </div>
       <p class="note">ฤดูตามกรมอุตุนิยมวิทยา · เทียบต่อวันเพราะฤดูยาวไม่เท่ากัน · “×1.5” = พบในฤดูนั้นมากกว่าที่คาดจากความยาวฤดู 1.5 เท่า (นับเฉพาะหัวข้อที่มีอย่างน้อย 8 เรื่อง) · จำนวนเรื่องขึ้นกับชั่วโมงบินและการรายงานของแต่ละช่วงด้วย ไม่ได้มาจากอากาศอย่างเดียว · หัวข้อติดด้วยคำค้นอัตโนมัติ${noM ? ` · ไม่มีวันที่ ${nTh(noM)} เรื่อง` : ''}${noS ? ` · รู้แค่เดือนที่เปลี่ยนฤดู ${nTh(noS)} เรื่อง (ไม่นับเข้าฤดู)` : ''} · ไม่รวมเหตุของ ทอ.</p>
+    </section>
+    <section class="hv-r" id="hlist" aria-labelledby="h-l-h">${listHtml}</section>
+  </div>`;
+}
+
+// แบบ F: รายชั่วโมงของวัน (รวมทุกปีงบ) · เวลาจาก meta.time · ไม่รวมเหตุของหน่วยอื่น (r) · เปิดมาครั้งแรกเลือกช่วงมืด
+const HPER = { d: ['กลางวัน', '07.00–17.59 น.', 11], tw: ['สนธยา', '06 และ 18 น.', 2], dk: ['ช่วงมืด', '19.00–05.59 น.', 11] };
+const hPer = (r) => hDark(r) || 'd';
+const HBLK = [0, 3, 6, 9, 12, 15, 18, 21];
+function hvHours(h) {
+  const hv = state.hv;
+  const { topics, short } = h.data;
+  if (hv.hs === undefined) hv.hs = 'p.dk';
+  const pool = h.data.items.filter((x) => x.src !== 'r' && (hv.sq === 'ALL' || x.sq === hv.sq));
+  const timed = pool.filter((x) => hHour(x) != null);
+  const z = () => ({ accident: 0, incident: 0, hazard: 0, n: 0 });
+  const perH = Array.from({ length: 24 }, z);
+  const per = Object.fromEntries(Object.keys(HPER).map((k) => [k, { ...z(), tp: new Map() }]));
+  const tpAll = new Map();
+  const grid = topics.map(() => new Map());
+  const tot = topics.map(() => 0);
+  for (const it of timed) {
+    const r = hHour(it), ty = HTYPE_ORDER.includes(it.type) ? it.type : 'hazard', p = per[hPer(r)], b = Math.floor(r / 3);
+    perH[r][ty]++; perH[r].n++; p[ty]++; p.n++;
+    for (const t of it.tp || []) {
+      if (!grid[t]) continue;
+      p.tp.set(t, (p.tp.get(t) || 0) + 1); tpAll.set(t, (tpAll.get(t) || 0) + 1);
+      grid[t].set(b, (grid[t].get(b) || 0) + 1); tot[t]++;
+    }
+  }
+  const tyLine = (c) => HTYPE_ORDER.filter((k) => c[k]).map((k) => `${typeOf({ type: k })[0]} ${nTh(c[k])}`).join(' · ');
+  const hh = (r) => String(r).padStart(2, '0');
+
+  // ช่วงเวลา: เทียบอัตราต่อชั่วโมงกับค่าเฉลี่ยทั้งวัน เพราะแต่ละช่วงยาวไม่เท่ากัน · หัวข้อเด่น = สัดส่วนในช่วงสูงกว่าสัดส่วนของช่วงนั้นโดยรวม
+  const avg = timed.length / 24;
+  const perHtml = Object.keys(HPER).map((k) => {
+    const p = per[k], [nm, rg, hrs] = HPER[k];
+    const d = avg ? Math.round((p.n / hrs / avg - 1) * 100) : 0;
+    const cmp = Math.abs(d) < 3 ? 'ใกล้ค่าเฉลี่ย' : `${d > 0 ? 'สูง' : 'ต่ำ'}กว่าค่าเฉลี่ยรายชั่วโมง ${Math.abs(d)}%`;
+    const lift = [...p.tp].filter(([t, n]) => n >= 5 && tpAll.get(t) >= 8)
+      .map(([t, n]) => [t, n, n / tpAll.get(t) / (p.n / timed.length)]).filter((r) => r[2] >= 1.15)
+      .sort((a, b) => b[2] - a[2]).slice(0, 3);
+    const chips = lift.map(([t, n, x]) => `<button class="chip" data-hhs="tp.${t}.${k}" aria-pressed="${hv.hs === `tp.${t}.${k}`}" aria-label="${esc(short[t])} ใน${nm} ${n} เรื่อง ${x.toFixed(1)} เท่าของสัดส่วนปกติ">${esc(short[t])} <b>×${x.toFixed(1)}</b></button>`).join('');
+    return `<div class="h-sea p-${k}">
+      <button class="h-sea-b" data-hhs="p.${k}" aria-pressed="${hv.hs === `p.${k}`}">
+        <span class="nm">${nm}</span><span class="rg">${rg}</span>
+        <span class="v"><b>${nTh(p.n)}</b> เรื่อง</span>
+        <span class="cmp${d >= 3 ? ' up' : ''}">${p.n ? cmp : 'ไม่มีเรื่อง'}</span>
+        <span class="ty">${tyLine(p)}</span>
+      </button>
+      ${chips ? `<p class="lb">สัดส่วนสูงกว่าปกติในช่วงนี้</p><div class="chips">${chips}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  // แท่ง 00–23 ซ้อนตามประเภท · พื้นหลังเข้ม = ช่วงมืด
+  const hmx = Math.max(1, ...perH.map((c) => c.n));
+  const hbars = perH.map((c, r) => {
+    const segs = HTYPE_ORDER.filter((k) => c[k]).map((k) => `<i class="sg ${typeOf({ type: k })[1]}" style="height:${(c[k] / hmx * 100).toFixed(2)}%"></i>`).join('');
+    const al = `${hh(r)}.00–${hh(r)}.59 น.: ${c.n} เรื่อง${c.n ? ` — ${tyLine(c)}` : ''}${hDark(r) === 'dk' ? ' (ช่วงมืด)' : hDark(r) ? ' (ช่วงสนธยา)' : ''}`;
+    return `<button class="h-hb ${hDark(r)}" data-hhs="h.${r}" aria-pressed="${hv.hs === `h.${r}`}" aria-label="${esc(al)}" title="${esc(al)}"${c.n ? '' : ' disabled'}>`
+      + `<span class="n">${c.n || ''}</span><span class="col">${segs}</span><span class="mn">${r % 3 ? '' : hh(r)}</span></button>`;
+  }).join('');
+  const keys = HTYPE_ORDER.map((k) => { const [th, cls] = typeOf({ type: k }); return `<span><i class="sg ${cls}"></i>${th}</span>`; }).join('');
+
+  // ตารางหัวข้อ × ช่วง 3 ชั่วโมง
+  const rows = topics.map((_, t) => t).filter((t) => tot[t]).sort((a, b) => tot[b] - tot[a]);
+  const bmax = Math.max(1, ...rows.flatMap((t) => [...grid[t].values()]));
+  const lvl = (n) => { const r = n / bmax; return r <= 0.1 ? 1 : r <= 0.25 ? 2 : r <= 0.45 ? 3 : r <= 0.7 ? 4 : 5; };
+  const blk = (b) => `${hh(HBLK[b])}–${hh(HBLK[b] + 2)}`;
+  const body = rows.map((t) => {
+    const cells = HBLK.map((_, b) => {
+      const n = grid[t].get(b);
+      if (!n) return '<td><span class="z" aria-hidden="true">·</span></td>';
+      return `<td><button class="l${lvl(n)}" data-hhs="tb.${t}.${b}" aria-pressed="${hv.hs === `tb.${t}.${b}`}" aria-label="${esc(short[t])} เวลา ${blk(b)} น.: ${n} เรื่อง">${n}</button></td>`;
+    }).join('');
+    return `<tr><th class="tp" scope="row"><button data-hhs="t.${t}" aria-pressed="${hv.hs === `t.${t}`}" title="${esc(topics[t])}">${esc(short[t])}</button></th>${cells}<td class="tot">${nTh(tot[t])}</td></tr>`;
+  }).join('');
+
+  // รายการตามที่เลือก
+  const [k, a, b] = (hv.hs || '').split('.');
+  const sqTxt = hv.sq === 'ALL' ? 'ทุกฝูง' : `ฝูง ${hv.sq}`;
+  let L = null, name = '', sub = 'ทุกปีงบ';
+  if (k === 'h' && a !== '' && +a >= 0 && +a <= 23) { L = timed.filter((x) => hHour(x) === +a); name = `เวลา ${hh(+a)}.00–${hh(+a)}.59 น.`; if (hDark(+a) === 'dk') sub = 'ช่วงมืด · ทุกปีงบ'; }
+  else if (k === 'p' && HPER[a]) { L = timed.filter((x) => hPer(hHour(x)) === a); name = HPER[a][0]; sub = `${HPER[a][1]} · ทุกปีงบ`; }
+  else if ((k === 'tp' || k === 'tb' || k === 't') && grid[+a]) {
+    const t = +a;
+    L = timed.filter((x) => x.tp?.includes(t));
+    name = topics[t];
+    if (k === 'tp' && HPER[b]) { L = L.filter((x) => hPer(hHour(x)) === b); sub = `${HPER[b][0]} ${HPER[b][1]}`; }
+    else if (k === 'tb' && HBLK[+b] != null) { L = L.filter((x) => Math.floor(hHour(x) / 3) === +b); sub = `เวลา ${blk(+b)} น.`; }
+    else sub = 'ทุกช่วงเวลา';
+  }
+  const listHtml = L
+    ? `<h2 class="sec-h" id="h-l-h">${esc(name)} <span>${esc(sub)} · ${sqTxt} · ${nTh(L.length)} เรื่อง</span></h2>
+      ${L.length ? hGroups(L.sort(byFyDesc), 'fy') : '<p class="note">ไม่มีเรื่องในฝูงที่เลือก</p>'}`
+    : `<h2 class="sec-h" id="h-l-h">รายการเรื่อง</h2><p class="note">แตะช่วงเวลา แท่งชั่วโมง หรือตัวเลขในตาราง เพื่อดูรายการ</p>`;
+
+  const chipsSq = HSQ.map((q) => `<button class="chip" data-hsq="${q}" aria-pressed="${hv.sq === q}">${icon('check', 'ic ck')}${q === 'ALL' ? 'ทุกฝูง' : `ฝูง ${q}`}</button>`).join('');
+  const noT = pool.length - timed.length;
+  return `<div class="hv-grid t">
+    <section class="hv-l" aria-labelledby="h-pr-h">
+      <h2 class="sec-h" id="h-pr-h">ตามช่วงเวลา <span>${nTh(timed.length)} เรื่องที่ระบุเวลา · รวมทุกปีงบ</span></h2>
+      <div class="chips h-sq" role="group" aria-label="ฝูงบิน">${chipsSq}</div>
+      <div class="h-seas h-pers">${perHtml}</div>
+      <h2 class="sec-h">รายชั่วโมง <span>00 → 23 น.</span></h2>
+      <div class="h-hrs big" role="group" aria-label="จำนวนเรื่องตามชั่วโมงของวัน">${hbars}</div>
+      <div class="h-keys">${keys}<span><i class="sw dk"></i>ช่วงมืด</span><span><i class="sw tw"></i>สนธยา</span></div>
+      <h2 class="sec-h">หัวข้อ × ช่วงเวลา <span>ช่วงละ 3 ชั่วโมง</span></h2>
+      <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × ช่วงเวลา เลื่อนซ้ายขวาได้">
+        <table class="hm hr">
+          <thead><tr><th class="tp" scope="col">หัวข้อ</th>${HBLK.map((r, b) => `<th scope="col"${r >= 18 || r < 6 ? ' class="p-dk"' : ''}>${blk(b)}</th>`).join('')}<th class="tot" scope="col">รวม</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+      <p class="note">เวลาตามที่บันทึกไว้ บางเรื่องเป็นเวลาที่พบหรือรายงาน ไม่ใช่เวลาเกิด · ช่วงมืดที่ลพบุรีราว 19.00–05.59 น. ชั่วโมง 06 และ 18 คาบเกี่ยวแสงสนธยา · เทียบต่อชั่วโมงเพราะแต่ละช่วงยาวไม่เท่ากัน · “×1.5” = หัวข้อนั้นอยู่ในช่วงนี้มากกว่าสัดส่วนปกติ 1.5 เท่า (นับเฉพาะหัวข้อที่มีอย่างน้อย 8 เรื่อง) · จำนวนเรื่องขึ้นกับว่าบินหรือทำงานช่วงไหนมาก ไม่ได้บอกว่าช่วงไหนอันตรายกว่า · ป้าย “กลางคืน” ด้านบนตรวจทีละเรื่องแล้ว แม่นกว่าเวลาในกราฟ${noT ? ` · ไม่ระบุเวลา ${nTh(noT)} เรื่อง` : ''} · ไม่รวมเหตุของ ทอ.</p>
     </section>
     <section class="hv-r" id="hlist" aria-labelledby="h-l-h">${listHtml}</section>
   </div>`;
@@ -1901,6 +1995,7 @@ function renderHist(arg, sub, still = false) {
   if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
   else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(hf) + '</div>';
   else if (arg === 'months') html = hvHead(h, 'm', still) + hvMonths(hf) + '</div>';
+  else if (arg === 'hours') html = hvHead(h, 'h', still) + hvHours(hf) + '</div>';
   else if (arg === 'case' && sub) html = hvCard(h, decodeURIComponent(sub), s);
   else if (arg === 'topic' && sub) html = hvTopic(h, +decodeURIComponent(sub), s);
   else html = hvItem(h, arg, s);
@@ -1921,7 +2016,7 @@ function redrawHist() {
   const a = document.activeElement;
   let sel = null;
   if (a && main.contains(a)) {
-    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hnt', 'hms'].filter((x) => a.dataset[x] != null);
+    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hnt', 'hms', 'hhs'].filter((x) => a.dataset[x] != null);
     if (k.length) sel = k.map((x) => `[data-${x}="${CSS.escape(a.dataset[x])}"]`).join('');
   }
   const parts = location.hash.replace(/^#\/?/, '').split('/');
@@ -2254,6 +2349,12 @@ main.addEventListener('click', (e) => {
     state.hv.ms = state.hv.ms === t.dataset.hms ? null : t.dataset.hms;
     redrawHist();
     if (state.hv.ms && !wide.matches) $('#hlist')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
+  if (t.dataset.hhs) {
+    state.hv.hs = state.hv.hs === t.dataset.hhs ? null : t.dataset.hhs;
+    redrawHist();
+    if (state.hv.hs && !wide.matches) $('#hlist')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
     return;
   }
   if (t.dataset.hmode) { LS.set('histMode', t.dataset.hmode); redrawHist(); return; }
