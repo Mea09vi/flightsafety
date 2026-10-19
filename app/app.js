@@ -60,7 +60,7 @@ const state = {
   hist: null, // ประวัติเหตุ บน.2 โหลดตอนเปิดหน้าครั้งแรก { status, data }
   // หน้าประวัติเหตุ: ปีงบที่เลือก · แหล่งที่กรองในปีนั้น · ฝูงของตารางหัวข้อ · ช่องที่กด { tp, fy }
   // back = หน้าที่เปิดรายละเอียดมา · ret = หน้านอก #/history ที่เข้ามา (เช่น หน้าเคส)
-  hv: { y: null, src: null, sq: 'ALL', cell: null, back: '', ret: '' },
+  hv: { y: null, src: null, sq: 'ALL', cell: null, img: false, back: '', ret: '' },
   caseBack: '', // เปิดหน้าเคสจากประวัติเหตุ: ปุ่มย้อนกลับไปที่นั่น ไม่ใช่หน้ารายการ
 };
 
@@ -358,7 +358,7 @@ function viewFilter() {
       return `<button class="tile src-t" disabled>${head}<span class="lab">ยังไม่มีข้อมูลหน่วยในเวอร์ชันนี้</span></button>`;
     }
     return `<button class="tile src-t" data-k="src" data-v="${o.v}" aria-pressed="false">${head}
-      <span class="lab">${esc(o.sub)}</span><span class="n">${srcN(o.v)} เคส</span>${ck}</button>`;
+      <span class="lab">${esc(o.sub)}</span><span class="n">${nTh(srcN(o.v))} เคส</span>${ck}</button>`;
   };
 
   main.innerHTML = `<div class="lay"><div class="view filter">
@@ -444,7 +444,7 @@ function syncFilter() {
     el.classList.toggle('done', done);
     el.classList.remove('need');
     $('.hint', el).textContent = st.k === 'src'
-      ? `ค้นจาก ${allCases().filter((c) => inSrc(c, s)).length} เคส`
+      ? `ค้นจาก ${nTh(allCases().filter((c) => inSrc(c, s)).length)} เคส`
       : done
         ? (st.k === 'environment' ? `เลือก ${s.environment.length} ข้อ` : 'เลือกแล้ว')
         : (st.k === 'environment' ? 'เลือกได้หลายข้อ' : 'เลือก 1 ข้อ');
@@ -596,7 +596,7 @@ function viewResults() {
     ? `<p class="note dash-note">${icon('lock')}<span>ข้อมูลหน่วย (บน.2 / ทอ.) ยังล็อกอยู่ ผลนี้มีแต่เคสต่างประเทศ · <a href="#/results" data-act="unlock">ใส่รหัสหน่วย</a></span></p>` : '';
 
   if (all.length) {
-    const from = `ค้นจาก ${pool} เคส${s.src === 'ALL' ? '' : ` (${esc(srcOpt(s.src).th)})`}`;
+    const from = `ค้นจาก ${nTh(pool)} เคส${s.src === 'ALL' ? '' : ` (${esc(srcOpt(s.src).th)})`}`;
     // ไม่มีกลุ่ม ก: ตัวเลขใหญ่เป็นจำนวนเคสใกล้เคียง (ข + ค) และบอกตรง ๆ ว่ายังไม่มีเคสที่ตรงทั้งหมด
     html += m.mor
       ? `<div class="hero"><span class="big">${all.length}</span><div>
@@ -1410,6 +1410,7 @@ function hGroups(list, by, here = null) {
 // หัวหน้าประวัติเหตุ + แท็บ รายปี/ตามหัวข้อ · คืน <div> ที่ยังไม่ปิด ผู้เรียกปิดเอง
 function hvHead(h, tab, still) {
   const items = h.data.items;
+  const nImg = items.filter((x) => himgs(x).length).length;
   return `<div class="view hv${still ? ' still' : ''}"><div class="hv-top">
     <p class="eyebrow">ประวัติเหตุ บน.2</p>
     <h1 class="page-h">เคยเกิดใน<em>บน.2</em></h1>
@@ -1418,7 +1419,8 @@ function hvHead(h, tab, still) {
     <nav class="h-tabs" aria-label="มุมมอง">
       <a data-replace href="#/history"${tab === 'y' ? ' aria-current="page"' : ''}>${icon('chart')}รายปี</a>
       <a data-replace href="#/history/topics"${tab === 't' ? ' aria-current="page"' : ''}>${icon('grid3')}ตามหัวข้อ</a>
-    </nav></div>`;
+      ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}
+    </nav>${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
 }
 
 // แบบ B: เส้นเวลารายปีงบ แท่งซ้อนตามแหล่ง · แตะปีเพื่อดูรายการของปีนั้น
@@ -1457,7 +1459,7 @@ function hvYears(h) {
       <h2 class="sec-h" id="h-tl-h">รายปีงบ <span>ใหม่ → เก่า</span></h2>
       <ol class="h-tls">${tl}</ol>
       <div class="h-keys">${keys}</div>
-      ${gaps.length ? `<p class="note gap-note">ปีงบ ${yrRuns(gaps)} ยังไม่มีบันทึกประชุม จึงมีแต่แบบฟอร์ม ถ้าได้บันทึกประชุมของปีเหล่านี้มา จะจับคู่เพิ่มได้</p>` : ''}
+      ${gaps.length && !hv.img ? `<p class="note gap-note">ปีงบ ${yrRuns(gaps)} ยังไม่มีบันทึกประชุม จึงมีแต่แบบฟอร์ม ถ้าได้บันทึกประชุมของปีเหล่านี้มา จะจับคู่เพิ่มได้</p>` : ''}
     </section>
     <section class="hv-r" id="hlist" aria-labelledby="h-y-h">
       <h2 class="sec-h" id="h-y-h">ปีงบ ${esc(hv.y)} <span>${nTh(cur.n)} เรื่อง</span></h2>
@@ -1700,8 +1702,11 @@ function renderHist(arg, sub, still = false) {
   hCards = new Set(allCases().map((c) => c.id));
   const s = still ? ' still' : '';
   let html;
-  if (!arg) html = hvHead(h, 'y', still) + hvYears(h) + '</div>';
-  else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(h) + '</div>';
+  // ปุ่ม "เฉพาะที่มีภาพ" กรองทั้งเส้นเวลาและตารางหัวข้อ (หน้าเรื่อง/หัวข้อเดี่ยวไม่กรอง)
+  if (state.hv.img && !h.data.items.some((x) => himgs(x).length)) state.hv.img = false;
+  const hf = state.hv.img ? { ...h, data: { ...h.data, items: h.data.items.filter((x) => himgs(x).length) } } : h;
+  if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
+  else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(hf) + '</div>';
   else if (arg === 'case' && sub) html = hvCard(h, decodeURIComponent(sub), s);
   else if (arg === 'topic' && sub) html = hvTopic(h, +decodeURIComponent(sub), s);
   else html = hvItem(h, arg, s);
@@ -1722,7 +1727,7 @@ function redrawHist() {
   const a = document.activeElement;
   let sel = null;
   if (a && main.contains(a)) {
-    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode'].filter((x) => a.dataset[x] != null);
+    const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg'].filter((x) => a.dataset[x] != null);
     if (k.length) sel = k.map((x) => `[data-${x}="${CSS.escape(a.dataset[x])}"]`).join('');
   }
   const parts = location.hash.replace(/^#\/?/, '').split('/');
@@ -1810,7 +1815,7 @@ function viewAbout() {
         <p class="msg" id="msg" role="status" aria-live="polite"></p>
       </form>`,
     unlocked: `<div class="status-line" style="margin-bottom:14px"><span class="tag">${dot('ok')}ปลดล็อกแล้ว</span>
-      เคสของหน่วย ${state.unit.length} เคส · ข้อมูล ${esc(fmtVer(state.unitVersion))}</div>
+      เคสของหน่วย ${nTh(state.unit.length)} เคส · ข้อมูล ${esc(fmtVer(state.unitVersion))}</div>
       ${state.unitDev ? `<p class="status-line"><span class="tag draft">${dot('hollow')}ทดสอบ</span>โหลดจาก dev server บนเครื่องนี้ (ไม่เข้ารหัส) — ใช้ทดสอบเท่านั้น</p>`
         : '<button class="btn" data-act="forget">ล้างกุญแจจากเครื่องนี้</button>'}`,
   }[st];
@@ -1882,7 +1887,7 @@ async function onUnlock(e) {
   try {
     await unlock(pass);
     msg.className = 'msg ok';
-    msg.textContent = `ปลดล็อกแล้ว · ${state.unit.length} เคส`;
+    msg.textContent = `ปลดล็อกแล้ว · ${nTh(state.unit.length)} เคส`;
     setTimeout(viewAbout, 700);
   } catch {
     msg.className = 'msg err';
@@ -2038,6 +2043,7 @@ main.addEventListener('click', (e) => {
     if (!wide.matches) $('#hlist')?.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
     return;
   }
+  if (t.hasAttribute('data-himg')) { state.hv.img = !state.hv.img; redrawHist(); return; }
   if (t.dataset.hsrc) { state.hv.src = state.hv.src === t.dataset.hsrc ? null : t.dataset.hsrc; redrawHist(); return; }
   // เปลี่ยนฝูงแล้วคงช่องที่เลือกไว้ ถ้าฝูงใหม่ไม่มีเรื่องในช่องนั้น hvTopics ล้างให้เอง
   if (t.dataset.hsq) { state.hv.sq = t.dataset.hsq; redrawHist(); return; }

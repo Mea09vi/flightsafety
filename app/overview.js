@@ -1006,9 +1006,21 @@ export async function mountOverview(host, { state }) {
     const a = AGBY.get(code);
     return `<button type="button" class="bd-r" data-k="ag" data-v="${esc(code)}" data-fk="ag-${esc(code)}" aria-pressed="false">`
       + `<span class="bd-c" aria-hidden="true" data-s="${esc(code.padEnd(BD_W).slice(0, BD_W))}">${fls(BD_W)}</span>`
-      + `<span class="bd-t"><span class="th">${esc(a.th)}</span><span class="en">${esc(a.name)}</span></span>`
+      + `<span class="bd-t"><span class="th">${esc(a.th)}${flag(a.th)}</span><span class="en">${esc(a.name)}</span></span>`
       + `<span class="bd-n" aria-hidden="true" data-s="000">${fls(3)}</span><span class="bd-b"><i></i></span></button>`;
   };
+  /* ธงชาติท้ายชื่อประเทศ (ผู้ใช้สั่ง 19 ต.ค. 2569) — วาด SVG เองเพราะ emoji ธงไม่แสดงบน Windows; ลดรายละเอียดให้อ่านได้ที่ขนาด 21×14 */
+  const FLAG = {
+    'ญี่ปุ่น': '<rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#BC002D"/>',
+    'ฝรั่งเศส': '<rect width="10" height="20" fill="#002654"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#CE1126"/>',
+    'สหรัฐฯ': '<rect width="30" height="20" fill="#fff"/><path d="M0 0h30v1.54H0zM0 3.08h30v1.54H0zM0 6.15h30v1.54H0zM0 9.23h30v1.54H0zM0 12.31h30v1.54H0zM0 15.38h30v1.54H0zM0 18.46h30V20H0z" fill="#B22234"/><rect width="12" height="10.77" fill="#3C3B6E"/>',
+    'แคนาดา': '<rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#D52B1E"/><rect x="22.5" width="7.5" height="20" fill="#D52B1E"/><path d="M15 4l1.2 2.4 1.4-.6-.5 2.8 2.3-1.2-.6 1.8 1.5.4-2.7 2.4.4 1.2-2.6-.4v2.8h-.8v-2.8l-2.6.4.4-1.2-2.7-2.4 1.5-.4-.6-1.8 2.3 1.2-.5-2.8 1.4.6z" fill="#D52B1E"/>',
+    'สหราชอาณาจักร': '<rect width="30" height="20" fill="#012169"/><path d="M0 0l30 20M30 0L0 20" stroke="#fff" stroke-width="4"/><path d="M0 0l30 20M30 0L0 20" stroke="#C8102E" stroke-width="1.4"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="3.4"/>',
+    'ไทย': '<rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.34" fill="#F4F5F8"/><rect y="6.67" width="30" height="6.66" fill="#2D2A4A"/>',
+    'ไอร์แลนด์': '<rect width="10" height="20" fill="#169B62"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#FF883E"/>',
+    'นอร์เวย์': '<rect width="30" height="20" fill="#BA0C2F"/><path d="M10.9 0v20M0 10h30" stroke="#fff" stroke-width="5"/><path d="M10.9 0v20M0 10h30" stroke="#00205B" stroke-width="2.6"/>',
+  };
+  const flag = (th) => (FLAG[th] ? `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" focusable="false">${FLAG[th]}</svg>` : '');
   const flap = (box, str, dim) => {
     const cells = [...box.children], tok = {};
     FLT.set(box, tok);

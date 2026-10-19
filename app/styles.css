@@ -1486,6 +1486,17 @@ html.ov-lock { overflow: hidden; }
 .h-tabs a:hover { color: var(--text); }
 .h-tabs a[aria-current="page"] { color: var(--text); border-bottom-color: var(--gold); }
 .h-tabs .ic { width: 18px; height: 18px; }
+.h-imgtg {
+  margin: 0 0 6px auto; min-height: 40px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; align-self: center;
+  border: 1px solid var(--line2); border-radius: 999px; background: none; color: var(--text2); font: 600 14px/1.2 var(--f-d); cursor: pointer;
+}
+.h-imgtg b { color: var(--text); font-variant-numeric: tabular-nums; }
+.h-imgtg .ck { display: none; width: 14px; height: 14px; stroke-width: 2.6; }
+.h-imgtg:hover { color: var(--text); border-color: var(--sky); }
+.h-imgtg[aria-pressed="true"] { color: var(--text); border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); }
+.h-imgtg[aria-pressed="true"] .ck { display: inline; }
+.h-imgnote { margin: -12px 0 18px; }
+@media (max-width: 480px) { .h-imgtg { padding: 0 10px; font-size: 13px; } .h-tabs a { padding: 0 10px; } }
 
 /* ป้ายแหล่ง: m แบบฟอร์ม+ประชุม · e ประชุมอย่างเดียว · r เหตุ ทอ. · f แบบฟอร์มอย่างเดียว (ประชุม = เส้นประ) */
 .h-src {
