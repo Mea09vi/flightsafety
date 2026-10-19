@@ -273,6 +273,14 @@ main > .view.dh:not(#_) { max-width: none; }
 .hv-top > .h-tabs a { min-height: 40px; padding: 0 16px; border: 0; border-radius: 8px; font: 500 14px var(--f-k); color: var(--text2); transition: background .2s, color .2s; }
 .hv-top > .h-tabs a:hover { color: var(--text); background: hsl(var(--d-slate-300) / .06); }
 .hv-top > .h-tabs a[aria-current="page"] { background: var(--d-sel-bg); color: var(--d-sel-fg); font-weight: 600; box-shadow: 0 6px 16px -10px hsl(var(--d-accent-t) / .9); }
+/* ชิปย่อยกลางคืน/หมายเหตุ อยู่แถวใหม่ใต้ทั้งสองคอลัมน์ ชิดขวาใต้แถบมุมมอง ไม่ทับคำโปรย */
+.hv-top > .h-ntsub, .hv-top > .h-imgnote { grid-column: 1 / -1; justify-self: end; margin: 12px 0 0; text-align: right; }
+.hv-top > .h-ntsub + .h-imgnote { margin-top: 6px; max-width: 760px; }
+/* จอคอมฯ แคบ: แถบมุมมองกว้าง ~650px จะบีบคำโปรยจนเหลือไม่กี่ตัวอักษร จึงย้ายลงแถวใหม่ชิดซ้าย */
+@media (max-width: 1399px) {
+  .hv-top > .h-tabs { grid-column: 1 / -1; grid-row: auto; justify-self: start; margin-top: 18px; }
+  .hv-top > .h-ntsub, .hv-top > .h-imgnote { justify-self: start; text-align: left; }
+}
 .hv-grid > .hv-l, .hv-grid > .hv-r { padding: 20px 22px 22px; background: var(--d-card-bg); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--d-card-sh); }
 .hv .sec-h { font: 500 19px/1.35 var(--f-k); }
 .h-tl { border-radius: 8px; transition: background .2s, box-shadow .2s; }
