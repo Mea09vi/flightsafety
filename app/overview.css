@@ -77,7 +77,11 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 /* ---------- ส่วนหัว ---------- */
 .dh { position: relative; isolation: isolate; overflow: hidden; padding: 64px 0 72px; }
 .dh-media { position: absolute; inset: 0; z-index: -4; overflow: hidden; background: var(--ov-hole) var(--hero-s) 72% 46% / cover no-repeat; opacity: var(--ov-hero-o); }
-@media (min-width: 1024px) { .dh-media { background-image: var(--hero); } }
+@media (min-width: 1024px) {
+  .dh-media { background-image: var(--hero); }
+  /* จอคอมฯ: หัวเรื่องใช้ Kanit เหมือนหน้าอื่นใน desk.css (ผู้ใช้สั่ง 19 ต.ค. 2569 แทน Noto Serif Thai) */
+  :host { --f-s: var(--f-k, var(--f-d)); }
+}
 .dh-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 72% 46%; opacity: .36; transform-origin: 74% 52%; animation: kb 40s ease-in-out infinite alternate; }
 .dh-scrim { position: absolute; inset: 0; z-index: -3; pointer-events: none; background:
   linear-gradient(90deg, color-mix(in srgb, var(--bg) 94%, transparent) 0%, color-mix(in srgb, var(--bg) 72%, transparent) 40%, color-mix(in srgb, var(--bg) 40%, transparent) 68%, color-mix(in srgb, var(--bg) 62%, transparent) 100%),

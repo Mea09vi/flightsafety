@@ -300,7 +300,7 @@ export async function mountOverview(host, { state }) {
   <div class="dh-media"></div><div class="dh-scrim"></div><div class="dh-grain"></div>
   <div class="wrap dh-in">
     <div>
-      <p class="eyebrow"><span>ภาพรวมสถิติ · คลังเคสสากล · <span class="nw">ข้อมูล ${U.isoTh(W.version)}</span></span></p>
+      <p class="eyebrow"><span>ภาพรวมสถิติ · คลังข้อมูลสากล · <span class="nw">ข้อมูล ${U.isoTh(W.version)}</span></span></p>
       <h1 id="dh-t"><span>${U.fmt(N)} เคส ใน ${U.Y1 - U.Y0} ปี</span><span class="g"><span class="nw">เกิดตอนไหน</span> <span class="nw">เพราะอะไร</span></span></h1>
       <p class="dek">${AG_N} หน่วยงานสอบสวน ${CTY_N} ประเทศ · เฮลิคอปเตอร์ทุกเคส · ทุกเคสมีลิงก์รายงานต้นฉบับ — เลือกส่วนใดของกราฟก็ได้ ทั้งหน้าจะกรองตามทันที</p>
       <p class="dh-note">${ic('info', 'sm')}<span>ตัวเลขทั้งหมดคือจำนวนเคสในคลัง ไม่ใช่อัตราการเกิดเหตุ</span></p>
