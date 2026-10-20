@@ -3,6 +3,7 @@
 //          #/dashboard[?ตัวกรอง]  #/areas  #/about  #/theory  #/theory/:บท[/สไลด์]  #/history  #/history/:id
 
 import { mountOverview } from './overview.js';
+import * as AIR from './airmanship.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -1047,6 +1048,11 @@ function viewBriefEnd() {
         const c = byId(id);
         return `<li><span class="n">${k + 1}</span><div><p class="q">${esc(c.brief_question)}</p><p class="t">${esc(c.title)}</p></div></li>`;
       }).join('')}</ol>
+      <div class="end-air" aria-label="Wing 2 Airmanship นำไปใช้ก่อนและระหว่างบิน">
+        <p class="h"><b>WING 2 AIRMANSHIP</b><span>นำไปใช้ก่อนและระหว่างบิน</span></p>
+        <ol>${AIR.STEPS.map((s, k) => `<li${s.hot ? ' class="hot"' : ''}><span class="n">${k + 1}</span>${esc(s.s)}</li>`).join('')}</ol>
+        <p class="m">${AIR.MOTTO}</p>
+      </div>
     </div>
     <div class="brief-foot">
       <button class="btn btn-icon" data-go="-1" aria-label="กลับไปเรื่องสุดท้าย">${icon('back')}</button>
@@ -1213,6 +1219,7 @@ const APPS = [
   { href: '#/theory', ic: 'book', th: 'ทฤษฎีนิรภัย', c: 'violet' },
   { href: '#/regs', ic: 'doc', th: 'กฎระเบียบ', c: 'rose' },
   { href: '#/areas', ic: 'pin', th: 'พื้นที่บิน', c: 'green' },
+  { href: '#/airmanship', ic: 'target', th: 'Airmanship', c: 'indigo' },
   { href: '#/about', ic: 'info', th: 'ข้อมูล', c: 'grey' },
 ];
 const appTile = (a) => {
@@ -1316,6 +1323,16 @@ function viewHomeDesk() {
         </div>
       </section>
     </div>
+    <a class="d-card d-lift dh-air d-rise" style="--i:8" href="#/airmanship" aria-labelledby="dh-air-h">
+      <div class="dh-air-l">
+        <p class="eyebrow">นโยบายผู้บังคับการกองบิน 2</p>
+        <h2 id="dh-air-h">WING 2 <em>AIRMANSHIP</em></h2>
+        <p class="sub">6 เสาหลักในการตัดสินใจ · SA และ Judgment · 5 ขั้นก่อนและระหว่างบิน</p>
+        <p class="motto">${AIR.MOTTO}</p>
+      </div>
+      <ul class="dh-air-p">${AIR.PILLARS.map((p) => `<li><span class="d-itile">${icon(p.ic)}</span><b>${p.en}</b><span>${esc(p.th)}</span></li>`).join('')}</ul>
+      <span class="more">ดูนโยบาย${icon('next')}</span>
+    </a>
   </div>`;
   countUp(main);
 
@@ -2523,6 +2540,7 @@ function route() {
     case 'areas': viewAreas(); break;
     case 'about': viewAbout(); break;
     case 'regs': viewRegs(); break;
+    case 'airmanship': AIR.render(main, { esc, icon }); break;
     case 'theory': viewTheory(arg, parts[2], lastPath); break;
     case 'history': viewHist(arg, parts[2], lastPath); break;
     default: viewHome();
@@ -2532,12 +2550,12 @@ function route() {
     : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
       : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
   // แถบเมนูจอคอมฯ มีลิงก์ประวัติเหตุ/ทฤษฎีของตัวเอง
-  const dtab = ['history', 'theory', 'regs'].includes(page) ? page : null;
+  const dtab = ['history', 'theory', 'regs', 'airmanship'].includes(page) ? page : null;
   for (const a of $$('.tabbar a')) {
     if (a.dataset.tab === tab || a.dataset.tab === dtab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
   setBadges();
-  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs'].includes(page) && !lesson && scrollMemo[path] != null;
+  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs', 'airmanship'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
   // หน้าภาพรวมวาดหลังโหลด CSS เสร็จ — คืนตำแหน่งเลื่อนอีกครั้งเมื่อเนื้อหามาแล้ว
   if (keep && page === 'dashboard') { const y = scrollMemo[path]; OV.ready.then(() => scrollTo(0, y)); }
