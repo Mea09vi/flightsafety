@@ -135,6 +135,7 @@ async function unlock(pass, remember = true) {
   const raw = b64.enc(await crypto.subtle.exportKey('raw', key));
   if (remember) { LS.set('key', raw); SS.del('key'); } else { SS.set('key', raw); LS.del('key'); }
   if (state.hist?.status === 'locked') state.hist = null;
+  if (state.regs?.status === 'locked') state.regs = null;
   // ถอดรหัสประวัติเหตุต่อเลยโดยไม่รอ ให้ไฟล์เข้าแคชไว้เปิดตอนไม่มีสัญญาณ
   loadHistory().catch(() => {});
 }
@@ -170,6 +171,39 @@ async function readHistory() {
       : new TextDecoder().decode(pt);
     return { status: 'ok', data: prepHistory(JSON.parse(txt)) };
   } catch { return { status: 'locked' }; }
+}
+// กฎระเบียบและคู่มือ (#/regs): ระเบียบ ทอ./คู่มือจากเว็บ สนภ.ทอ. เป็นข้อมูลสาธารณะ (data/regs.json)
+// รายชื่อ รปป.บน.2 หัวข้อ ๐๔ เข้ารหัสด้วยกุญแจหน่วย (data/regs.enc.json) · localhost: `node tools/serve.mjs --regs <ไฟล์นอก repo>`
+let regsLoading = null;
+function loadRegs() {
+  if (state.regs) return Promise.resolve(state.regs);
+  return (regsLoading ??= readRegs().then((r) => { state.regs = r; regsLoading = null; return r; }));
+}
+async function readRegs() {
+  let pub = { groups: [], items: [] };
+  try { const r = await fetch('data/regs.json'); if (r.ok) pub = await r.json(); } catch { /* ออฟไลน์และยังไม่มีแคช */ }
+  const done = (status, rpp = []) => ({ status, groups: pub.groups, fetched: pub.fetched, items: [...rpp, ...pub.items] });
+  if (IS_LOCAL) {
+    try {
+      const r = await fetch('data/regs.dev.json', { cache: 'no-store' });
+      if (r.ok) return done('ok', (await r.json()).items);
+    } catch { /* ไม่ได้รันแบบ --regs */ }
+  }
+  let enc;
+  try {
+    const r = await fetch('data/regs.enc.json');
+    if (!r.ok) return done('missing');
+    enc = await r.json();
+  } catch { return done('missing'); }
+  const raw = LS.get('key', null) || SS.get('key', null);
+  if (!raw) return done('locked');
+  if (typeof DecompressionStream === 'undefined') return done('unsupported');
+  try {
+    const key = await crypto.subtle.importKey('raw', b64.dec(raw), 'AES-GCM', false, ['decrypt']);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(enc.iv) }, key, b64.dec(enc.ct));
+    const txt = await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    return done('ok', JSON.parse(txt).items);
+  } catch { return done('locked'); }
 }
 // รูปจากเอกสาร: dev = ชื่อไฟล์ data/himg/ (ไม่เข้ารหัส) · เผยแพร่ = it.ie → data/hie/<id>.bin (iv 12 ไบต์ + AES-GCM กุญแจหน่วย)
 const himgs = (it) => (state.hist?.dev ? it.img : it.ie) || [];
@@ -1159,6 +1193,7 @@ const APPS = [
   { href: '#/dashboard', ic: 'chart', th: 'เคสสากล', c: 'blue' },
   { href: '#/history', ic: 'hist', th: 'ประวัติเหตุ', c: 'teal' },
   { href: '#/theory', ic: 'book', th: 'ทฤษฎีนิรภัย', c: 'violet' },
+  { href: '#/regs', ic: 'doc', th: 'กฎระเบียบ', c: 'rose' },
   { href: '#/areas', ic: 'pin', th: 'พื้นที่บิน', c: 'green' },
   { href: '#/about', ic: 'info', th: 'ข้อมูล', c: 'grey' },
 ];
@@ -2165,6 +2200,72 @@ function viewAreas() {
   </div>`;
 }
 
+/* ── กฎระเบียบและคู่มือ ─────────────────────────────────── */
+// ลิงก์ออกไปเอกสารต้นฉบับเท่านั้น ไม่เก็บสำเนา PDF ในแอป (DECISIONS.md หัวข้อ "กฎระเบียบและคู่มือ")
+
+const REG_OLD = 2559; // ออกก่อน พ.ศ. 2559 = เก่ากว่า 10 ปี — ติดป้ายให้ตรวจว่ายังใช้อยู่ไหม
+const rv = { g: '', q: '' };
+function viewRegs() {
+  main.innerHTML = `<div class="view regs">
+    <p class="eyebrow">ข้อมูลอ้างอิง</p>
+    <h1 class="page-h">กฎระเบียบและคู่มือ</h1>
+    <p class="rg-lede">รวมลิงก์เอกสารด้านนิรภัย กดแล้วเปิดเอกสารต้นฉบับในแท็บใหม่</p>
+    <div id="rg-body"><p class="rg-lede">กำลังโหลด…</p></div>
+  </div>`;
+  loadRegs().then((R) => {
+    const box = $('#rg-body');
+    if (!box) return; // ผู้ใช้ไปหน้าอื่นแล้ว
+    const groups = [{ key: 'rpp', th: 'รปป.บน.2' }, ...R.groups];
+    const rppNote = {
+      locked: 'รายชื่อ รปป.บน.2 ล็อกอยู่ — ปลดล็อกข้อมูลของหน่วยก่อน',
+      missing: 'ยังไม่มีรายชื่อ รปป.บน.2 ในเวอร์ชันนี้',
+      unsupported: 'เบราว์เซอร์นี้เปิดรายชื่อ รปป.บน.2 ไม่ได้ — ลองใช้ Chrome หรือ Safari รุ่นใหม่',
+    }[R.status];
+    box.innerHTML = `<form class="h-q" role="search" onsubmit="return false"><label>${icon('search')}<input type="search" id="rg-q" placeholder="ค้นชื่อเอกสาร เลขที่ ปี หรือหน่วย" value="${esc(rv.q)}" autocomplete="off" aria-label="ค้นหาเอกสาร"></label></form>
+      <div id="rg-res"></div>`;
+    const res = $('#rg-res');
+    const draw = () => {
+      const { g, q } = rv;
+      const qs = q.trim().toLowerCase();
+      const pool = R.items.filter((x) => !qs || `${x.g === 'rpp' ? 'บน.2-' : ''}${x.id} ${x.t} ${x.unit || ''} ${x.note || ''} ${x.y || ''}`.toLowerCase().includes(qs));
+      const cnt = (k) => pool.filter((x) => x.g === k).length;
+      const list = pool.filter((x) => !g || x.g === g);
+      const secs = groups.filter((x) => list.some((i) => i.g === x.key));
+      res.innerHTML = `<div class="chips rg-chips">
+          <button class="chip" data-rg="" aria-pressed="${!g}">${icon('check', 'ic ck')}ทั้งหมด <b class="cn">${nTh(pool.length)}</b></button>
+          ${groups.map((x) => `<button class="chip${cnt(x.key) ? '' : ' zero'}" data-rg="${x.key}" aria-pressed="${g === x.key}">${icon(x.key === 'rpp' && rppNote ? 'lock' : 'check', 'ic ck')}${esc(x.th)} <b class="cn">${nTh(cnt(x.key))}</b></button>`).join('')}
+        </div>
+        ${rppNote && (!g || g === 'rpp') ? `<p class="rg-note">${dot('warn')}${rppNote}</p>` : ''}
+        ${secs.map((x) => `<section class="rg-sec">
+          <h2 class="sec-h">${esc(x.th)} <span>${nTh(list.filter((i) => i.g === x.key).length)} ฉบับ</span></h2>
+          <ul class="rg-list">${list.filter((i) => i.g === x.key).map(regCard).join('')}</ul>
+        </section>`).join('') || (g === 'rpp' && rppNote ? '' : `<div class="empty">${icon('search')}<h2>ไม่พบเอกสาร</h2><p>ลองค้นด้วยคำอื่น หรือเลือก "ทั้งหมด"</p></div>`)}
+        <p class="rg-src">ระเบียบ ทอ. และคู่มือ: <a href="https://safety.rtaf.mi.th/standards" target="_blank" rel="noopener">safety.rtaf.mi.th/standards</a>${R.fetched ? ` · ดึงรายชื่อเมื่อ ${esc(fmtVer(R.fetched))}` : ''}${R.status === 'ok' ? ' · รปป.บน.2 เฉพาะหัวข้อ ๐๔ นิรภัยการบินและภาคพื้น' : ''}</p>`;
+    };
+    draw();
+    res.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-rg]');
+      if (!c) return;
+      rv.g = rv.g === c.dataset.rg ? '' : c.dataset.rg;
+      draw();
+    });
+    $('#rg-q').addEventListener('input', (e) => { rv.q = e.target.value; draw(); });
+  }).catch((err) => console.warn('regs', err));
+}
+function regCard(x) {
+  const tags = [
+    x.y ? `<span>พ.ศ. ${x.y}</span>` : '',
+    x.unit ? `<span>${esc(x.unit)}</span>` : '',
+    x.y && x.y < REG_OLD ? '<span class="rg-old">เก่ากว่า 10 ปี</span>' : '',
+    x.f ? `<span class="rg-f">${esc(x.f.toUpperCase())}</span>` : '',
+  ].join('');
+  return `<li><a class="rg-card" href="${esc(x.u)}" target="_blank" rel="noopener">
+    <span class="rg-ic">${icon('doc')}</span>
+    <span class="rg-b">${x.g === 'rpp' ? `<small class="rg-n">บน.2-${esc(x.id)}</small>` : ''}<span class="rg-t">${esc(x.t)}</span>${tags ? `<span class="rg-m">${tags}</span>` : ''}${x.note ? `<span class="rg-x">${esc(x.note)}</span>` : ''}</span>
+    <span class="rg-go" title="เปิดเอกสาร">${icon('ext')}</span>
+  </a></li>`;
+}
+
 // 2026-10-12 → 12 ต.ค. 69
 function fmtVer(v) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
@@ -2305,6 +2406,7 @@ function setBadges() {
   const put = (k, n) => { const b = $(`[data-badge="${k}"]`); if (b) b.textContent = n ? n.toLocaleString('en-US') : ''; };
   put('intl', state.intl.length);
   import('./lessons.js').then(({ LESSONS }) => put('theory', LESSONS.length)).catch(() => {});
+  loadRegs().then((r) => put('regs', r.items.length)).catch(() => {});
   if (state.unitStatus !== 'unlocked') { put('history', 0); return; }
   loadHistory().then((h) => put('history', h.status === 'ok' ? h.data.items.length : 0)).catch(() => {});
 }
@@ -2363,6 +2465,7 @@ function route() {
     case 'dashboard': viewOverview(); break;
     case 'areas': viewAreas(); break;
     case 'about': viewAbout(); break;
+    case 'regs': viewRegs(); break;
     case 'theory': viewTheory(arg, parts[2], lastPath); break;
     case 'history': viewHist(arg, parts[2], lastPath); break;
     default: viewHome();
@@ -2372,12 +2475,12 @@ function route() {
     : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
       : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
   // แถบเมนูจอคอมฯ มีลิงก์ประวัติเหตุ/ทฤษฎีของตัวเอง
-  const dtab = ['history', 'theory'].includes(page) ? page : null;
+  const dtab = ['history', 'theory', 'regs'].includes(page) ? page : null;
   for (const a of $$('.tabbar a')) {
     if (a.dataset.tab === tab || a.dataset.tab === dtab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
   setBadges();
-  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history'].includes(page) && !lesson && scrollMemo[path] != null;
+  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
   // หน้าภาพรวมวาดหลังโหลด CSS เสร็จ — คืนตำแหน่งเลื่อนอีกครั้งเมื่อเนื้อหามาแล้ว
   if (keep && page === 'dashboard') { const y = scrollMemo[path]; OV.ready.then(() => scrollTo(0, y)); }

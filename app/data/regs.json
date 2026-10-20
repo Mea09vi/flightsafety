@@ -1,0 +1,42 @@
+{
+  "source": "https://safety.rtaf.mi.th/standards",
+  "fetched": "2026-10-20",
+  "groups": [
+    { "key": "rtaf", "th": "ระเบียบ ทอ." },
+    { "key": "air", "th": "คู่มือนิรภัยการบิน" },
+    { "key": "gnd", "th": "คู่มือนิรภัยภาคพื้น" }
+  ],
+  "items": [
+    { "g": "rtaf", "id": "r1", "t": "ระเบียบ ทอ.ว่าด้วยนิรภัยการบิน", "y": 2565, "u": "https://safety.rtaf.mi.th/web/content/3568/r1.pdf" },
+    { "g": "rtaf", "id": "r2", "t": "ระเบียบ ทอ.ว่าด้วยการป้องกันและระงับอัคคีภัย", "y": 2565, "u": "https://safety.rtaf.mi.th/web/content/3569/r2.pdf" },
+    { "g": "rtaf", "id": "r3", "t": "ระเบียบ ทอ.ว่าด้วยนิรภัยภาคพื้น", "y": 2564, "u": "https://safety.rtaf.mi.th/web/content/3570/r3.pdf" },
+    { "g": "rtaf", "id": "r4", "t": "ระเบียบ ทอ.ว่าด้วยมาตรฐานการปฏิบัติการบิน", "y": 2564, "u": "https://safety.rtaf.mi.th/web/content/3571/r4.pdf" },
+    { "g": "rtaf", "id": "r5", "t": "ระเบียบ ทอ.ว่าด้วยการปฏิบัติการบิน", "y": 2561, "u": "https://safety.rtaf.mi.th/web/content/3572/r5.pdf" },
+    { "g": "rtaf", "id": "r6", "t": "ระเบียบ ทอ.ว่าด้วยการปฏิบัติเมื่อ อ.เกิดเหตุฉุกเฉินหรืออุบัติเหตุ ในและนอกเขตสนามบินดอนเมือง", "y": 2553, "u": "https://safety.rtaf.mi.th/web/content/3573/r6.pdf" },
+    { "g": "rtaf", "id": "r7", "t": "ระเบียบ ทอ.ว่าด้วยนิรภัยการบิน", "y": 2552, "u": "https://safety.rtaf.mi.th/web/content/3574/r7.pdf" },
+    { "g": "rtaf", "id": "r8", "t": "ระเบียบ ทอ.ว่าด้วยการขับขี่และโดยสารรถจักรยาน", "y": 2549, "u": "https://safety.rtaf.mi.th/web/content/3575/r8.pdf" },
+    { "g": "rtaf", "id": "r9", "t": "ระเบียบ ทอ.ว่าด้วยฐานบินทหาร", "y": 2534, "u": "https://safety.rtaf.mi.th/web/content/3576/r9.pdf" },
+    { "g": "rtaf", "id": "r10", "t": "ระเบียบ ทอ.ว่าด้วยกฏการบินทั่วไป", "y": 2525, "u": "https://safety.rtaf.mi.th/web/content/3577/r10.pdf" },
+    { "g": "air", "id": "a1", "t": "คู่มือการบันทึกข้อมูลและการวิเคราะห์ด้านนิรภัยการบิน", "u": "https://safety.rtaf.mi.th/web/content/3596/a1.pdf" },
+    { "g": "air", "id": "a2", "t": "คู่มือการสำรวจนิรภัยการบิน", "u": "https://safety.rtaf.mi.th/web/content/3597/a2.pdf" },
+    { "g": "air", "id": "a3", "t": "คู่มือการปฏิบัติเมื่อ อ.เกิดเหตุฉุกเฉินหรืออุบัติเหตุในและนอกเขตสนามบิน", "u": "https://safety.rtaf.mi.th/web/content/3598/a3.pdf" },
+    { "g": "air", "id": "a4", "t": "ตัวอย่างคู่มือระบบการจัดการด้านนิรภัยการบิน", "f": "docx", "u": "https://safety.rtaf.mi.th/web/content/3599/a4.docx" },
+    { "g": "air", "id": "a5", "t": "คู่มือการจัดทำระบบการจัดการด้านนิรภัยการบิน", "u": "https://safety.rtaf.mi.th/web/content/3600/a5.pdf" },
+    { "g": "air", "id": "a6", "t": "คู่มือประเมินด้านนิรภัยการบิน ปี 65", "y": 2565, "u": "https://safety.rtaf.mi.th/web/content/3601/a6.pdf" },
+    { "g": "air", "id": "a7", "t": "การจัดการความเสี่ยงในการปฏิบัติการของกองทัพอากาศ (Operational Risk Management)", "u": "https://safety.rtaf.mi.th/web/content/3602/a7.pdf" },
+    { "g": "air", "id": "a8", "t": "คู่มือการรายงานและการสอบสวนอากาศยานไร้นักบิน", "u": "https://safety.rtaf.mi.th/web/content/3603/a8.pdf" },
+    { "g": "air", "id": "a13", "t": "คู่มือการรายงานด้านนิรภัยการบิน", "u": "https://safety.rtaf.mi.th/web/content/4181/a13.pdf" },
+    { "g": "air", "id": "a10_1", "t": "คู่มือการสอบสวนอากาศยานอุบัติเหตุ", "u": "https://safety.rtaf.mi.th/web/content/3687/a10_1.pdf" },
+    { "g": "air", "id": "a11", "t": "คู่มือการดำเนินการป้องกันสัตว์ที่เป็นอันตรายต่อการบิน", "u": "https://safety.rtaf.mi.th/web/content/3606/a11.pdf" },
+    { "g": "gnd", "id": "g1", "t": "ประกาศ สนภ.ทอ. เรื่อง มาตรฐานการใช้สีด้านนิรภัยภาคพื้น และมาตรฐานการใช้สีด้านนิรภัยภาคพื้นสำหรับโรงเก็บ อ.", "u": "https://safety.rtaf.mi.th/web/content/3607/g1.pdf" },
+    { "g": "gnd", "id": "g2", "t": "คู่มือการวิเคราะห์ข้อมูลนิรภัยภาคพื้น", "u": "https://safety.rtaf.mi.th/web/content/3608/g2.pdf" },
+    { "g": "gnd", "id": "g3", "t": "คู่มือตรวจสำรวจนิรภัยภาคพื้น ปี 2568", "y": 2568, "u": "https://safety.rtaf.mi.th/web/content/3609/g3.pdf" },
+    { "g": "gnd", "id": "g4", "t": "คู่มือการสอบสวนอุบัติเหตุภาคพื้น", "y": 2567, "u": "https://safety.rtaf.mi.th/web/content/3610/g4.pdf" },
+    { "g": "gnd", "id": "g5", "t": "คู่มือการปฏิบัติงานด้านนิรภัยภาคพื้น", "u": "https://safety.rtaf.mi.th/web/content/3611/g5.pdf" },
+    { "g": "gnd", "id": "g6", "t": "คู่มือการตรวจประเมินนิรภัยภาคพื้น", "u": "https://safety.rtaf.mi.th/web/content/3612/g6.pdf" },
+    { "g": "gnd", "id": "g7", "t": "คู่มือการจัดการความเสี่ยงด้านนิรภัยภาคพื้น ประกอบระเบียบกองทัพอากาศว่าด้วยนิรภัยภาคพื้น พ.ศ.2564", "u": "https://safety.rtaf.mi.th/web/content/3613/g7.pdf" },
+    { "g": "gnd", "id": "g8", "t": "คู่มือการวิเคราะห์นิรภัยภาคพื้น ประกอบระเบียบกองทัพอากาศว่าด้วยนิรภัยภาคพื้น พ.ศ.2564", "u": "https://safety.rtaf.mi.th/web/content/3614/g8.pdf" },
+    { "g": "gnd", "id": "g9", "t": "คู่มือการขับขี่ปลอดภัย", "u": "https://safety.rtaf.mi.th/web/content/3615/g9.pdf" },
+    { "g": "gnd", "id": "g10", "t": "มาตรฐานงานนิรภัยภาคพื้น ทอ.", "u": "https://safety.rtaf.mi.th/web/content/3616/g10.pdf" }
+  ]
+}

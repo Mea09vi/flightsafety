@@ -7,6 +7,9 @@ unit_cases*.json
 app/data/history.dev.json
 app/data/himg/
 history.json
+app/data/regs.dev.json
+rpp*.json
+rpp*.xlsx
 
 # ไฟล์ตรวจเคสของ FSO (หมายเหตุอาจอ้างถึงหน่วย) และสำเนาสำรอง seed
 review/
