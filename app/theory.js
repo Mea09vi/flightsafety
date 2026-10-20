@@ -2,6 +2,7 @@
 // app.js เรียก render() ทุกครั้งที่ URL เปลี่ยน: #/theory = รายการบท · #/theory/<id>/<n> = สไลด์ที่ n (เริ่ม 1)
 // ปุ่มในไฟล์นี้ใช้ data-l* ทั้งหมด ไม่ชนกับ data-go / data-act ของโหมดบรีฟใน app.js
 import { LESSONS } from './lessons.js';
+import { THEORY_DIAGRAMS } from './theory_diagrams.js';
 
 let H = null;          // ตัวช่วยจาก app.js: esc icon keepAwake main tax
 let L = null;          // บทที่เปิดอยู่
@@ -77,10 +78,55 @@ function list() {
       <span class="leg-t"><small>จุดที่ ${two(i + 1)}</small><b>${esc(l.title)}</b><em>${ST_TXT[s]} · ราว ${l.mins} นาที</em></span>${icon('next')}</a></li>`;
   }).join('')}</ol></section>`).join('');
 
+  const heroHtml = `
+    <section class="th-command-hero" aria-label="ศูนย์การเรียนรู้ทฤษฎีนิรภัยการบิน">
+      <div class="th-hero-media">
+        <img class="th-hero-img" src="img/theory-hero.jpg" alt="RTAF Helicopter Formation Flight" loading="eager" />
+        <div class="th-hero-overlay"></div>
+        <div class="th-hero-grid-pattern"></div>
+      </div>
+      <div class="th-hero-content">
+        <div class="th-hero-badges">
+          <span class="th-badge-sec"><span class="badge-dot pulse"></span> WING 2 RTAF AVIATION SAFETY</span>
+          <span class="th-badge-gold">STANDARD OPERATING SYLLABUS</span>
+        </div>
+        <h1 class="th-hero-title">
+          ทฤษฎีนิรภัยการบิน<span class="th-hero-hl">ระดับผู้บังคับบัญชา</span>
+        </h1>
+        <p class="th-hero-desc">
+          ประมวล 11 ทฤษฎีและโมเดลความปลอดภัยการบินสากล (FAA, NTSB, DoD, ICAO) 
+          ถอดบทเรียนสู่การปฏิบัติการบินปีกหมุน กองบิน 2 เพื่อการตัดสินใจเชิงยุทธการและการบริหารความเสี่ยงแบบไร้รอยต่อ
+        </p>
+        <div class="th-hero-stats">
+          <div class="th-stat-item">
+            <span class="th-stat-val">${N}</span>
+            <span class="th-stat-lbl">โมเดลสากล</span>
+          </div>
+          <div class="th-stat-item">
+            <span class="th-stat-val">${nDone}/${N}</span>
+            <span class="th-stat-lbl">ผ่านการศึกษา</span>
+          </div>
+          <div class="th-stat-item">
+            <span class="th-stat-val">${left ? `${left} นาที` : 'ครบสมบูรณ์'}</span>
+            <span class="th-stat-lbl">${left ? 'เวลาประเมินที่เหลือ' : 'สำเร็จทุกหลักสูตร'}</span>
+          </div>
+          <div class="th-stat-item th-stat-badge">
+            <span class="th-stat-tag">COMMAND BRIEF READY</span>
+            <span class="th-stat-lbl">พร้อมนำเสนอ ผบ. / ผู้การ</span>
+          </div>
+        </div>
+      </div>
+    </section>`;
+
   main.innerHTML = `<div class="view theory">
-    <p class="eyebrow">ทฤษฎีนิรภัย · เส้นทาง ${N} จุด</p>
-    <h1 class="page-h">ทฤษฎีจาก<em>ต้นฉบับ</em></h1>
-    <p class="th-meta">เรียนแล้ว <b>${nDone}/${N}</b> บท · ${left ? `เหลือราว ${left} นาที` : 'ครบทุกบทแล้ว'}</p>
+    ${heroHtml}
+    <div class="th-body-head">
+      <div>
+        <p class="eyebrow">ทฤษฎีนิรภัย · เส้นทาง ${N} จุด</p>
+        <h2 class="page-h">แผนที่เส้นทาง<em>โมเดลความปลอดภัย</em></h2>
+      </div>
+      <p class="th-meta">เรียนแล้ว <b>${nDone}/${N}</b> บท · ${left ? `เหลือราว ${left} นาที` : 'ครบทุกบทแล้ว'}</p>
+    </div>
     <div class="rt">
       <div class="rmap">${routeMap(st, next)}</div>
       <aside class="rpanel" aria-live="polite">${panel(sel, st)}</aside>
@@ -125,9 +171,17 @@ function panel(i, st) {
   const { esc, icon } = H;
   const l = LESSONS[i];
   const s = st(i);
+  const diag = THEORY_DIAGRAMS[l.id] || '';
   return `<p class="rp-leg">จุดที่ ${two(i + 1)}/${two(LESSONS.length)} · ช่วง${phaseOf(i)}</p>
     <div class="rp-h"><span class="app-ic" ${tile(l.color)}>${icon(l.icon)}</span>
       <div><h2>${esc(l.title)}</h2><p class="rp-st ${s}">${ST_TXT[s]}</p></div></div>
+    <div class="rp-diag-card">
+      <div class="rp-diag-bar">
+        <span class="rp-diag-tag">TACTICAL SAFETY MODEL</span>
+        <span class="rp-diag-code">${esc(l.id.toUpperCase())}</span>
+      </div>
+      <div class="rp-diag-body">${diag}</div>
+    </div>
     <p class="rp-tip">${esc(l.tip)}</p>
     <p class="rp-meta">${deckOf(l).length} สไลด์ · ราว ${l.mins} นาที</p>
     <a class="btn btn-primary rp-go" href="#/theory/${l.id}">${s === 'done' ? 'ทบทวนบทนี้' : 'เริ่มบทนี้'} ${icon('next')}</a>
@@ -239,9 +293,30 @@ const key = () => `${L.id}:${idx}`;
 function slide(s) {
   const { esc, icon } = H;
   switch (s.t) {
-    case 'title': return `<p class="plab">บทเรียน · ราว ${L.mins} นาที</p>
-      <h1 class="ptitle">${esc(s.h)}</h1><p class="ptext">${esc(s.sub)}</p>
-      ${s.stat ? `<p class="ls-stat"><b>${esc(s.stat.n)}</b><span>${esc(s.stat.t)}</span></p>` : ''}`;
+    case 'title': {
+      const diag = THEORY_DIAGRAMS[L.id] || '';
+      return `<div class="ls-title-grid">
+        <div class="ls-title-copy">
+          <div class="ls-title-badge-row">
+            <span class="th-badge-sec">RTAF SAFETY SYLLABUS</span>
+            <span class="plab">บทเรียน · ราว ${L.mins} นาที</span>
+          </div>
+          <h1 class="ptitle">${esc(s.h)}</h1>
+          <p class="ptext">${esc(s.sub)}</p>
+          ${s.stat ? `<p class="ls-stat"><b>${esc(s.stat.n)}</b><span>${esc(s.stat.t)}</span></p>` : ''}
+        </div>
+        <div class="ls-title-vis">
+          <div class="ls-vis-box">
+            <div class="ls-vis-bar">
+              <span class="ls-vis-tag">OFFICIAL MODEL ARCHITECTURE</span>
+              <span class="ls-vis-ref">${esc(L.id.toUpperCase())}</span>
+            </div>
+            <div class="ls-vis-svg">${diag}</div>
+            <div class="ls-vis-caption">แผนภาพเชิงโครงสร้างตามมาตรฐานการฝึกอบรมการบินนิรภัย</div>
+          </div>
+        </div>
+      </div>`;
+    }
 
     case 'points': return `<h2 class="ls-h">${esc(s.h)}</h2>
       <ol class="ls-pts">${s.items.map((it, k) => `<li><span class="n">${k + 1}</span><div><b>${esc(it.b)}</b><p>${esc(it.t)}</p></div></li>`).join('')}</ol>`;

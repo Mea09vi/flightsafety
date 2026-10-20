@@ -369,6 +369,15 @@ const STEPS = [
   { k: 'environment', th: 'อากาศ / สภาพแวดล้อม', short: 'สภาพอากาศ' },
 ];
 
+/* ภาพร่าง Blueprint SVG ประจำแบบ ฮ. กองบิน 2 สำหรับ Aircraft Selector */
+const AC_SVG = {
+  H225M: '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M12 20h66l18-6 10 3-8 6-14 4H34l-14-3-8-4z" fill-opacity=".22" stroke-width="1.4"/><path d="M22 10h74M59 10v10M98 11l8 8m0-8l-8 8M40 27h28" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  B412EP: '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M16 21h58l22-5 8 2-6 5-18 4H32l-10-3-6-3z" fill-opacity=".22" stroke-width="1.4"/><path d="M24 11h68M58 11v10M96 12l6 7m0-7l-6 7M36 28h32M34 26v2M64 26v2" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  'S-92': '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M10 19h68l20-7 10 2-7 8-15 5H28l-12-3-6-5z" fill-opacity=".22" stroke-width="1.4"/><path d="M20 9h78M59 9v10M100 10l7 7m0-7l-7 7M34 28h36" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  H135: '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M22 20h50l22-3 8 2-6 4-18 3H36l-10-3-4-3z" fill-opacity=".22" stroke-width="1.4"/><path d="M28 11h60M58 11v9M96 16a3.5 3.5 0 100 .1M38 27h28M42 25v2M62 25v2" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  'S-70I': '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M12 20h64l22-5 9 2-7 6-18 3H30l-12-3-6-3z" fill-opacity=".22" stroke-width="1.4"/><path d="M20 10h74M57 10v10M98 12l7 7m0-7l-7 7M34 27h30" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
+};
+
 function viewFilter() {
   const t = state.tax;
   const squadrons = {};
@@ -410,9 +419,18 @@ function viewFilter() {
     <section class="step" id="st-aircraft">
       <div class="step-h"><span class="num">02</span><h2>แบบ ฮ.</h2><span class="hint"></span></div>
       ${Object.entries(squadrons).map(([q, list]) => `<div class="sqn" role="group" aria-label="ฝูง ${q}">
-        <p class="sqn-l">ฝูง<b>${esc(q)}</b></p>
-        <div class="tiles">${list.map((a) => `<button class="tile" data-k="aircraft" data-v="${esc(a.code)}" aria-pressed="false">
-          <span class="code">${esc(a.code)}</span><span class="lab">${esc(a.label)}</span>${icon('check', 'ic ck')}</button>`).join('')}</div>
+        <div class="sqn-badge"><span class="sqn-sub">ฝูงบิน</span><b>${esc(q)}</b></div>
+        <div class="tiles ac-tiles">${list.map((a) => {
+          const bp = AC_SVG[a.code] || '';
+          return `<button class="tile tile-ac" data-k="aircraft" data-v="${esc(a.code)}" aria-pressed="false">
+            <div class="ac-info">
+              <span class="code">${esc(a.code)}</span>
+              <span class="lab">${esc(a.label)}</span>
+            </div>
+            ${bp ? `<div class="ac-blueprint" aria-hidden="true">${bp}</div>` : ''}
+            ${icon('check', 'ic ck')}
+          </button>`;
+        }).join('')}</div>
       </div>`).join('')}
     </section>
 
@@ -1223,9 +1241,11 @@ function countUp(root) {
 // หน้าหลักจอคอมฯ (≥1024px): ปก + ทฤษฎีวันนี้ + ตัวเลข 4 ช่อง + บทเรียน + หัวข้อที่พบบ่อย · ตัวเลขทุกตัวมาจากข้อมูลจริง
 function viewHomeDesk() {
   const st = state.unitStatus;
-  const kpi = (i, tone, ic, lab, v, d, extra = '', href = '') => {
-    const tag = href ? 'a' : 'div';
-    return `<${tag} class="d-card dh-kpi d-rise${href ? ' d-lift' : ''}${tone ? ' t-' + tone : ''}" style="--i:${i}"${href ? ` href="${href}"` : ''}>
+  const kpi = (i, tone, ic, lab, v, d, extra = '', href = '', act = '') => {
+    const tag = href ? 'a' : act ? 'button' : 'div';
+    const actAttr = act ? ` data-act="${act}" type="button"` : '';
+    const lockCls = act ? ` is-${act}` : '';
+    return `<${tag} class="d-card dh-kpi d-rise${href || act ? ' d-lift' : ''}${tone ? ' t-' + tone : ''}${lockCls}" style="--i:${i}"${href ? ` href="${href}"` : ''}${actAttr}>
       <span class="lab"><span class="d-itile${tone ? ' t-' + tone : ''}">${icon(ic)}</span>${lab}</span>
       <span class="v"${typeof v === 'number' ? ` data-count="${v}"` : ''}>${typeof v === 'number' ? v.toLocaleString('en-US') : v}</span>
       <span class="d">${d}</span>${extra}</${tag}>`;
@@ -1251,9 +1271,18 @@ function viewHomeDesk() {
     </div>
     <div class="dh-kpis">
       ${kpi(2, '', 'chart', 'เคสต่างประเทศ', state.intl.length, 'รายงานสอบสวนสาธารณะ', '', '#/dashboard')}
-      ${kpi(3, 'gold', 'card', 'การ์ดบทเรียนของหน่วย', st === 'unlocked' ? state.unit.length : '—',
-        locked ? 'ล็อกอยู่ · ใส่รหัสหน่วยเพื่อดู' : st === 'missing' ? 'ยังไม่มีในเวอร์ชันนี้' : 'จากเหตุของ บน.2 และ ทอ.')}
-      <div id="dh-hist-kpi" style="display:contents">${kpi(4, 'green', 'hist', 'ประวัติเหตุ บน.2', '—', locked ? 'ล็อกอยู่' : 'กำลังโหลด…')}</div>
+      ${kpi(3, 'gold', 'card', 'การ์ดบทเรียนของหน่วย',
+        locked ? `<span class="dh-lock-tag">${icon('lock')} RESTRICTED</span>` : (st === 'unlocked' ? state.unit.length : '—'),
+        locked ? '<span class="dh-lock-d">บทเรียนเฉพาะ บน.2 · แตะเพื่อปลดล็อก</span>' : (st === 'missing' ? 'ยังไม่มีในเวอร์ชันนี้' : 'จากเหตุของ บน.2 และ ทอ.'),
+        locked ? '<div class="dh-ghost-kpi-bar" aria-hidden="true"></div>' : '',
+        '',
+        locked ? 'unlock' : '')}
+      <div id="dh-hist-kpi" style="display:contents">${kpi(4, 'green', 'hist', 'ประวัติเหตุ บน.2',
+        locked ? `<span class="dh-lock-tag">${icon('lock')} CLASSIFIED</span>` : '—',
+        locked ? '<span class="dh-lock-d">ประวัติเหตุการณ์ 3 ฝูง · แตะเพื่อปลดล็อก</span>' : (st === 'missing' ? 'ยังไม่มีในเวอร์ชันนี้' : 'กำลังโหลด…'),
+        locked ? '<div class="dh-ghost-kpi-bar" aria-hidden="true"></div>' : '',
+        '',
+        locked ? 'unlock' : '')}</div>
       ${kpi(5, 'violet', 'book', 'ทฤษฎีนิรภัย', '—', '', '', '#/theory').replace('class="d"', 'class="d" id="dh-th-d"').replace('class="v"', 'class="v" id="dh-th-v"')}
     </div>
     <div class="dh-row3">
@@ -1265,7 +1294,26 @@ function viewHomeDesk() {
       <section class="d-card d-rise" style="--i:7" aria-labelledby="dh-tp-h">
         <div class="dh-ch"><span class="d-itile t-gold">${icon('grid3')}</span><h2 id="dh-tp-h">หัวข้อที่พบบ่อยใน บน.2</h2>
           <a class="more" href="#/history/topics">ดูตาราง${icon('next')}</a></div>
-        <div id="dh-tp"><p class="dh-empty">${locked ? 'ข้อมูลของหน่วยล็อกอยู่ ใส่รหัสหน่วยเพื่อดูหัวข้อ' : 'กำลังโหลด…'}</p></div>
+        <div id="dh-tp">
+          ${locked ? `
+          <button type="button" class="dh-locked-dossier" data-act="unlock" title="แตะเพื่อปลดล็อกข้อมูลหน่วย">
+            <div class="dh-ghost-stream" aria-hidden="true">
+              <div class="dh-ghost-row"><span class="dh-ghost-label">การบินกลางคืน / NVG ภูเขา</span><span class="dh-ghost-bar" style="width:84%"></span><span class="dh-ghost-num">••</span></div>
+              <div class="dh-ghost-row"><span class="dh-ghost-label">สภาพอากาศแปรปรวน / หมอกควัน</span><span class="dh-ghost-bar" style="width:66%"></span><span class="dh-ghost-num">••</span></div>
+              <div class="dh-ghost-row"><span class="dh-ghost-label">บินเกาะหมู่ / Tactical Formation</span><span class="dh-ghost-bar" style="width:52%"></span><span class="dh-ghost-num">••</span></div>
+              <div class="dh-ghost-row"><span class="dh-ghost-label">ส่งกลับสายแพทย์ / พื้นที่จำกัด</span><span class="dh-ghost-bar" style="width:38%"></span><span class="dh-ghost-num">••</span></div>
+            </div>
+            <div class="dh-locked-overlay">
+              <div class="dh-locked-badge">
+                <span class="dh-badge-ic">${icon('lock')}</span>
+                <b>RESTRICTED · สถิติเฉพาะ บน.2 เข้ารหัส</b>
+              </div>
+              <p class="dh-locked-desc">สถิติข้อขัดข้องและบทเรียนการบิน 3 ฝูงบิน (201, 202, 203)</p>
+              <span class="d-btn pri d-btn-sm">${icon('lock')} ปลดล็อกด้วยรหัสหน่วย</span>
+            </div>
+          </button>
+          ` : '<p class="dh-empty">กำลังโหลด…</p>'}
+        </div>
       </section>
     </div>
   </div>`;
@@ -1290,8 +1338,17 @@ function viewHomeDesk() {
     $('#dh-les').innerHTML = LESSONS.map((x, i) => {
       const cls = done.has(x.id) ? ' done' : x === next ? ' next' : '';
       const s = done.has(x.id) ? 'เรียนแล้ว' : x === next ? 'บทถัดไป' : `${x.mins} นาที`;
-      return `<a class="dh-le${cls}" href="#/theory/${x.id}"><span class="n">${done.has(x.id) ? '✓' : String(i + 1).padStart(2, '0')}</span>`
-        + `<span><b>${esc(x.short)}</b><small>${s}</small></span></a>`;
+      const num = String(i + 1).padStart(2, '0');
+      return `<a class="dh-le${cls} c-${x.color}" href="#/theory/${x.id}">
+        <span class="dh-le-icbox">
+          <span class="dh-le-ic">${icon(x.icon)}</span>
+          <span class="dh-le-num">${done.has(x.id) ? '✓' : num}</span>
+        </span>
+        <span class="dh-le-meta">
+          <b class="dh-le-title">${esc(x.short)}</b>
+          <small class="dh-le-sub">${s}</small>
+        </span>
+      </a>`;
     }).join('');
   }).catch((err) => {
     const el = $('#dh-les');

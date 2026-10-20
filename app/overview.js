@@ -1422,18 +1422,37 @@ export async function mountOverview(host, { state }) {
     }
   });
 
-  /* ═════ 05 แบบอากาศยาน: วงแหวน + ภาพร่าง Blueprint SVG + แถบ DNA ช่วงการบิน ═════ */
+  /* ═════ 05 แบบอากาศยาน: รูปถ่ายจริง + วงแหวน + แถบ DNA ช่วงการบิน ═════ */
+  const AC_IMG = {
+    H225M: 'img/ac-h225m.webp',
+    B412EP: 'img/ac-b412ep.webp',
+    'S-92': 'img/ac-s92.webp',
+    H135: 'img/ac-h135.webp',
+    'S-70I': 'img/ac-s70i.webp',
+    ALL: 'img/ac-other.webp',
+  };
   let GG_IN = U.reduced;
   const ggRing = (ar) => { const p = GG_IN ? +ar.dataset.p || 0 : 0; ar.setAttribute('stroke-dasharray', `${p} 100`); ar.style.opacity = p ? '1' : '0'; };
   const gCard = (k) => {
     const wing = k !== 'ALL';
+    const imgSrc = AC_IMG[k] || '';
+    const imgAlt = wing ? `${acName(k)} กองบิน 2` : 'เฮลิคอปเตอร์แบบอื่น';
+    const photoHtml = imgSrc
+      ? `<div class="gc-photo"><img src="${imgSrc}" alt="${esc(imgAlt)}" loading="lazy" decoding="async"/><span class="gc-photo-shim" aria-hidden="true"></span></div>`
+      : '<div class="gc-photo gc-photo-empty"></div>';
+
     return `<button type="button" class="gc" data-k="ac" data-v="${k}" data-fk="gc-${k}" aria-pressed="false"><span class="gc-ck">${ic('check', 'xs')}</span>`
-      + (wing && AC_SVG[k] ? `<span class="gc-bp">${AC_SVG[k]}</span>` : '<span class="gc-bp"></span>')
+      + photoHtml
       + (wing
         ? `<span class="gc-r"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="tr" cx="60" cy="60" r="50"/><circle class="ar" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" data-p="0" style="opacity:0"/></svg><span class="gc-v"><b>0</b><small>%</small></span></span>`
         : '<span class="gc-o"><b>0</b><small>เคส</small></span>')
-      + `<span class="gc-n">${esc(acName(k))}</span><span class="gc-s">${wing ? `ฝูง ${esc(U.AC_SQ[k] || '—')}` : 'แบบที่ บน.2 ไม่ได้ใช้'}</span>`
-      + `<span class="gc-m"></span><span class="gc-dna" aria-hidden="true"></span><span class="gc-p"></span>${wing && FAM[k] ? `<span class="gc-f">${esc(FAM[k])}</span>` : ''}</button>`;
+      + `<span class="gc-n">${esc(acName(k))}</span>`
+      + `<span class="gc-s ${wing ? 'sq' : 'oth'}">${wing ? `ฝูง ${esc(U.AC_SQ[k] || '—')}` : 'แบบที่ บน.2 ไม่ได้ใช้'}</span>`
+      + `<span class="gc-m"></span>`
+      + `<span class="gc-dna" aria-hidden="true"></span>`
+      + `<span class="gc-p"></span>`
+      + (wing && FAM[k] ? `<span class="gc-f">${esc(FAM[k])}</span>` : '')
+      + `</button>`;
   };
   HTML.push(`<section class="sec wrap" id="s-types" aria-labelledby="h-types">
   ${head('05', 'types', '', 'วงแหวนคือสัดส่วนของแต่ละแบบในบรรดาเคสของเฮลิคอปเตอร์แบบที่ บน.2 ใช้ — แตะการ์ดเพื่อกรองทั้งหน้าตามแบบ หรือกดปุ่มขวาบนเพื่อดูรวมทั้ง 5 แบบของ บน.2',
@@ -1452,9 +1471,10 @@ export async function mountOverview(host, { state }) {
       const ph = phs[0];
       b.classList.toggle('z', !n);
       b.setAttribute('aria-pressed', String(S.ac === k));
-      $('.gc-m', b).innerHTML = `<span><i class="d" style="background:var(--bad)"></i>${U.fmt(a)}</span><span><i class="d" style="background:var(--warn)"></i>${U.fmt(n - a)}</span>`;
+      $('.gc-m', b).innerHTML = `<span class="gc-stat acc" title="อุบัติเหตุ ${U.fmt(a)} เคส"><i class="d"></i><b>${U.fmt(a)}</b></span>`
+        + `<span class="gc-stat inc" title="อุบัติการณ์ ${U.fmt(n - a)} เคส"><i class="d"></i><b>${U.fmt(n - a)}</b></span>`;
       $('.gc-dna', b).innerHTML = phs.slice(0, 4).map(([, cN], idx) => `<i style="flex:${cN};opacity:${1 - idx * 0.2}"></i>`).join('');
-      $('.gc-p', b).textContent = ph ? `ช่วงที่พบมาก: ${PH[ph[0]]} (${ph[1]})` : 'ไม่มีเคสในตัวกรองนี้';
+      $('.gc-p', b).innerHTML = ph ? `ช่วงที่พบมาก: <b>${esc(PH[ph[0]])}</b> <span class="gc-cnt">(${U.fmt(ph[1])})</span>` : 'ไม่มีเคสในตัวกรองนี้';
       let lab;
       if (k === 'ALL') { setNum($('.gc-o b', b), n); lab = `${U.fmt(n)} เคส`; }
       else {
