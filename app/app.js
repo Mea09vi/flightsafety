@@ -60,7 +60,7 @@ const state = {
   hist: null, // ประวัติเหตุ บน.2 โหลดตอนเปิดหน้าครั้งแรก { status, data }
   // หน้าประวัติเหตุ: ปีงบที่เลือก · แหล่งที่กรองในปีนั้น · ฝูงของตารางหัวข้อ · ช่องที่กด { tp, fy }
   // back = หน้าที่เปิดรายละเอียดมา · ret = หน้านอก #/history ที่เข้ามา (เช่น หน้าเคส)
-  hv: { y: null, src: null, sq: 'ALL', cell: null, img: false, back: '', ret: '' },
+  hv: { y: null, src: null, sq: 'ALL', cell: null, img: false, back: '', ret: '', q: '' },
   caseBack: '', // เปิดหน้าเคสจากประวัติเหตุ: ปุ่มย้อนกลับไปที่นั่น ไม่ใช่หน้ารายการ
 };
 
@@ -135,6 +135,8 @@ async function unlock(pass, remember = true) {
   const raw = b64.enc(await crypto.subtle.exportKey('raw', key));
   if (remember) { LS.set('key', raw); SS.del('key'); } else { SS.set('key', raw); LS.del('key'); }
   if (state.hist?.status === 'locked') state.hist = null;
+  // ถอดรหัสประวัติเหตุต่อเลยโดยไม่รอ ให้ไฟล์เข้าแคชไว้เปิดตอนไม่มีสัญญาณ
+  loadHistory().catch(() => {});
 }
 
 // ประวัติเหตุ บน.2 (#/history และแผง "เกิดใน บน.2 มาแล้ว" ในหน้าเคส) — โหลดตอนใช้ครั้งแรก ใช้กุญแจเดียวกับเคสหน่วย
@@ -382,7 +384,7 @@ function viewFilter() {
 
     <section class="step" id="st-mission">
       <div class="step-h"><span class="num">03</span><h2>ภารกิจ</h2><span class="hint"></span></div>
-      <div class="chips">${t.mission.map((x) => chip('mission', x)).join('')}</div>
+      <div class="chips">${t.mission.map((x) => chip('mission', x).replace('</button>', '<b class="cn"></b></button>')).join('')}</div>
     </section>
 
     <section class="step" id="st-environment">
@@ -448,6 +450,13 @@ function syncFilter() {
       : done
         ? (st.k === 'environment' ? `เลือก ${s.environment.length} ข้อ` : 'เลือกแล้ว')
         : (st.k === 'environment' ? 'เลือกได้หลายข้อ' : 'เลือก 1 ข้อ');
+  }
+  // จำนวนเคสที่ระบุภารกิจนั้นตรง ๆ (ตามแหล่งและแบบ ฮ. ที่เลือก ไม่นับ "ทุกภารกิจ")
+  const pool = allCases().filter((c) => inSrc(c, s) && (!s.aircraft || c.aircraft.includes(s.aircraft) || c.aircraft.includes('ALL')));
+  for (const b of $$('#st-mission [data-v]', main)) {
+    const n = pool.filter((c) => c.mission.includes(b.dataset.v)).length;
+    $('.cn', b).textContent = nTh(n);
+    b.classList.toggle('zero', !n);
   }
   const optN = s.phase.length + s.hfacs.length;
   $('#opt-hint').textContent = optN ? `เลือก ${optN} ข้อ` : '';
@@ -868,9 +877,9 @@ function toggleTick(id, k) {
   if (i < 0) list.push(k); else list.splice(i, 1);
   t.cases[id] = list;
   LS.set('ticks', t);
-  const b = $(`[data-tick="${k}"]`, main);
-  b.setAttribute('aria-pressed', String(i < 0));
-  $('#prog').textContent = `${list.length}/${byId(id).actions_today.length}`;
+  $(`[data-tick="${k}"]`, main)?.setAttribute('aria-pressed', String(i < 0));
+  const p = $('#prog'); // หน้าบรีฟไม่มีตัวนับ
+  if (p) p.textContent = `${list.length}/${byId(id).actions_today.length}`;
   if (i < 0) navigator.vibrate?.(10);
 }
 
@@ -908,8 +917,15 @@ function briefSet(id) {
   return briefDeck.includes(id) ? briefDeck : [id];
 }
 
+// รายการ "ทำวันนี้" ของบรีฟ แตะติ๊กได้ ใช้ที่เก็บเดียวกับหน้าเคส
+function pdoList(c) {
+  const done = ticks().cases[c.id] || [];
+  return `<ol class="pdo">${c.actions_today.map((a, k) => `<li><button data-tick="${k}" aria-pressed="${done.includes(k)}">`
+    + `<span class="n">${k + 1}</span><span class="t">${esc(a)}</span><span class="box">${icon('check')}</span></button></li>`).join('')}</ol>`;
+}
+
 function pmain(c, key) {
-  const pdo = `<ol class="pdo">${c.actions_today.map((a, k) => `<li><span>${k + 1}</span>${esc(a)}</li>`).join('')}</ol>`;
+  const pdo = pdoList(c);
   switch (key) {
     case 'sum': return `<h1 class="ptitle">${esc(c.title)}</h1><div class="ptext">${storyHtml(c, { brief: true })}</div>`;
     case 'fac': return `<p class="plab">ปัจจัยที่เกี่ยวข้อง</p><ul class="pfac">${c.factors.slice(0, FAC_MAX).map((f) => `<li>${conf(esc(f))}</li>`).join('')}</ul>`
@@ -1017,7 +1033,7 @@ function viewBrief(id, step) {
         <div>
           <section class="ask"><p class="ask-l">คำถามบรีฟ</p><p class="q">${esc(c.brief_question)}</p></section>
           <h3>ทำวันนี้</h3>
-          <ol class="pdo">${c.actions_today.map((a, k) => `<li><span>${k + 1}</span>${esc(a)}</li>`).join('')}</ol>
+          ${pdoList(c)}
         </div>
       </div>
       <div class="brief-foot">${prev}
@@ -1098,15 +1114,19 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'Escape') exitBrief();
 });
 
-let touchX = null;
+// เปลี่ยนสไลด์เมื่อปัดแนวนอนชัด ๆ เท่านั้น — เลื่อนอ่านขึ้นลงแล้วนิ้วเอียงไม่นับ (DECISIONS.md "ข้อเสนอแนะนักบินรอบแรก")
+let touchX = null, touchY = null;
 document.addEventListener('touchstart', (e) => {
-  touchX = document.body.classList.contains('briefing') ? e.touches[0].clientX : null;
+  const on = document.body.classList.contains('briefing');
+  touchX = on ? e.touches[0].clientX : null;
+  touchY = on ? e.touches[0].clientY : null;
 }, { passive: true });
 document.addEventListener('touchend', (e) => {
   if (touchX == null) return;
   const dx = e.changedTouches[0].clientX - touchX;
-  touchX = null;
-  if (Math.abs(dx) > 60) briefGo(dx < 0 ? 1 : -1);
+  const dy = e.changedTouches[0].clientY - touchY;
+  touchX = touchY = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) briefGo(dx < 0 ? 1 : -1);
 }, { passive: true });
 
 /* ── หน้าภาพรวม ─────────────────────────────────────────────── */
@@ -1136,7 +1156,7 @@ function viewOverview() {
 
 const APPS = [
   { href: '#/filter', ic: 'brief', th: 'บรีฟก่อนบิน', c: 'gold' },
-  { href: '#/dashboard', ic: 'chart', th: 'ภาพรวม', c: 'blue' },
+  { href: '#/dashboard', ic: 'chart', th: 'เคสสากล', c: 'blue' },
   { href: '#/history', ic: 'hist', th: 'ประวัติเหตุ', c: 'teal' },
   { href: '#/theory', ic: 'book', th: 'ทฤษฎีนิรภัย', c: 'violet' },
   { href: '#/areas', ic: 'pin', th: 'พื้นที่บิน', c: 'green' },
@@ -1408,6 +1428,36 @@ function hGroups(list, by, here = null) {
   }).join('');
 }
 
+// ค้นข้อความในประวัติเหตุ: ทุกคำ (เว้นวรรคคั่น) ต้องพบในหัวเรื่อง แบบ ฮ. หรือเนื้อเรื่องที่ใดที่หนึ่ง
+const hHay = new WeakMap();
+function hText(it) {
+  let t = hHay.get(it);
+  if (t == null) {
+    const out = [];
+    const walk = (v, k) => {
+      if (k === 'img' || k === 'enc') return;
+      if (typeof v === 'string') out.push(v);
+      else if (Array.isArray(v)) v.forEach((x) => walk(x));
+      else if (v && typeof v === 'object') for (const [kk, x] of Object.entries(v)) walk(x, kk);
+    };
+    walk(it);
+    t = out.join(' ').toLowerCase();
+    hHay.set(it, t);
+  }
+  return t;
+}
+const hQuery = (list, q) => {
+  const ws = q.toLowerCase().split(/\s+/).filter(Boolean);
+  return ws.length ? list.filter((x) => { const t = hText(x); return ws.every((w) => t.includes(w)); }) : list;
+};
+
+// ผลค้นหา: แทนมุมมองของแท็บ เรียงตามปีงบ ใหม่ก่อน
+function hvSearch(h, q) {
+  const list = hQuery(h.data.items, q).sort(byFyDesc);
+  if (!list.length) return `<p class="note h-qn" role="status">ไม่พบเรื่องที่มีคำว่า “${esc(q)}” · ลองคำสั้นลงหรือสะกดแบบอื่น${state.hv.img || state.hv.nt ? ' หรือปิดตัวกรองกลางคืน/ภาพ' : ''}</p>`;
+  return `<p class="note h-qn" role="status">พบ <b>${nTh(list.length)}</b> เรื่อง · เรียงตามปีงบ ใหม่ก่อน</p><section class="hv-s" id="hlist" aria-label="ผลค้นหา">${hGroups(list, 'fy')}</section>`;
+}
+
 // หัวหน้าประวัติเหตุ + แท็บ รายปี/ตามหัวข้อ · คืน <div> ที่ยังไม่ปิด ผู้เรียกปิดเอง
 function hvHead(h, tab, still) {
   const items = h.data.items;
@@ -1429,7 +1479,8 @@ function hvHead(h, tab, still) {
         <a data-replace href="#/history/hours"${tab === 'h' ? ' aria-current="page"' : ''}>${icon('clock')}รายชั่วโมง</a>
       <span class="h-tgs">${nNt.a ? `<button class="h-imgtg" data-hnt="" aria-pressed="${!!nt}">${icon('check', 'ic ck')}${icon('moon')}กลางคืน <b>${nTh(nNt.a)}</b></button>` : ''}
       ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}</span>
-    </nav>${ntSub}${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}</div>`;
+    </nav>${ntSub}${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}
+    <form class="h-q" role="search" data-hqf><label>${icon('search')}<input type="search" id="hq" value="${esc(state.hv.q)}" placeholder="ค้นหา เช่น ระบบ อาการ สถานที่ นามเรียกขาน" aria-label="ค้นหาประวัติเหตุ" enterkeyhint="search" autocomplete="off" spellcheck="false"></label></form></div>`;
 }
 
 // แบบ B: เส้นเวลารายปีงบ แท่งซ้อนตามแหล่ง · แตะปีเพื่อดูรายการของปีนั้น
@@ -1992,7 +2043,9 @@ function renderHist(arg, sub, still = false) {
   if (state.hv.nt && !h.data.items.some((x) => x.nt)) state.hv.nt = null;
   const nt = state.hv.nt, keep = (x) => (!state.hv.img || himgs(x).length) && (!nt || (nt === 'a' ? x.nt : x.nt === nt));
   const hf = state.hv.img || nt ? { ...h, data: { ...h.data, items: h.data.items.filter(keep) } } : h;
-  if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
+  const q = state.hv.q.trim();
+  if (q && ['', 'topics', 'months', 'hours'].includes(arg)) html = hvHead(h, { '': 'y', topics: 't', months: 'm', hours: 'h' }[arg], still) + hvSearch(hf, q) + '</div>';
+  else if (!arg) html = hvHead(h, 'y', still) + hvYears(hf) + '</div>';
   else if (arg === 'topics') html = hvHead(h, 't', still) + hvTopics(hf) + '</div>';
   else if (arg === 'months') html = hvHead(h, 'm', still) + hvMonths(hf) + '</div>';
   else if (arg === 'hours') html = hvHead(h, 'h', still) + hvHours(hf) + '</div>';
@@ -2014,6 +2067,10 @@ function viewHist(arg, sub, prev) {
 function redrawHist() {
   if (!state.hist) return;
   const a = document.activeElement;
+  if (a?.id === 'hq') {
+    renderHistKeepQ();
+    return;
+  }
   let sel = null;
   if (a && main.contains(a)) {
     const k = ['hy', 'hsrc', 'hsq', 'htp', 'hfy', 'hmode', 'himg', 'hnt', 'hms', 'hhs'].filter((x) => a.dataset[x] != null);
@@ -2023,6 +2080,31 @@ function redrawHist() {
   renderHist(decodeURIComponent(parts[1] || ''), parts[2], true);
   if (sel) $(sel, main)?.focus({ preventScroll: true });
 }
+
+// พิมพ์ในช่องค้นหา: วาดใหม่แล้วคืนโฟกัส/เคอร์เซอร์ให้ช่องเดิม
+function renderHistKeepQ() {
+  const a = $('#hq');
+  const pos = a?.selectionStart ?? state.hv.q.length;
+  const parts = location.hash.replace(/^#\/?/, '').split('/');
+  renderHist(decodeURIComponent(parts[1] || ''), parts[2], true);
+  const b = $('#hq');
+  if (b) { b.focus({ preventScroll: true }); b.setSelectionRange(pos, pos); }
+}
+let hqT = 0;
+document.addEventListener('input', (e) => {
+  if (e.target.id !== 'hq') return;
+  state.hv.q = e.target.value;
+  clearTimeout(hqT);
+  hqT = setTimeout(renderHistKeepQ, 180);
+});
+document.addEventListener('submit', (e) => {
+  if (!e.target.matches('[data-hqf]')) return;
+  e.preventDefault();
+  clearTimeout(hqT);
+  state.hv.q = $('#hq').value;
+  renderHistKeepQ();
+  $('#hq')?.blur(); // ปิดแป้นพิมพ์บนมือถือ ให้เห็นผล
+});
 
 // แบบ D: แผง "เกิดใน บน.2 มาแล้ว" ท้ายหน้าเคส · ปิดได้ที่ปุ่มในแผง หรือหน้า ข้อมูล
 async function fillHistPanel(c, panel = true) {
@@ -2159,7 +2241,7 @@ function viewAbout() {
 
     <section class="panel">
       <h2>นโยบายข้อมูล</h2>
-      <p style="margin:0">ทุกเคสไม่มีชื่อบุคคล หมายเลขเครื่อง หรือวันที่เต็ม (เก็บแค่ปี) · เคส INTL สรุปจากรายงานสอบสวนที่เผยแพร่สาธารณะ กดลิงก์ในแต่ละเคสเพื่ออ่านต้นฉบับ · เคสที่มีป้าย "ร่าง" ยังไม่ผ่านการตรวจทาน</p>
+      <p style="margin:0">ทุกเคสไม่มีชื่อบุคคล · เคสของ บน.2 มีวันเวลา นามเรียกขาน หมายเลขเครื่อง และสถานที่เท่าที่บันทึกต้นฉบับมี ส่วนเคสของหน่วยอื่นใน ทอ. เก็บแค่ปี · เคส INTL สรุปจากรายงานสอบสวนที่เผยแพร่สาธารณะ กดลิงก์ในแต่ละเคสเพื่ออ่านต้นฉบับ · เคสที่มีป้าย "ร่าง" ยังไม่ผ่านการตรวจทาน</p>
     </section>
   </div>`;
 }
