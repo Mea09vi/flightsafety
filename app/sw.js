@@ -1,6 +1,6 @@
 // Service worker — app shell แบบ cache-first, ข้อมูลแบบ stale-while-revalidate
 // เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ใน SHELL เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = 'w2sb-2026-10-20a';
+const VERSION = 'w2sb-2026-10-20c';
 // ฟอนต์ฝังใน app/fonts/ (ชื่อไฟล์ <ฟอนต์>-<น้ำหนัก>-<ช่วงอักษร>.woff2) ต้องตรงกับ @font-face ใน styles.css
 const FONTS = ['baijamjuree-600', 'notoserifthai-600', 'plexsansthai-400', 'plexsansthai-500', 'plexsansthai-600']
   .flatMap((f) => ['thai', 'latin'].map((s) => `fonts/${f}-${s}.woff2`))
