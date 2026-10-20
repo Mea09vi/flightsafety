@@ -1,12 +1,12 @@
 // Service worker — app shell แบบ cache-first, ข้อมูลแบบ stale-while-revalidate
 // เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ใน SHELL เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = 'w2sb-2026-10-20i';
+const VERSION = 'w2sb-2026-10-20j';
 // ฟอนต์ฝังใน app/fonts/ (ชื่อไฟล์ <ฟอนต์>-<น้ำหนัก>-<ช่วงอักษร>.woff2) ต้องตรงกับ @font-face ใน styles.css
 const FONTS = ['baijamjuree-600', 'notoserifthai-600', 'plexsansthai-400', 'plexsansthai-500', 'plexsansthai-600']
   .flatMap((f) => ['thai', 'latin'].map((s) => `fonts/${f}-${s}.woff2`))
   .concat(['fonts/plexmono-500-latin.woff2', 'fonts/plexmono-600-latin.woff2']);
 // ภาพปกหน้าหลัก ธีมกลางคืน/กระดาษ ขนาดเต็มและจอเล็ก (รวม ~60 KB) ให้ปกขึ้นได้ตอนออฟไลน์
-const IMG = ['night', 'day'].flatMap((t) => [`img/hero-${t}.webp`, `img/hero-${t}-s.webp`]);
+const IMG = ['night', 'day'].flatMap((t) => [`img/hero-${t}.webp`, `img/hero-${t}-s.webp`, `img/air-${t}.webp`, `img/air-${t}-s.webp`]);
 // ภาพถ่ายอากาศยานจริงประจำแบบ ฮ. กองบิน 2 และแบบอื่นในหน้าภาพรวม
 const AC_IMGS = ['h225m', 'b412ep', 's92', 'h135', 's70i', 'other'].map((k) => `img/ac-${k}.webp`);
 // หน้าจอคอมฯ (desk.css): หัวเรื่อง Kanit

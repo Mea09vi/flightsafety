@@ -119,6 +119,9 @@
   --node: #dfe6f2;
   --hero: url("img/hero-night.webp");
   --hero-s: url("img/hero-night-s.webp");
+  --air-img: url("img/air-night.webp");
+  --air-img-s: url("img/air-night-s.webp");
+  --air-scrim: linear-gradient(180deg, rgb(11 17 32 / .78) 0%, rgb(11 17 32 / .55) 48%, rgb(11 17 32 / .08) 78%, transparent 100%);
   --scrim: linear-gradient(90deg, rgb(11 17 32 / .94) 0%, rgb(11 17 32 / .78) 42%, rgb(11 17 32 / .1) 78%), linear-gradient(0deg, var(--bg) 0%, transparent 38%);
   --sky: #6cc9ff;
   --gold: #f2c66d;
@@ -156,6 +159,9 @@
   --node: #2a2f39;
   --hero: url("img/hero-day.webp");
   --hero-s: url("img/hero-day-s.webp");
+  --air-img: url("img/air-day.webp");
+  --air-img-s: url("img/air-day-s.webp");
+  --air-scrim: linear-gradient(180deg, rgb(244 239 228 / .86) 0%, rgb(244 239 228 / .62) 48%, rgb(244 239 228 / .1) 78%, transparent 100%);
   --scrim: linear-gradient(90deg, rgb(244 239 228 / .96) 0%, rgb(244 239 228 / .82) 42%, rgb(244 239 228 / .08) 78%), linear-gradient(0deg, var(--bg) 0%, transparent 38%);
   --sky: #0d64a6;
   --gold: #8a5d00;
@@ -2501,8 +2507,9 @@ body.briefing .policy, body.lesson .policy { display: none; }
 
 /* หน้า #/airmanship */
 .air { max-width: 980px; margin: 0 auto; }
-.air-hero { position: relative; padding: 26px 20px 22px; border: 1px solid var(--line); border-radius: 18px; text-align: center; overflow: hidden;
-  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 62%), var(--bg2); }
+.air-hero { position: relative; padding: 26px 20px calc(48vw - 20px); border: 1px solid var(--line); border-radius: 18px; text-align: center; overflow: hidden;
+  background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 70%), var(--air-img-s) 50% 100% / 100% auto no-repeat, var(--bg2); }
+@media (min-width: 760px) { .air-hero { padding: 34px 24px 150px; background: var(--air-scrim), var(--air-img) 60% 100% / cover no-repeat, var(--bg2); } }
 .air-emb { display: block; margin: 0 auto 10px; width: 46px; height: auto; }
 .air-eye { font: 500 12.5px/1.4 var(--f-d); letter-spacing: .08em; color: var(--muted); }
 .air-hero h1 { margin: 6px 0 2px; font: 700 clamp(30px, 8vw, 52px)/1.1 var(--f-d); letter-spacing: .04em; }
