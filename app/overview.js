@@ -1438,7 +1438,7 @@ export async function mountOverview(host, { state }) {
     const imgSrc = AC_IMG[k] || '';
     const imgAlt = wing ? `${acName(k)} กองบิน 2` : 'เฮลิคอปเตอร์แบบอื่น';
     const photoHtml = imgSrc
-      ? `<div class="gc-photo"><img src="${imgSrc}" alt="${esc(imgAlt)}" loading="lazy" decoding="async"/><span class="gc-photo-shim" aria-hidden="true"></span></div>`
+      ? `<div class="gc-photo"><img src="${imgSrc}" alt="${esc(imgAlt)}" loading="eager" decoding="async"/><span class="gc-photo-shim" aria-hidden="true"></span></div>`
       : '<div class="gc-photo gc-photo-empty"></div>';
 
     return `<button type="button" class="gc" data-k="ac" data-v="${k}" data-fk="gc-${k}" aria-pressed="false"><span class="gc-ck">${ic('check', 'xs')}</span>`

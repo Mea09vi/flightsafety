@@ -370,6 +370,15 @@ const STEPS = [
   { k: 'environment', th: 'อากาศ / สภาพแวดล้อม', short: 'สภาพอากาศ' },
 ];
 
+/* ภาพถ่ายอากาศยานจริงประจำแบบ ฮ. กองบิน 2 */
+const AC_IMG = {
+  H225M: 'img/ac-h225m.webp',
+  B412EP: 'img/ac-b412ep.webp',
+  'S-92': 'img/ac-s92.webp',
+  H135: 'img/ac-h135.webp',
+  'S-70I': 'img/ac-s70i.webp',
+};
+
 /* ภาพร่าง Blueprint SVG ประจำแบบ ฮ. กองบิน 2 สำหรับ Aircraft Selector */
 const AC_SVG = {
   H225M: '<svg viewBox="0 0 120 36" class="ac-bp" aria-hidden="true"><path d="M12 20h66l18-6 10 3-8 6-14 4H34l-14-3-8-4z" fill-opacity=".22" stroke-width="1.4"/><path d="M22 10h74M59 10v10M98 11l8 8m0-8l-8 8M40 27h28" fill="none" stroke-width="1.5" stroke-linecap="round"/></svg>',
@@ -422,13 +431,14 @@ function viewFilter() {
       ${Object.entries(squadrons).map(([q, list]) => `<div class="sqn" role="group" aria-label="ฝูง ${q}">
         <div class="sqn-badge"><span class="sqn-sub">ฝูงบิน</span><b>${esc(q)}</b></div>
         <div class="tiles ac-tiles">${list.map((a) => {
+          const img = AC_IMG[a.code] || '';
           const bp = AC_SVG[a.code] || '';
           return `<button class="tile tile-ac" data-k="aircraft" data-v="${esc(a.code)}" aria-pressed="false">
             <div class="ac-info">
               <span class="code">${esc(a.code)}</span>
               <span class="lab">${esc(a.label)}</span>
             </div>
-            ${bp ? `<div class="ac-blueprint" aria-hidden="true">${bp}</div>` : ''}
+            ${img ? `<div class="ac-photo"><img src="${img}" alt="${esc(a.code)}" loading="eager" decoding="async"/></div>` : (bp ? `<div class="ac-blueprint" aria-hidden="true">${bp}</div>` : '')}
             ${icon('check', 'ic ck')}
           </button>`;
         }).join('')}</div>

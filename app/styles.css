@@ -243,13 +243,14 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .brand { display: flex; align-items: center; gap: 10px; min-height: 48px; text-decoration: none; min-width: 0; }
 .brand b { font: 600 16px/1 var(--f-d); white-space: nowrap; }
-.logo { width: 28px; height: 28px; border-radius: 7px; background: var(--gold); color: var(--on-pri); display: grid; place-items: center; flex: none; }
-.logo .ic { width: 18px; height: 18px; stroke-width: 2.4; }
+/* จอแคบใช้ตรา บน.2 แบบเดียวกับแถบเมนูซ้ายจอคอมฯ (.logo เดิมเก็บไว้เผื่อ แต่ไม่แสดง) */
+.logo { display: none; }
+.annun .emblem { display: block; flex: none; width: 30px; height: auto; filter: drop-shadow(0 2px 4px rgb(0 0 0 / .35)); }
 .net { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); white-space: nowrap; }
 .net .lamp { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px; border: 1px solid var(--line2); border-radius: 4px; }
 .net .ver { color: var(--muted); }
 /* ส่วนของแถบเมนูซ้ายจอคอมฯ (desk.css) ซ่อนบนจอแคบ */
-.d-only, .d-ic, .emblem, .d-badge, .tabbar .d-only { display: none; }
+.d-only, .d-ic, .d-badge, .tabbar .d-only { display: none; }
 .brand b em { font-style: normal; }
 .b-t { display: contents; }
 
@@ -319,12 +320,24 @@ main {
 
 /* การ์ดเลือก ฮ. พร้อมพิมพ์เขียว Blueprint SVG */
 .tile.tile-ac {
-  min-height: 68px; padding: 8px 6px 8px 10px;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px;
+  min-height: 68px; padding: 8px 8px 8px 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px;
   overflow: hidden;
 }
 .tile.tile-ac .ac-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; z-index: 1; }
-.tile.tile-ac .ac-info .lab { font-size: 11px; line-height: 1.25; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile.tile-ac .ac-info .code { font-weight: 700; font-size: 15px; line-height: 1.2; letter-spacing: -0.01em; }
+.tile.tile-ac .ac-info .lab { font-size: 11.5px; line-height: 1.25; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile.tile-ac .ac-photo {
+  position: relative; flex: none; width: 68px; height: 40px; border-radius: 8px;
+  overflow: hidden; background: #090e17; border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-left: auto; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.tile.tile-ac .ac-photo img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;
+  transition: transform .25s ease;
+}
+.tile.tile-ac:hover .ac-photo img { transform: scale(1.06); }
+.tile.tile-ac[aria-pressed="true"] .ac-photo { border-color: var(--gold); box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
 .tile.tile-ac .ac-blueprint {
   flex: none; width: 54px; height: 22px; opacity: .78;
   display: flex; align-items: center; justify-content: flex-end;
@@ -333,7 +346,7 @@ main {
 .tile.tile-ac .ac-bp { width: 100%; height: 100%; stroke: currentColor; fill: currentColor; }
 .tile.tile-ac:hover .ac-blueprint { opacity: 1; transform: translateX(-2px) scale(1.05); }
 .tile.tile-ac[aria-pressed="true"] .ac-blueprint { opacity: 1; }
-.tile.tile-ac .ck { position: absolute; right: 6px; top: 6px; margin-top: 0; width: 16px; height: 16px; }
+.tile.tile-ac .ck { position: absolute; right: 6px; top: 6px; margin-top: 0; width: 16px; height: 16px; z-index: 2; }
 
 .tile[aria-pressed="true"], .chip[aria-pressed="true"], .seg button[aria-pressed="true"] {
   background: var(--text); color: var(--bg); border-color: var(--text);
