@@ -43,6 +43,8 @@ REF_HOSTS = {
     "mod.go.jp": "MOD Japan",
     "defense.gouv.fr": "BEA-É France",
     "mot.go.th": "AAIC Thailand",
+    "aaib.gov.in": "AAIB India",
+    "shk.se": "SHK Sweden",
 }
 
 # คำที่อาจระบุตัวตน — เตือนแต่ไม่บล็อก (ไม่ตรวจช่อง ref)
