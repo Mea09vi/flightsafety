@@ -17,11 +17,11 @@ export const THEORY_DIAGRAMS = {
     <!-- Trajectory of Hazard (ลำแสงอันตราย) -->
     <path d="M20 95L95 95L165 95L235 95L278 95" fill="none" stroke="url(#sw-ray)" stroke-width="3" stroke-dasharray="5 3"/>
     <circle cx="20" cy="95" r="4.5" fill="#ff7a85"/>
-    <text x="20" y="80" fill="#ff7a85" font-size="10.5" font-weight="600" text-anchor="middle">อันตราย (Hazard)</text>
+    <text x="6" y="80" fill="#ff7a85" font-size="10.5" font-weight="600">อันตราย (Hazard)</text>
 
     <!-- Slice 1: อิทธิพลระดับองค์กร -->
     <g transform="translate(80, 30)">
-      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--d-gold-600) / .16)" stroke="var(--gold)" stroke-width="1.6"/>
+      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(37 58% 51% / .16)" stroke="var(--gold)" stroke-width="1.6"/>
       <ellipse cx="14" cy="65" rx="7" ry="12" fill="#0b1120" stroke="var(--gold)" stroke-width="1.4"/>
       <ellipse cx="12" cy="110" rx="5" ry="8" fill="#0b1120" stroke="var(--gold)" stroke-width="1.2"/>
       <text x="12" y="152" fill="var(--gold)" font-size="9" font-weight="600" text-anchor="middle">1. องค์กร</text>
@@ -29,7 +29,7 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Slice 2: การกำกับดูแล -->
     <g transform="translate(150, 30)">
-      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--d-glow) / .16)" stroke="var(--gold)" stroke-width="1.6"/>
+      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--td-glow) / .16)" stroke="var(--gold)" stroke-width="1.6"/>
       <ellipse cx="14" cy="65" rx="6" ry="11" fill="#0b1120" stroke="var(--gold)" stroke-width="1.4"/>
       <ellipse cx="15" cy="35" rx="5" ry="7" fill="#0b1120" stroke="var(--gold)" stroke-width="1.2"/>
       <text x="12" y="152" fill="var(--gold)" font-size="9" font-weight="600" text-anchor="middle">2. กำกับดูแล</text>
@@ -37,14 +37,14 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Slice 3: สภาพก่อนเกิดเหตุ -->
     <g transform="translate(220, 30)">
-      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--d-accent-t) / .16)" stroke="var(--sky)" stroke-width="1.6"/>
+      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--td-accent) / .16)" stroke="var(--sky)" stroke-width="1.6"/>
       <ellipse cx="14" cy="65" rx="6" ry="10" fill="#0b1120" stroke="var(--sky)" stroke-width="1.4"/>
       <text x="12" y="152" fill="var(--sky)" font-size="9" font-weight="600" text-anchor="middle">3. สภาพแวดล้อม</text>
     </g>
 
     <!-- Slice 4: การกระทำหน้างาน (ชั้นที่หยุดอันตรายได้) -->
     <g transform="translate(290, 30)">
-      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(var(--d-green-400) / .22)" stroke="var(--ok)" stroke-width="2"/>
+      <polygon points="0,15 25,0 25,125 0,140" fill="hsl(151 57% 60% / .22)" stroke="var(--ok)" stroke-width="2"/>
       <!-- รูไม่ตรงแนวลำแสง รูอยู่ข้างล่าง ลำแสงจึงชนเนื้อชีสหยุดลง -->
       <ellipse cx="13" cy="30" rx="5" ry="8" fill="#0b1120" stroke="var(--ok)" stroke-width="1.2"/>
       <ellipse cx="14" cy="115" rx="6" ry="9" fill="#0b1120" stroke="var(--ok)" stroke-width="1.2"/>
@@ -54,7 +54,7 @@ export const THEORY_DIAGRAMS = {
       <text x="12" y="152" fill="var(--ok)" font-size="9" font-weight="600" text-anchor="middle">4. การปฏิบัติ</text>
     </g>
 
-    <rect x="238" y="14" width="112" height="22" rx="4" fill="hsl(var(--d-green-400) / .18)" stroke="var(--ok)" stroke-width="1"/>
+    <rect x="238" y="14" width="112" height="22" rx="4" fill="hsl(151 57% 60% / .18)" stroke="var(--ok)" stroke-width="1"/>
     <text x="294" y="29" fill="var(--ok)" font-size="9.5" font-weight="600" text-anchor="middle">✓ ปิดรูสำเร็จ · ปลอดภัย</text>
   </svg>`,
 
@@ -62,25 +62,25 @@ export const THEORY_DIAGRAMS = {
   hfacs: `<svg class="td-svg" viewBox="0 0 360 200" aria-label="ลำดับขั้น HFACS 4 ระดับ">
     <g transform="translate(20, 16)">
       <!-- Tier 4: Organizational Influences -->
-      <rect x="50" y="0" width="220" height="32" rx="6" fill="hsl(var(--d-violet-400) / .25)" stroke="hsl(var(--d-violet-400))" stroke-width="1.6"/>
-      <text x="160" y="16" fill="#fff" font-size="11.5" font-weight="600" text-anchor="middle">ระดับ 4: อิทธิพลระดับองค์กร (Organizational)</text>
+      <rect x="50" y="0" width="220" height="32" rx="6" fill="hsl(264 100% 77% / .25)" stroke="hsl(264 100% 77%)" stroke-width="1.6"/>
+      <text x="160" y="16" fill="var(--text)" font-size="11.5" font-weight="600" text-anchor="middle">ระดับ 4: อิทธิพลระดับองค์กร (Organizational)</text>
       <text x="160" y="27" fill="var(--text2)" font-size="8.5" text-anchor="middle">นโยบาย • ทรัพยากร • วัฒนธรรมความปลอดภัย</text>
       
       <!-- Tier 3: Unsafe Supervision -->
-      <path d="M160 33L160 44" stroke="hsl(var(--d-violet-400))" stroke-width="2" marker-end="url(#arr)"/>
-      <rect x="36" y="44" width="248" height="32" rx="6" fill="hsl(var(--d-violet-400) / .18)" stroke="hsl(var(--d-violet-400) / .8)" stroke-width="1.4"/>
+      <path d="M160 33L160 44" stroke="hsl(264 100% 77%)" stroke-width="2" marker-end="url(#arr)"/>
+      <rect x="36" y="44" width="248" height="32" rx="6" fill="hsl(264 100% 77% / .18)" stroke="hsl(264 100% 77% / .8)" stroke-width="1.4"/>
       <text x="160" y="60" fill="var(--text)" font-size="11.5" font-weight="600" text-anchor="middle">ระดับ 3: การกำกับดูแลที่ไม่ปลอดภัย (Supervision)</text>
       <text x="160" y="71" fill="var(--text2)" font-size="8.5" text-anchor="middle">การฝึกอบรม • การวางแผนการบิน • การไม่กำกับแก้ไข</text>
 
       <!-- Tier 2: Preconditions for Unsafe Acts -->
-      <path d="M160 77L160 88" stroke="hsl(var(--d-violet-400))" stroke-width="2"/>
-      <rect x="22" y="88" width="276" height="32" rx="6" fill="hsl(var(--d-accent-t) / .16)" stroke="var(--sky)" stroke-width="1.4"/>
+      <path d="M160 77L160 88" stroke="hsl(264 100% 77%)" stroke-width="2"/>
+      <rect x="22" y="88" width="276" height="32" rx="6" fill="hsl(var(--td-accent) / .16)" stroke="var(--sky)" stroke-width="1.4"/>
       <text x="160" y="104" fill="var(--sky)" font-size="11.5" font-weight="600" text-anchor="middle">ระดับ 2: สภาพก่อนเกิดเหตุ (Preconditions)</text>
       <text x="160" y="115" fill="var(--text2)" font-size="8.5" text-anchor="middle">ความพร้อมทางกาย/จิตใจ • CRM • สภาพแวดล้อมทางกายภาพ</text>
 
       <!-- Tier 1: Unsafe Acts -->
       <path d="M160 121L160 132" stroke="var(--sky)" stroke-width="2"/>
-      <rect x="8" y="132" width="304" height="36" rx="6" fill="hsl(var(--d-glow) / .2)" stroke="var(--gold)" stroke-width="1.8"/>
+      <rect x="8" y="132" width="304" height="36" rx="6" fill="hsl(var(--td-glow) / .2)" stroke="var(--gold)" stroke-width="1.8"/>
       <text x="160" y="149" fill="var(--gold)" font-size="12" font-weight="700" text-anchor="middle">ระดับ 1: การกระทำที่ไม่ปลอดภัย (Unsafe Acts)</text>
       <text x="160" y="161" fill="var(--text2)" font-size="9" text-anchor="middle">ข้อผิดพลาด (Errors: ฝีมือ/การตัดสินใจ) • การฝ่าฝืนระเบียบ (Violations)</text>
     </g>
@@ -92,13 +92,13 @@ export const THEORY_DIAGRAMS = {
     <g transform="translate(180, 100)">
       <rect x="-42" y="-36" width="84" height="72" rx="10" fill="hsl(175 75% 42% / .28)" stroke="#14b8a6" stroke-width="2.2"/>
       <text x="0" y="-8" fill="#14b8a6" font-size="18" font-weight="800" text-anchor="middle">L</text>
-      <text x="0" y="10" fill="#fff" font-size="11" font-weight="600" text-anchor="middle">Liveware</text>
+      <text x="0" y="10" fill="var(--text)" font-size="11" font-weight="600" text-anchor="middle">Liveware</text>
       <text x="0" y="24" fill="var(--text2)" font-size="8.5" text-anchor="middle">นักบิน (ใจกลาง)</text>
     </g>
 
     <!-- Top: Software (ระเบียบ/คู่มือ/SOP) -->
     <g transform="translate(180, 26)">
-      <rect x="-65" y="-18" width="130" height="36" rx="6" fill="hsl(var(--d-accent-t) / .15)" stroke="var(--sky)" stroke-width="1.4"/>
+      <rect x="-65" y="-18" width="130" height="36" rx="6" fill="hsl(var(--td-accent) / .15)" stroke="var(--sky)" stroke-width="1.4"/>
       <line x1="0" y1="18" x2="0" y2="38" stroke="var(--sky)" stroke-width="1.5" stroke-dasharray="3 3"/>
       <text x="0" y="-1" fill="var(--sky)" font-size="11" font-weight="700" text-anchor="middle">S · Software</text>
       <text x="0" y="11" fill="var(--text2)" font-size="8.5" text-anchor="middle">SOP • คู่มือการบิน • เช็กลิสต์</text>
@@ -106,7 +106,7 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Left: Hardware (อากาศยาน/เครื่องวัด) -->
     <g transform="translate(56, 100)">
-      <rect x="-46" y="-30" width="92" height="60" rx="6" fill="hsl(var(--d-glow) / .15)" stroke="var(--gold)" stroke-width="1.4"/>
+      <rect x="-46" y="-30" width="92" height="60" rx="6" fill="hsl(var(--td-glow) / .15)" stroke="var(--gold)" stroke-width="1.4"/>
       <line x1="46" y1="0" x2="82" y2="0" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="3 3"/>
       <text x="0" y="-8" fill="var(--gold)" font-size="11" font-weight="700" text-anchor="middle">H · Hardware</text>
       <text x="0" y="8" fill="var(--text2)" font-size="8.5" text-anchor="middle">ตัว ฮ. • เครื่องยนต์</text>
@@ -115,7 +115,7 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Bottom: Environment (สภาพแวดล้อม/ภูมิประเทศ) -->
     <g transform="translate(180, 172)">
-      <rect x="-65" y="-16" width="130" height="34" rx="6" fill="hsl(var(--d-green-400) / .15)" stroke="var(--ok)" stroke-width="1.4"/>
+      <rect x="-65" y="-16" width="130" height="34" rx="6" fill="hsl(151 57% 60% / .15)" stroke="var(--ok)" stroke-width="1.4"/>
       <line x1="0" y1="-16" x2="0" y2="-36" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="3 3"/>
       <text x="0" y="0" fill="var(--ok)" font-size="11" font-weight="700" text-anchor="middle">E · Environment</text>
       <text x="0" y="12" fill="var(--text2)" font-size="8.5" text-anchor="middle">อากาศ • ป่าเขา • กลางคืน/หมอก</text>
@@ -148,26 +148,26 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Stage 2: Error -->
     <g transform="translate(170, 50)">
-      <rect x="-46" y="0" width="92" height="70" rx="8" fill="hsl(var(--d-glow) / .18)" stroke="var(--gold)" stroke-width="1.6"/>
+      <rect x="-46" y="0" width="92" height="70" rx="8" fill="hsl(var(--td-glow) / .18)" stroke="var(--gold)" stroke-width="1.6"/>
       <text x="0" y="24" fill="var(--gold)" font-size="12" font-weight="700" text-anchor="middle">2. ERROR</text>
       <text x="0" y="40" fill="var(--text)" font-size="9.5" text-anchor="middle">ข้อผิดพลาดลูกเรือ</text>
       <text x="0" y="54" fill="var(--text2)" font-size="8" text-anchor="middle">สื่อสารพลาด/คีย์ผิด</text>
-      <circle cx="0" cy="80" r="12" fill="hsl(var(--d-glow) / .2)" stroke="var(--gold)" stroke-width="1.4"/>
+      <circle cx="0" cy="80" r="12" fill="hsl(var(--td-glow) / .2)" stroke="var(--gold)" stroke-width="1.4"/>
       <text x="0" y="84" fill="var(--gold)" font-size="10" font-weight="700" text-anchor="middle">แก้</text>
     </g>
 
     <!-- Stage 3: Undesired State -->
     <g transform="translate(280, 50)">
-      <rect x="-46" y="0" width="92" height="70" rx="8" fill="hsl(var(--d-accent-t) / .18)" stroke="var(--sky)" stroke-width="1.6"/>
+      <rect x="-46" y="0" width="92" height="70" rx="8" fill="hsl(var(--td-accent) / .18)" stroke="var(--sky)" stroke-width="1.6"/>
       <text x="0" y="24" fill="var(--sky)" font-size="12" font-weight="700" text-anchor="middle">3. UAS</text>
       <text x="0" y="40" fill="var(--text)" font-size="9.5" text-anchor="middle">ท่าทางบินไม่พึงประสงค์</text>
       <text x="0" y="54" fill="var(--text2)" font-size="8" text-anchor="middle">ระดับต่ำ/ความเร็วหลุด</text>
-      <circle cx="0" cy="80" r="12" fill="hsl(var(--d-accent-t) / .2)" stroke="var(--sky)" stroke-width="1.4"/>
+      <circle cx="0" cy="80" r="12" fill="hsl(var(--td-accent) / .2)" stroke="var(--sky)" stroke-width="1.4"/>
       <text x="0" y="84" fill="var(--sky)" font-size="10" font-weight="700" text-anchor="middle">ฟื้น</text>
     </g>
 
     <!-- Defense Outcome Banner -->
-    <rect x="70" y="152" width="220" height="28" rx="6" fill="hsl(var(--d-green-400) / .18)" stroke="var(--ok)" stroke-width="1.4"/>
+    <rect x="70" y="152" width="220" height="28" rx="6" fill="hsl(151 57% 60% / .18)" stroke="var(--ok)" stroke-width="1.4"/>
     <text x="180" y="170" fill="var(--ok)" font-size="10.5" font-weight="600" text-anchor="middle">✓ ปฏิบัติการบินปลอดภัย (Safe Flight Outcome)</text>
   </svg>`,
 
@@ -203,18 +203,18 @@ export const THEORY_DIAGRAMS = {
       <text x="-8" y="87" fill="var(--text2)" font-size="9" text-anchor="end">เล็กน้อย (IV)</text>
       <text x="-8" y="111" fill="var(--text2)" font-size="9" text-anchor="end">เล็กมาก (V)</text>
 
-      <text x="20" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">บ่อย (A)</text>
-      <text x="62" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">อาจเกิด (B)</text>
-      <text x="104" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">บางครั้ง (C)</text>
-      <text x="146" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">ยาก (D)</text>
-      <text x="188" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">ยากยิ่ง (E)</text>
+      <text x="20" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">บ่อย<tspan x="20" dy="11">(A)</tspan></text>
+      <text x="62" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">อาจเกิด<tspan x="62" dy="11">(B)</tspan></text>
+      <text x="104" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">บางครั้ง<tspan x="104" dy="11">(C)</tspan></text>
+      <text x="146" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">ยาก<tspan x="146" dy="11">(D)</tspan></text>
+      <text x="188" y="132" fill="var(--text2)" font-size="9" text-anchor="middle">ยากยิ่ง<tspan x="188" dy="11">(E)</tspan></text>
     </g>
 
     <!-- Legend -->
-    <g transform="translate(40, 168)">
-      <circle cx="10" cy="8" r="5" fill="#ef4444"/><text x="22" y="12" fill="var(--text)" font-size="9.5">ความเสี่ยงสูงมาก (High)</text>
-      <circle cx="120" cy="8" r="5" fill="#f59e0b"/><text x="132" y="12" fill="var(--text)" font-size="9.5">ยอมรับได้จำกัด (Serious)</text>
-      <circle cx="230" cy="8" r="5" fill="#10b981"/><text x="242" y="12" fill="var(--text)" font-size="9.5">ยอมรับได้ (Medium/Low)</text>
+    <g transform="translate(0, 168)">
+      <circle cx="6" cy="8" r="5" fill="#ef4444"/><text x="18" y="12" fill="var(--text)" font-size="9.5">ความเสี่ยงสูงมาก (High)</text>
+      <circle cx="124" cy="8" r="5" fill="#f59e0b"/><text x="136" y="12" fill="var(--text)" font-size="9.5">ยอมรับได้จำกัด (Serious)</text>
+      <circle cx="242" cy="8" r="5" fill="#10b981"/><text x="254" y="12" fill="var(--text)" font-size="9.5">ยอมรับได้ (Medium/Low)</text>
     </g>
   </svg>`,
 
@@ -223,26 +223,26 @@ export const THEORY_DIAGRAMS = {
     <!-- Center Shield -->
     <g transform="translate(180, 100)">
       <circle cx="0" cy="0" r="68" fill="none" stroke="var(--line2)" stroke-width="1.5" stroke-dasharray="4 4"/>
-      <circle cx="0" cy="0" r="34" fill="hsl(var(--d-green-400) / .2)" stroke="var(--ok)" stroke-width="2"/>
-      <path d="M-10 -12L10 -12L12 2C12 10 -1 16 -10 12Z" fill="none" stroke="var(--ok)" stroke-width="1.6"/>
-      <text x="0" y="2" fill="var(--ok)" font-size="10" font-weight="700" text-anchor="middle">DIRTY</text>
-      <text x="0" y="14" fill="#fff" font-size="9" font-weight="700" text-anchor="middle">DOZEN</text>
+      <circle cx="0" cy="0" r="34" fill="hsl(151 57% 60% / .2)" stroke="var(--ok)" stroke-width="2"/>
+      <path d="M-10 -12L10 -12L12 2C12 10 -1 16 -10 12Z" fill="none" stroke="var(--ok)" stroke-width="1.6" transform="translate(0, -17) scale(.6)"/>
+      <text x="0" y="6" fill="var(--ok)" font-size="10" font-weight="700" text-anchor="middle">DIRTY</text>
+      <text x="0" y="18" fill="var(--text)" font-size="9" font-weight="700" text-anchor="middle">DOZEN</text>
     </g>
 
-    <!-- 12 Nodes Radial -->
+    <!-- 12 Nodes Radial: วางแบบหน้าปัดนาฬิกา ทุก 30° ไม่ให้ข้อความชนกัน -->
     <g transform="translate(180, 100)" font-size="8.5" fill="var(--text2)">
-      <text x="0" y="-76" text-anchor="middle" fill="var(--gold)" font-weight="600">1. ขาดการสื่อสาร</text>
-      <text x="52" y="-56" text-anchor="start">2. ประมาทชะล่าใจ</text>
-      <text x="76" y="-14" text-anchor="start">3. ขาดความรู้</text>
-      <text x="76" y="26" text-anchor="start" fill="#f43f5e" font-weight="600">4. สมาธิหลุด</text>
-      <text x="50" y="66" text-anchor="start">5. ขาดทีมเวิร์ก</text>
-      <text x="0" y="86" text-anchor="middle" fill="#f43f5e" font-weight="600">6. ความล้า (Fatigue)</text>
-      <text x="-50" y="66" text-anchor="end">7. ขาดทรัพยากร</text>
-      <text x="-76" y="26" text-anchor="end" fill="var(--gold)" font-weight="600">8. แรงกดดัน (Pressure)</text>
-      <text x="-76" y="-14" text-anchor="end">9. ไม่กล้าทักท้วง</text>
-      <text x="-52" y="-56" text-anchor="end">10. ความเครียด</text>
-      <text x="-30" y="-76" text-anchor="middle">11. ขาด SA</text>
-      <text x="32" y="-76" text-anchor="middle">12. ขนบผิด ๆ</text>
+      <text x="0" y="-80" text-anchor="middle" fill="var(--gold)" font-weight="600">1. ขาดการสื่อสาร</text>
+      <text x="42" y="-69" text-anchor="start">2. ประมาทชะล่าใจ</text>
+      <text x="73" y="-40" text-anchor="start">3. ขาดความรู้</text>
+      <text x="84" y="4" text-anchor="start" fill="#f43f5e" font-weight="600">4. สมาธิหลุด</text>
+      <text x="73" y="48" text-anchor="start">5. ขาดทีมเวิร์ก</text>
+      <text x="42" y="78" text-anchor="start" fill="#f43f5e" font-weight="600">6. ความล้า (Fatigue)</text>
+      <text x="0" y="90" text-anchor="middle">7. ขาดทรัพยากร</text>
+      <text x="-42" y="78" text-anchor="end" fill="var(--gold)" font-weight="600">8. แรงกดดัน (Pressure)</text>
+      <text x="-73" y="48" text-anchor="end">9. ไม่กล้าทักท้วง</text>
+      <text x="-84" y="4" text-anchor="end">10. ความเครียด</text>
+      <text x="-73" y="-40" text-anchor="end">11. ขาด SA</text>
+      <text x="-42" y="-69" text-anchor="end">12. ขนบผิด ๆ</text>
     </g>
   </svg>`,
 
@@ -253,14 +253,14 @@ export const THEORY_DIAGRAMS = {
       <rect x="-42" y="-36" width="84" height="72" rx="8" fill="hsl(25 90% 55% / .18)" stroke="#fb923c" stroke-width="1.8"/>
       <circle cx="0" cy="-12" r="10" fill="#fb923c" opacity=".8"/>
       <path d="M-14 14C-14 4 14 4 14 14Z" fill="#fb923c" opacity=".8"/>
-      <text x="0" y="26" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">PF (บินหลัก)</text>
+      <text x="0" y="26" fill="var(--text)" font-size="10" font-weight="700" text-anchor="middle">PF (บินหลัก)</text>
     </g>
 
     <g transform="translate(270, 85)">
-      <rect x="-42" y="-36" width="84" height="72" rx="8" fill="hsl(var(--d-accent-t) / .18)" stroke="var(--sky)" stroke-width="1.8"/>
+      <rect x="-42" y="-36" width="84" height="72" rx="8" fill="hsl(var(--td-accent) / .18)" stroke="var(--sky)" stroke-width="1.8"/>
       <circle cx="0" cy="-12" r="10" fill="var(--sky)" opacity=".8"/>
       <path d="M-14 14C-14 4 14 4 14 14Z" fill="var(--sky)" opacity=".8"/>
-      <text x="0" y="26" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">PM (ตรวจวัด)</text>
+      <text x="0" y="26" fill="var(--text)" font-size="10" font-weight="700" text-anchor="middle">PM (ตรวจวัด)</text>
     </g>
 
     <!-- Communication Bridge -->
@@ -271,7 +271,7 @@ export const THEORY_DIAGRAMS = {
     <text x="180" y="126" fill="var(--sky)" font-size="9" font-weight="600" text-anchor="middle">← Acknowledge / ขานตอบยืนยัน</text>
 
     <!-- Bottom Closed Loop Badge -->
-    <rect x="75" y="152" width="210" height="26" rx="6" fill="hsl(var(--d-card-bg-t) / .9)" stroke="var(--line2)" stroke-width="1"/>
+    <rect x="75" y="152" width="210" height="26" rx="6" fill="var(--surface)" stroke="var(--line2)" stroke-width="1"/>
     <text x="180" y="169" fill="var(--gold)" font-size="10" font-weight="600" text-anchor="middle">Two-Challenge Rule · ยืนยันเครื่องวัดตรงกัน</text>
   </svg>`,
 
@@ -280,8 +280,8 @@ export const THEORY_DIAGRAMS = {
     <g transform="translate(180, 180)">
       <!-- Radar Sweep Arcs -->
       <path d="M-50 0 A50 50 0 0 1 50 0" fill="hsl(175 75% 42% / .18)" stroke="#14b8a6" stroke-width="1.8"/>
-      <path d="M-95 0 A95 95 0 0 1 95 0" fill="hsl(var(--d-accent-t) / .12)" stroke="var(--sky)" stroke-width="1.6"/>
-      <path d="M-140 0 A140 140 0 0 1 140 0" fill="hsl(var(--d-glow) / .08)" stroke="var(--gold)" stroke-width="1.6" stroke-dasharray="4 3"/>
+      <path d="M-95 0 A95 95 0 0 1 95 0" fill="hsl(var(--td-accent) / .12)" stroke="var(--sky)" stroke-width="1.6"/>
+      <path d="M-140 0 A140 140 0 0 1 140 0" fill="hsl(var(--td-glow) / .08)" stroke="var(--gold)" stroke-width="1.6" stroke-dasharray="4 3"/>
 
       <!-- Center Helicopter -->
       <polygon points="0,-14 6,-4 14,0 0,-2 -14,0 -6,-4" fill="#fff"/>
@@ -290,10 +290,10 @@ export const THEORY_DIAGRAMS = {
 
     <!-- Level Descriptions -->
     <g transform="translate(180, 0)">
-      <rect x="-80" y="16" width="160" height="26" rx="5" fill="hsl(var(--d-glow) / .18)" stroke="var(--gold)" stroke-width="1.4"/>
+      <rect x="-80" y="16" width="160" height="26" rx="5" fill="hsl(var(--td-glow) / .18)" stroke="var(--gold)" stroke-width="1.4"/>
       <text x="0" y="32" fill="var(--gold)" font-size="10.5" font-weight="700" text-anchor="middle">ระดับ 3: Projection (คาดการณ์ล่วงหน้า)</text>
 
-      <rect x="-70" y="62" width="140" height="24" rx="5" fill="hsl(var(--d-accent-t) / .18)" stroke="var(--sky)" stroke-width="1.4"/>
+      <rect x="-70" y="62" width="140" height="24" rx="5" fill="hsl(var(--td-accent) / .18)" stroke="var(--sky)" stroke-width="1.4"/>
       <text x="0" y="77" fill="var(--sky)" font-size="10" font-weight="600" text-anchor="middle">ระดับ 2: Comprehension (เข้าใจความหมาย)</text>
 
       <rect x="-60" y="106" width="120" height="24" rx="5" fill="hsl(175 75% 42% / .22)" stroke="#14b8a6" stroke-width="1.4"/>
@@ -312,42 +312,42 @@ export const THEORY_DIAGRAMS = {
       <!-- 6 Steps -->
       <!-- D: Detect -->
       <g transform="translate(0, -68)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--gold)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--gold)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--gold)" font-size="10" font-weight="700" text-anchor="middle">D · Detect</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">ตรวจพบการเปลี่ยน</text>
       </g>
 
       <!-- E: Estimate -->
       <g transform="translate(68, -34)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--sky)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--sky)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--sky)" font-size="10" font-weight="700" text-anchor="middle">E · Estimate</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">ประเมินผลกระทบ</text>
       </g>
 
       <!-- C: Choose -->
       <g transform="translate(68, 34)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--sky)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--sky)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--sky)" font-size="10" font-weight="700" text-anchor="middle">C · Choose</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">เลือกผลลัพธ์</text>
       </g>
 
       <!-- I: Identify -->
       <g transform="translate(0, 68)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--ok)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--ok)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--ok)" font-size="10" font-weight="700" text-anchor="middle">I · Identify</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">ระบุทางแก้</text>
       </g>
 
       <!-- D: Do -->
       <g transform="translate(-68, 34)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--ok)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--ok)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--ok)" font-size="10" font-weight="700" text-anchor="middle">D · Do</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">ลงมือปฏิบัติ</text>
       </g>
 
       <!-- E: Evaluate -->
       <g transform="translate(-68, -34)">
-        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="hsl(var(--d-sunk))" stroke="var(--gold)" stroke-width="1.4"/>
+        <rect x="-35" y="-14" width="70" height="28" rx="6" fill="var(--td-sunk)" stroke="var(--gold)" stroke-width="1.4"/>
         <text x="0" y="-1" fill="var(--gold)" font-size="10" font-weight="700" text-anchor="middle">E · Evaluate</text>
         <text x="0" y="9" fill="var(--text2)" font-size="7.5" text-anchor="middle">ประเมินซ้ำ</text>
       </g>
@@ -423,7 +423,7 @@ export const THEORY_DIAGRAMS = {
       <text x="280" y="145" fill="var(--muted)" font-size="8" text-anchor="middle">24:00</text>
 
       <!-- Sleep Debt Callout -->
-      <rect x="130" y="75" width="140" height="24" rx="4" fill="hsl(var(--d-glow) / .15)" stroke="var(--gold)" stroke-width="1"/>
+      <rect x="130" y="75" width="140" height="24" rx="4" fill="hsl(var(--td-glow) / .15)" stroke="var(--gold)" stroke-width="1"/>
       <text x="200" y="90" fill="var(--gold)" font-size="8.5" font-weight="600" text-anchor="middle">หนี้การนอน > 2 ชม. กดทับปฏิกิริยาตอบสนอง</text>
     </g>
 

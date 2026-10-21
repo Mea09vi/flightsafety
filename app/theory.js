@@ -233,7 +233,8 @@ function panel(i, st) {
         <span class="rp-diag-tag">แผนภาพโมเดล (Safety model)</span>
         <span class="rp-diag-code">${esc(l.id.toUpperCase())}</span>
       </div>
-      <div class="rp-diag-body">${diag}</div>
+      <button class="rp-diag-body" data-ldiag="${i}" aria-label="ขยายแผนภาพ ${esc(l.title)}">${diag}
+        <span class="rp-diag-open">${icon('search')}ขยายแผนภาพ</span></button>
     </div>
     <p class="rp-tip">${esc(l.tip)}</p>
     <p class="rp-meta">${deckOf(l).length} สไลด์ · ราว ${l.mins} นาที</p>
@@ -251,6 +252,26 @@ function pick(i, focus) {
   const p = H.main.querySelector('.rpanel');
   if (p) p.innerHTML = panel(i, st);
   if (focus) H.main.querySelector(`.wp[data-lsel="${i}"]`)?.focus();
+}
+
+// ภาพย่อในแผงข้างกว้างไม่ถึง 300px ตัวอักษรในแผนภาพจะเหลือ ~6px จึงซ่อนตัวอักษรในภาพย่อ
+// แล้วเปิดแผนภาพเต็มใน dialog กว้างอย่างน้อย 640px ให้ตัวอักษรเล็กสุด (7 หน่วย) ได้ ≥12px (กฎตัวอักษร ข้อ 2)
+function openDiag(i) {
+  const { esc, icon } = H;
+  const l = LESSONS[i];
+  const dlg = document.createElement('dialog');
+  dlg.className = 'diag-dlg';
+  dlg.setAttribute('aria-label', `แผนภาพ ${l.title}`);
+  dlg.innerHTML = `<div class="dd-bar"><h2>${esc(l.title)}</h2>
+      <button class="btn btn-icon dd-x" aria-label="ปิด">${icon('x')}</button></div>
+    <div class="dd-body">${THEORY_DIAGRAMS[l.id] || ''}</div>`;
+  dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('.dd-x')) dlg.close(); });
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg);
+  dlg.showModal();
+  // จอแคบกว่า 640px: เปิดที่กึ่งกลางแผนภาพ ซึ่งเป็นแกนของทุกแผนภาพ
+  const body = dlg.querySelector('.dd-body');
+  body.scrollLeft = (body.scrollWidth - body.clientWidth) / 2;
 }
 
 function notFound() {
@@ -1053,6 +1074,7 @@ function wire() {
   H.main.addEventListener('click', (e) => {
     const t = e.target.closest('button, a');
     if (t?.dataset.lsel != null && !L) { pick(Number(t.dataset.lsel)); return; }
+    if (t?.dataset.ldiag != null && !L) { openDiag(Number(t.dataset.ldiag)); return; }
     if (!t || !on()) return;
     const d = t.dataset;
     if (d.lgo) { if (d.lgo === 'restart') { idx = 0; location.replace(url(L.id, 0)); } else go(Number(d.lgo)); return; }
