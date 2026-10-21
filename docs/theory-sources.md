@@ -73,7 +73,7 @@
 | 9 | คำพูด | FAA AC 120-51E (2004) | 14 | 14 | Effective monitoring and cross-checking can be the last line of defense that prevents an accident because detecting an error or unsafe situation may break the chain of events leading to an accident. |
 | 9 | คำพูด | FAA AMT Handbook–General (FAA-H-8083-30B) | 14-29 | 652 | If the chain of events is broken at the maintenance level, the likelihood of the accident occurring can be drastically decreased. |
 
-## บท `hfacs` — HFACS ปัจจัยมนุษย์ 4 ระดับ (10 นาที, 12 สไลด์ + หน้าจบบท)
+## บท `hfacs` — HFACS ปัจจัยมนุษย์ 4 ระดับ (10 นาที, 13 สไลด์ + หน้าจบบท)
 
 **แหล่งอ้างอิงที่แสดงในหน้าจบบท**
 
@@ -86,23 +86,25 @@
 | สไลด์ | ชนิด | เอกสาร | หน้าที่พิมพ์ | หน้า PDF | ข้อความต้นฉบับ / ข้อมูล |
 |---|---|---|---|---|---|
 | 1 | ตัวเลขหน้าเปิด | — | — |  | **70–80%** — ของอุบัติเหตุการบินมีความผิดพลาดของมนุษย์เป็นส่วนหนึ่ง (AM-00/7 หน้า 1) |
-| 2 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 1 | 5 | In fact, estimates in the literature indicate that between 70 and 80 percent of aviation accidents can be attributed, at least in part, to human error (Shappell & Wiegmann, 1996). |
-| 2 | คำพูด | DoD HFACS 8.0 | 1 | 2 | Human error remains the leading cause of DoD mishaps. |
-| 3 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 2 | 6 | Represented as “holes” in the cheese, these active failures are typically the last unsafe acts committed by aircrew. |
-| 3 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 2 | 6 | As their name suggests, latent failures, unlike their active counterparts, may lie dormant or undetected for hours, days, weeks, or even longer, until one day they adversely affect the unsuspecting aircrew. |
-| 5 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 3 | 7 | …these skill-based actions are particularly vulnerable to failures of attention and/or memory. |
-| 5 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 4 | 8 | …intentional behavior that proceeds as intended, yet the plan proves inadequate or inappropriate for the situation. |
-| 5 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 5 | 9 | Typically, perceptual errors occur when sensory input is degraded or “unusual,” as is the case with visual illusions and spatial disorientation or when aircrew simply misjudge the aircraft’s altitude, attitude, or airspeed |
-| 7 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | The first, routine violations, tend to be habitual by nature and often tolerated by governing authority (Reason, 1990). |
-| 7 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | Therefore, by definition, if a routine violation is identified, one must look further up the supervisory chain to identify those individuals in authority who are not enforcing the rules. |
-| 7 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | …exceptional violations appear as isolated departures from authority, not necessarily indicative of individual’s typical behavior pattern nor condoned by management (Reason, 1990). |
-| 8 | กราฟ hbar | Shappell et al. 2006, DOT/FAA/AM-06/18 | 7 | 11 | อุบัติเหตุการบินพาณิชย์สหรัฐฯ 1,020 เหตุ (1990–2002) [ชุด: Air carrier (n=181) / Commuter (n=839)] — (ค่าเป็น %) Skill-based Errors: 42.5 / 59.5 · Decision Errors: 39.2 / 36.1 · Violations: 17.1 / 24.4 · Perceptual Errors: 5.5 / 6.7 · Physical Environment: 37.0 / 62.6 · Crew Resource Management: 18.8 / 8.9 · Adverse Mental States: 3.3 / 7.2 · Inadequate Supervision: 8.3 / 2.5 · Operational Process: 11.6 / 3.5 _(% ของอุบัติเหตุที่พบหมวดนั้น (เหตุหนึ่งมีได้หลายหมวด รวมจึงไม่เท่ากับ 100) · 9 จาก 19 หมวด)_ |
-| 9 | คำพูด | Shappell et al. 2006, DOT/FAA/AM-06/18 | 7 | 11 | What is apparent from the data is that the majority of human causal factors identified in the database involved aircrew and their environment (i.e., unsafe acts of operators and preconditions for unsafe acts) rather than supervisory or organizational factors. |
-| 9 | คำพูด | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 10 | 16 | Another explanation, however, is that these factors do contribute to most accidents, yet they are rarely identified using existing accident investigation processes. |
-| 10 | สถิติ | Shappell et al. 2006, DOT/FAA/AM-06/18 | 6 | 10 | **68%** — Sixty-eight percent of all commercial aviation accidents included in this study involved some form of aircrew or supervisory error. |
-| 10 | สถิติ | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 10 | 16 | **16%** — Indeed, only 16% of all aircrew-related accidents involved some form of either supervisory or organizational involvement. |
-| 10 | สถิติ | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 9 | 15 | **6% → 46%** — …the relative proportion of accidents associated with violations increased appreciably from a low of 6% in 1990 to a high of 46% in 1996. |
-| 10 | สถิติ | Shappell et al. 2006, DOT/FAA/AM-06/18 | 8 | 12 | **>80%** — …over 80% of the CRM failures observed during commuter operations involved “preflight” activities (such as planning and briefing). |
+| 2 | ข้อสรุป | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 (ชื่อเอกสาร); DoD HFACS 8.0 | — |  | ชื่อเต็ม Human Factors Analysis and Classification System แปลเป็นไทย และอธิบายแต่ละคำ (เรียบเรียง ไม่ยกคำพูด) |
+| 3 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 1 | 5 | In fact, estimates in the literature indicate that between 70 and 80 percent of aviation accidents can be attributed, at least in part, to human error (Shappell & Wiegmann, 1996). |
+| 3 | คำพูด | DoD HFACS 8.0 | 1 | 2 | Human error remains the leading cause of DoD mishaps. |
+| 4 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 2 | 6 | Represented as “holes” in the cheese, these active failures are typically the last unsafe acts committed by aircrew. |
+| 4 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 2 | 6 | As their name suggests, latent failures, unlike their active counterparts, may lie dormant or undetected for hours, days, weeks, or even longer, until one day they adversely affect the unsuspecting aircrew. |
+| 5 | ภาพโต้ตอบ hfacs | AM-00/7 หน้า 3 (4 ระดับ); DoD HFACS 8.0 (หมวด 19 + รหัสย่อย) | — |  | ชื่อหมวด/รหัสภาษาอังกฤษจาก taxonomy.json (DoD HFACS 8.0); ชื่อไทยและคำอธิบายหมวดเรียบเรียงจากนิยามในคู่มือ ไม่ยกคำพูด |
+| 6 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 3 | 7 | …these skill-based actions are particularly vulnerable to failures of attention and/or memory. |
+| 6 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 4 | 8 | …intentional behavior that proceeds as intended, yet the plan proves inadequate or inappropriate for the situation. |
+| 6 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 5 | 9 | Typically, perceptual errors occur when sensory input is degraded or “unusual,” as is the case with visual illusions and spatial disorientation or when aircrew simply misjudge the aircraft’s altitude, attitude, or airspeed |
+| 8 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | The first, routine violations, tend to be habitual by nature and often tolerated by governing authority (Reason, 1990). |
+| 8 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | Therefore, by definition, if a routine violation is identified, one must look further up the supervisory chain to identify those individuals in authority who are not enforcing the rules. |
+| 8 | คำพูด | Shappell & Wiegmann 2000, DOT/FAA/AM-00/7 | 6 | 10 | …exceptional violations appear as isolated departures from authority, not necessarily indicative of individual’s typical behavior pattern nor condoned by management (Reason, 1990). |
+| 9 | กราฟ hbar | Shappell et al. 2006, DOT/FAA/AM-06/18 | 7 | 11 | อุบัติเหตุการบินพาณิชย์สหรัฐฯ 1,020 เหตุ (1990–2002) [ชุด: Air carrier (n=181) / Commuter (n=839)] — (ค่าเป็น %) Skill-based Errors: 42.5 / 59.5 · Decision Errors: 39.2 / 36.1 · Violations: 17.1 / 24.4 · Perceptual Errors: 5.5 / 6.7 · Physical Environment: 37.0 / 62.6 · Crew Resource Management: 18.8 / 8.9 · Adverse Mental States: 3.3 / 7.2 · Inadequate Supervision: 8.3 / 2.5 · Operational Process: 11.6 / 3.5 _(% ของอุบัติเหตุที่พบหมวดนั้น (เหตุหนึ่งมีได้หลายหมวด รวมจึงไม่เท่ากับ 100) · 9 จาก 19 หมวด)_ |
+| 10 | คำพูด | Shappell et al. 2006, DOT/FAA/AM-06/18 | 7 | 11 | What is apparent from the data is that the majority of human causal factors identified in the database involved aircrew and their environment (i.e., unsafe acts of operators and preconditions for unsafe acts) rather than supervisory or organizational factors. |
+| 10 | คำพูด | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 10 | 16 | Another explanation, however, is that these factors do contribute to most accidents, yet they are rarely identified using existing accident investigation processes. |
+| 11 | สถิติ | Shappell et al. 2006, DOT/FAA/AM-06/18 | 6 | 10 | **68%** — Sixty-eight percent of all commercial aviation accidents included in this study involved some form of aircrew or supervisory error. |
+| 11 | สถิติ | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 10 | 16 | **16%** — Indeed, only 16% of all aircrew-related accidents involved some form of either supervisory or organizational involvement. |
+| 11 | สถิติ | Wiegmann & Shappell 2001, DOT/FAA/AM-01/3 | 9 | 15 | **6% → 46%** — …the relative proportion of accidents associated with violations increased appreciably from a low of 6% in 1990 to a high of 46% in 1996. |
+| 11 | สถิติ | Shappell et al. 2006, DOT/FAA/AM-06/18 | 8 | 12 | **>80%** — …over 80% of the CRM failures observed during commuter operations involved “preflight” activities (such as planning and briefing). |
 
 ## บท `shell` — แบบจำลอง SHELL (8 นาที, 9 สไลด์ + หน้าจบบท)
 

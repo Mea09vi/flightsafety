@@ -65,6 +65,7 @@ const AX = (i) => 50 + i * 72;
 const AY = (i) => 330 - i * 24 - (i % 2) * 40;
 const DEP = [14, 386];
 const phaseOf = (i) => PHASES.find(([, a, b]) => i >= a && i < b)?.[0] || '';
+const AC = 'M0-12L3-3 12 2 12 5 3 2 2 9 5 12 5 13-0 11.5-5 13-5 12-2 9-3 2-12 5-12 2-3-3Z'; // เครื่องบิน หัวชี้ขึ้น
 
 function list() {
   const { esc, icon, main } = H;
@@ -415,7 +416,7 @@ function slide(s) {
     }
 
     case 'brief': return `<p class="plab">นำไปใช้</p><h2 class="ls-h">${esc(s.h)}</h2>
-      <ol class="pdo">${s.items.map((t, k) => `<li><span>${k + 1}</span>${esc(t)}</li>`).join('')}</ol>`;
+      <ol class="pdo pdo-n">${s.items.map((t, k) => `<li><span class="n">${k + 1}</span><span>${esc(t)}</span></li>`).join('')}</ol>`;
 
     // ข้อความต้นฉบับ (ภาษาอังกฤษ ไม่แปล) + คำอธิบายไทยสั้น ๆ ถ้ามี · ทุกคำพูดต้องมีเลขหน้าที่พิมพ์บนเอกสาร
     case 'quote': return `${s.h ? `<p class="plab">${esc(s.h)}</p>` : ''}
@@ -452,7 +453,7 @@ function slide(s) {
         </figure>
         <div class="ce-sum">
           <p class="plab">สรุป ${L.take.length} ข้อ</p><h2 class="ls-h">${esc(L.title)}</h2>
-          <ol class="pdo">${L.take.map((t, k) => `<li><span class="n">${k + 1}</span><span>${esc(t)}</span></li>`).join('')}</ol>
+          <ol class="pdo pdo-n">${L.take.map((t, k) => `<li><span class="n">${k + 1}</span><span>${esc(t)}</span></li>`).join('')}</ol>
           <div class="ls-refs"><p class="k">แหล่งอ้างอิง${notes.map((n) => `<span class="nt">${mark(n)} ${esc(n)}</span>`).join('')}</p><ul${L.refs.length > 3 ? ' class="two"' : ''}>${L.refs.map((r) => `<li><a href="${esc(r.u)}" target="_blank" rel="noopener noreferrer"><span>${esc(r.t)}${r.n ? `<sup>${mark(r.n)}</sup>` : ''}</span>${icon('ext')}</a></li>`).join('')}</ul></div>
         </div>
         <div class="ce-act">

@@ -728,6 +728,8 @@ body.briefing main, body.lesson main { max-width: none; padding: 0; }
   border-radius: 10px; text-align: left; font: inherit; color: inherit; transition: background-color .15s;
 }
 .pdo .n { font: 600 .9em/1.67 var(--f-m); color: var(--sky); }
+/* รายการมีเลขข้อ (บรีฟ/สรุปท้ายบทเรียน): เลขแยกคอลัมน์ ข้อความยาวไม่ไหลใต้เลข */
+.pdo-n li { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); gap: .3em; }
 .pdo .box {
   width: 1.3em; height: 1.3em; margin-top: .1em; display: grid; place-items: center; justify-self: end;
   border: 2px solid var(--muted); border-radius: .3em; color: transparent;
@@ -1733,6 +1735,25 @@ html.ov-lock { overflow: hidden; }
 .hf-p li { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); gap: .5em; font-size: .92em; line-height: 1.45; }
 .hf-p code { font: 500 .85em/1.7 var(--f-m); color: var(--sky); }
 .hf-p li small { display: block; font-size: .82em; color: var(--muted); }
+.hf-p .hf-q { display: flex; flex-wrap: wrap; gap: .1em .6em; margin-bottom: .8em; padding: .55em .8em; border-left: 3px solid var(--sky); border-radius: 0 6px 6px 0; background: var(--sky-d); color: var(--text); }
+.hf-q b { font: 600 .82em/1.7 var(--f-m); color: var(--sky); }
+.hf-p ul.hf-cs { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.hf-cs > li { display: block; font-size: 1em; }
+.hf-c { border: 1px solid var(--line2); border-radius: 8px; background: var(--surface2); }
+.hf-c[open] { border-color: var(--sky); }
+.hf-c summary { display: grid; grid-template-columns: 4.2em minmax(0, 1fr) auto; align-items: baseline; gap: .5em; padding: .55em .8em; cursor: pointer; list-style: none; }
+.hf-c summary::-webkit-details-marker { display: none; }
+.hf-c summary b { display: block; font-weight: 600; line-height: 1.4; }
+.hf-c summary em { font: 500 .78em/1.5 var(--f-m); font-style: normal; color: var(--muted); white-space: nowrap; }
+.hf-c summary em::after { content: ' ▾'; }
+.hf-c[open] summary em::after { content: ' ▴'; }
+.hf-c > p { margin: 0 .8em .6em; color: var(--text2); font-size: .94em; line-height: 1.55; }
+.hf-c > ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 6px 16px; margin: 0; padding: .6em .8em .8em; border-top: 1px dashed var(--line2); }
+@media (max-width: 719px) {
+  .hf-p { padding: 0 .8em 1em; }
+  .hf-c summary { grid-template-columns: 3.9em minmax(0, 1fr); }
+  .hf-c summary em { grid-column: 2; }
+}
 
 /* SHELL */
 .sh { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: clamp(16px, 3vw, 40px); align-items: start; }
