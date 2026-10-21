@@ -54,10 +54,10 @@ export function render(h) {
 // พิกัดอยู่ในกรอบ MW×MH · จุดคี่ยกสูงกว่าจุดคู่ ป้ายชื่อจึงสลับบน/ล่างได้ไม่ชนกัน
 // (จุดแรกป้ายอยู่บน ไม่ให้ทับเครื่องบินที่กำลังบินขาแรกจากทางวิ่ง)
 const PHASES = [
-  ['พื้นฐาน', 0, 3, 'PHASE 01', 'FOUNDATION'],
-  ['ก่อนบิน', 3, 6, 'PHASE 02', 'PRE-FLIGHT'],
-  ['ในห้องนักบิน', 6, 9, 'PHASE 03', 'IN-FLIGHT CRM'],
-  ['ร่างกาย', 9, 11, 'PHASE 04', 'PHYSIOLOGY'],
+  ['พื้นฐาน', 0, 3, 'Foundation'],
+  ['ก่อนบิน', 3, 6, 'Pre-flight'],
+  ['ในห้องนักบิน', 6, 9, 'In-flight CRM'],
+  ['ร่างกาย', 9, 11, 'Physiology'],
 ];
 const MW = 820;
 const MH = 400;
@@ -92,8 +92,8 @@ function list() {
       </div>
       <div class="th-hero-content">
         <div class="th-hero-badges">
-          <span class="th-badge-sec"><span class="badge-dot pulse"></span> WING 2 RTAF AVIATION SAFETY</span>
-          <span class="th-badge-gold">STANDARD OPERATING SYLLABUS</span>
+          <span class="th-badge-sec"><span class="badge-dot pulse"></span> นิรภัยการบิน กองบิน 2</span>
+          <span class="th-badge-gold">หลักสูตรมาตรฐาน (Standard syllabus)</span>
         </div>
         <h1 class="th-hero-title">
           ทฤษฎีนิรภัยการบิน<span class="th-hero-hl">ระดับผู้บังคับบัญชา</span>
@@ -116,7 +116,7 @@ function list() {
             <span class="th-stat-lbl">${left ? 'เวลาประเมินที่เหลือ' : 'สำเร็จทุกหลักสูตร'}</span>
           </div>
           <div class="th-stat-item th-stat-badge">
-            <span class="th-stat-tag">COMMAND BRIEF READY</span>
+            <span class="th-stat-tag">บรรยายสรุป (Command brief)</span>
             <span class="th-stat-lbl">พร้อมนำเสนอ ผบ. / ผู้การ</span>
           </div>
         </div>
@@ -147,25 +147,19 @@ function routeMap(st, next) {
   const pts = [DEP, ...P];
   const mid = (k) => (AX(k - 1) + AX(k)) / 2;
   const nextL = next >= 0 ? LESSONS[next] : null;
+  const pc = (v, m) => `${((v / m) * 100).toFixed(2)}%`;
 
-  const bands = PHASES.map(([n, a, b, code, en], k) => {
+  const bandTags = [];
+  const bands = PHASES.map(([n, a, b, en], k) => {
     const x0 = k === 0 ? 0 : mid(a);
     const x1 = k === PHASES.length - 1 ? MW : mid(b);
+    bandTags.push(`<span class="band-tag" style="left:${pc(x0, MW)}"><b><span class="bt-k">ช่วง ${k + 1} · </span>${n}</b><small>${en}</small></span>`);
     return `<rect class="band${k % 2 ? '' : ' alt'}" x="${x0}" y="0" width="${x1 - x0}" height="${MH}"/>
-      <line class="band-div" x1="${x1}" y1="0" x2="${x1}" y2="${MH}"/>
-      <g class="band-tag" transform="translate(${x0 + 12}, 22)">
-        <text class="bt-code">${code} · ${en}</text>
-        <text class="bt-th" y="14">ช่วง ${k + 1} · ${n}</text>
-      </g>`;
+      <line class="band-div" x1="${x1}" y1="0" x2="${x1}" y2="${MH}"/>`;
   }).join('');
 
-  const flLines = [
-    ['FL020', 310, '2,000 FT'],
-    ['FL040', 230, '4,000 FT'],
-    ['FL060', 150, '6,000 FT'],
-    ['FL080', 70, '8,000 FT'],
-  ].map(([fl, y, alt]) => `<line class="fl-line" x1="0" y1="${y}" x2="${MW}" y2="${y}"/>
-    <text class="fl-txt" x="${MW - 12}" y="${y - 4}">${fl} <tspan class="fl-sub">(${alt})</tspan></text>`).join('');
+  // เส้นระดับบิน FL020–FL080 ไม่ใส่ป้าย (ชนป้ายจุดแวะ) ช่วงระดับบอกไว้ในแถบ HUD แล้ว
+  const flLines = [310, 230, 150, 70].map((y) => `<line class="fl-line" x1="0" y1="${y}" x2="${MW}" y2="${y}"/>`).join('');
 
   const legsGlow = P.map((p, i) => {
     const [x1, y1] = pts[i];
@@ -181,8 +175,6 @@ function routeMap(st, next) {
   const [a, b] = next >= 0 ? [pts[next], pts[next + 1]] : [pts[N - 1], pts[N]];
   const ang = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI + 90;
   const [cx, cy] = next >= 0 ? [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] : [b[0] + 28, b[1] - 8];
-  const pc = (v, m) => `${((v / m) * 100).toFixed(2)}%`;
-
   const heliSvg = `
     <g class="heli-node" transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(1.15)">
       <circle class="heli-ping" cx="0" cy="-2" r="20"/>
@@ -200,10 +192,11 @@ function routeMap(st, next) {
 
   return `<div class="rmap-hud-wrap">
     <div class="hud-strip">
-      <div class="hud-tag"><i class="hud-dot pulse"></i><span>ROUTE: WING 2 SAFETY SYLLABUS · 11 WAYPOINTS</span></div>
-      <div class="hud-tag d-only-md"><span>CLIMB PROFILE: FL020 → FL080</span></div>
-      <div class="hud-tag">STATUS: <b class="${next >= 0 ? 'hud-active' : ''}">${next >= 0 ? `EN ROUTE WP-${two(next + 1)} ${esc(nextL.short)}` : 'ALL MISSIONS COMPLETE'}</b></div>
+      <div class="hud-tag"><i class="hud-dot pulse"></i><span>เส้นทางหลักสูตรนิรภัย บน.2 · ${N} จุด</span></div>
+      <div class="hud-tag d-only-md"><span>ไต่ระดับ <span class="hud-code">FL020 → FL080</span></span></div>
+      <div class="hud-tag">สถานะ: <b class="${next >= 0 ? 'hud-active' : ''}">${next >= 0 ? `กำลังบินสู่จุด ${two(next + 1)} ${esc(nextL.short)}` : 'ครบทุกบทแล้ว'}</b></div>
     </div>
+    <div class="band-row" aria-hidden="true"><div class="band-in">${bandTags.join('')}</div></div>
     <div class="rmap">
       <div class="hud-bracket-bl" aria-hidden="true"></div>
       <div class="hud-bracket-br" aria-hidden="true"></div>
@@ -237,7 +230,7 @@ function panel(i, st) {
       <div><h2>${esc(l.title)}</h2><p class="rp-st ${s}">${ST_TXT[s]}</p></div></div>
     <div class="rp-diag-card">
       <div class="rp-diag-bar">
-        <span class="rp-diag-tag">TACTICAL SAFETY MODEL</span>
+        <span class="rp-diag-tag">แผนภาพโมเดล (Safety model)</span>
         <span class="rp-diag-code">${esc(l.id.toUpperCase())}</span>
       </div>
       <div class="rp-diag-body">${diag}</div>
@@ -755,13 +748,13 @@ const WIDGETS = {
 
     return `<div class="hf-wrap">
       <div class="hf-strip">
-        <div class="hf-strip-tag"><i class="hf-dot"></i><span>HFACS 8.0 FRAMEWORK · 4-TIER DEFENSE-IN-DEPTH</span></div>
-        <div class="hf-strip-tag">ระดับปัจจุบัน: <span class="hf-sub">LEVEL ${curMeta.lvl} · ${curTh}</span></div>
+        <div class="hf-strip-tag"><i class="hf-dot"></i><span>HFACS 8.0 · ชั้นป้องกัน 4 ระดับ</span></div>
+        <div class="hf-strip-tag">ระดับที่เลือก: <span class="hf-sub">ระดับ ${curMeta.lvl} · ${curTh}</span></div>
       </div>
       <div class="hf-grid">
         <div class="hf-pyr-col">
           <div class="pyr-legend">
-            <span><span class="arr">▼</span> ห่วงโซ่สาเหตุ (CAUSAL TRAJECTORY)</span>
+            <span><span class="arr">▼</span> ห่วงโซ่สาเหตุ (Causal trajectory)</span>
             <span>4 ระดับ</span>
           </div>
           <div class="pyr-stack">
@@ -785,14 +778,14 @@ const WIDGETS = {
             }).join('')}
           </div>
           <div class="mishap-band">
-            <span class="mishap-icon" aria-hidden="true">⚠️</span>
+            <svg class="mishap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 21h20L12 3z"/><path d="M12 10v5M12 18v.01" stroke-linecap="round"/></svg>
             <span><b>ปลายทางห่วงโซ่สาเหตุ:</b> ทะลุชั้นป้องกันจนเกิดอุบัติเหตุ (Mishap)</span>
           </div>
         </div>
         <div class="hf-insp-col">
           <div class="dt-header">
             <div>
-              <div class="dt-level-tag">LEVEL 0${curMeta.lvl} // ${curK === 3 ? 'SHARP END OF AVIATION' : 'DEFENSE-IN-DEPTH BARRIER'}</div>
+              <div class="dt-level-tag">ระดับ ${curMeta.lvl} · ${curK === 3 ? 'ด่านสุดท้ายก่อนเกิดเหตุ (Sharp end)' : 'ชั้นป้องกันแฝง (Latent barrier)'}</div>
               <h3 class="dt-title">${curTh} <span class="dt-en">(${curEn})</span></h3>
             </div>
             <span class="dt-cat-count">${curList.length} หมวดหลัก</span>
