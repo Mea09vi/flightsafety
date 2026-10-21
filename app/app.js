@@ -1611,6 +1611,53 @@ function hvSearch(h, q) {
   return `<p class="note h-qn" role="status">พบ <b>${nTh(list.length)}</b> เรื่อง · เรียงตามปีงบ ใหม่ก่อน</p><section class="hv-s" id="hlist" aria-label="ผลค้นหา">${hGroups(list, 'fy')}</section>`;
 }
 
+// แถบผังพิจารณาประเภทรายงานและการสอบสวน คัดตามหน้า ๔ ข้อ ๕ ของคู่มือการสอบสวนอากาศยานอุบัติเหตุ
+// (ประกอบระเบียบ ทอ.ว่าด้วยนิรภัยการบิน พ.ศ.๒๕๖๕ ฉบับปรับปรุง ๒๕๖๘) ห้ามแต่งเกณฑ์เพิ่ม · เปิด/ปิดจำใน localStorage `w2sb.histFlow`
+const FLOW_SRC = 'https://safety.rtaf.mi.th/web/content/3687/a10_1.pdf';
+const FLOW_OUT = {
+  acc: 'อุบัติเหตุ', ser: 'อุบัติการณ์ร้ายแรง', inc: 'อุบัติการณ์', haz: 'รายงานอันตราย',
+};
+function hvFlow() {
+  const out = (k) => `<span class="fl-out ${k}"><i></i>${FLOW_OUT[k]}</span>`;
+  const step = (body, k, last) => `<li class="fl-step"><div class="fl-q">${body}</div>
+    <div class="fl-yes"><span class="fl-lb">ใช่</span>${icon('next')}${out(k)}</div>${last ? '' : '<span class="fl-no">ไม่ใช่ ↓</span>'}</li>`;
+  const ul = (xs) => `<ul>${xs.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+  const hurt = [
+    step('<b>บาดเจ็บ:</b> เสียชีวิต หรือบาดเจ็บสาหัส<br><b>ความชำรุดเสียหาย:</b> ขั้นจำหน่าย หรือเสียหายมาก', 'acc'),
+    step('<b>บาดเจ็บ:</b> บาดเจ็บเล็กน้อย<br><b>ความชำรุดเสียหาย:</b> ขั้นเสียหายเล็กน้อย', 'ser'),
+    step('<b>บาดเจ็บ:</b> ไม่ได้รับบาดเจ็บ<br><b>ความชำรุดเสียหาย:</b> ต่ำกว่าขั้นเสียหายเล็กน้อย', 'inc', true),
+  ];
+  const none = [
+    step('เข้าข้อใดข้อหนึ่ง' + ul(['T/O or L/D on Closed RWY', 'Fire/Smoke in Cabin/Cargo', 'Pilot Incapacitation',
+      'อาวุธหรือถังเชื้อเพลิงภายนอกตกนอกพื้นที่ที่กำหนด']), 'ser'),
+    step('เข้าข้อใดข้อหนึ่ง' + ul(['เชื้อเพลิงรั่วปริมาณมาก', 'สูญเสียกำลังขับไม่สามารถบินระดับได้',
+      'อ.ลงฉุกเฉินนอกสนามบิน ยกเว้น ฮ. ที่ลงฉุกเฉินแล้วตรวจสอบไม่พบความผิดปกติ', 'อ.ลงฉุกเฉินในและนอกสนามบินเนื่องจากปัญหา ย.',
+      'ย.ดับ หรือดับ ย.ในอากาศ', 'ระบบ Pitot-Static ใช้งานไม่ได้', 'บุคคล (นอกจาก นบ.) Hypoxia, G-LOC, Decompression Sickness',
+      'อาคาร ทรัพย์สินของราชการ เอกชน พลเรือน เสียหาย', 'Near CFIT', 'Severe abnormal performance', 'Declare Emergency Fuel',
+      'ประตู หน้าต่าง หรือประทุนเปิดออกในอากาศโดยไม่ตั้งใจ', 'Controllability Problem']), 'inc'),
+    `<li class="fl-step"><div class="fl-q">รายงานที่เหลือ เช่น${ul(['รายงาน บ.ชนนก', 'รายงาน อ.ใกล้จะชนกัน (Near-Miss)', 'รายงาน Runway Incursion / Excursion'])}
+      <span class="fl-fn">** การบันทึกสถิติให้บันทึกเป็นรายงานอันตราย</span></div>
+      <div class="fl-yes"><span class="fl-lb">บันทึกเป็น</span>${icon('next')}${out('haz')}</div></li>`,
+  ];
+  return `<details class="h-flow" data-hflow${LS.get('histFlow', false) ? ' open' : ''}>
+    <summary>${icon('grid3')}<span class="fl-sum"><b>ผังพิจารณาประเภทรายงานและการสอบสวน</b>
+      <span class="fl-chips">${Object.keys(FLOW_OUT).map(out).join('')}</span></span>${icon('down', 'ic fl-cv')}</summary>
+    <div class="fl-body">
+      <p class="fl-start"><span>เกิดเหตุการณ์ด้านนิรภัยการบิน</span>${icon('down')}<b>มีผู้บาดเจ็บ และ/หรือ อ.ชำรุดเสียหายหรือไม่</b></p>
+      <div class="fl-cols">
+        <section aria-label="มีผู้บาดเจ็บหรือ อ.ชำรุดเสียหาย"><h3 class="fl-h">ใช่ · มีบาดเจ็บหรือเสียหาย</h3><ol>${hurt.join('')}</ol></section>
+        <section aria-label="ไม่มีผู้บาดเจ็บและ อ.ไม่ชำรุดเสียหาย"><h3 class="fl-h">ไม่ใช่ · ไม่มีบาดเจ็บหรือเสียหาย</h3><ol>${none.join('')}</ol></section>
+      </div>
+      <dl class="fl-inv">
+        <dt>${out('acc')}${out('ser')}</dt><dd>สอบสวนโดย คจท.สอบสวนด้านนิรภัยการบิน <b>สนภ.ทอ.</b></dd>
+        <dt>${out('inc')}${out('haz')}</dt><dd>สอบสวนโดย คจท.สอบสวนด้านนิรภัยการบิน <b>หน่วยบิน</b></dd>
+      </dl>
+      <p class="note fl-ref">ที่มา: คู่มือการสอบสวนอากาศยานอุบัติเหตุ ประกอบระเบียบ ทอ.ว่าด้วยนิรภัยการบิน พ.ศ.๒๕๖๕ (ฉบับปรับปรุง พ.ศ.๒๕๖๘)
+        หน้า ๔ ข้อ ๕ แผนผังกระบวนการรายงานและสอบสวน อ.อุบัติเหตุ ·
+        <a href="${FLOW_SRC}" target="_blank" rel="noopener">เปิดคู่มือ (PDF)</a> · <a href="#/regs">กฎระเบียบและคู่มือทั้งหมด</a></p>
+    </div></details>`;
+}
+
 // หัวหน้าประวัติเหตุ + แท็บ รายปี/ตามหัวข้อ · คืน <div> ที่ยังไม่ปิด ผู้เรียกปิดเอง
 function hvHead(h, tab, still) {
   const items = h.data.items;
@@ -1633,7 +1680,7 @@ function hvHead(h, tab, still) {
       <span class="h-tgs">${nNt.a ? `<button class="h-imgtg" data-hnt="" aria-pressed="${!!nt}">${icon('check', 'ic ck')}${icon('moon')}กลางคืน <b>${nTh(nNt.a)}</b></button>` : ''}
       ${nImg ? `<button class="h-imgtg" data-himg aria-pressed="${state.hv.img}">${icon('check', 'ic ck')}${icon('image')}เฉพาะที่มีภาพ <b>${nTh(nImg)}</b></button>` : ''}</span>
     </nav>${ntSub}${state.hv.img ? `<p class="note h-imgnote">แสดงเฉพาะ ${nTh(nImg)} เรื่องที่มีภาพจากเอกสาร · แตะปุ่มอีกครั้งเพื่อดูทั้งหมด</p>` : ''}
-    <form class="h-q" role="search" data-hqf><label>${icon('search')}<input type="search" id="hq" value="${esc(state.hv.q)}" placeholder="ค้นหา เช่น ระบบ อาการ สถานที่ นามเรียกขาน" aria-label="ค้นหาประวัติเหตุ" enterkeyhint="search" autocomplete="off" spellcheck="false"></label></form></div>`;
+    <form class="h-q" role="search" data-hqf><label>${icon('search')}<input type="search" id="hq" value="${esc(state.hv.q)}" placeholder="ค้นหา เช่น ระบบ อาการ สถานที่ นามเรียกขาน" aria-label="ค้นหาประวัติเหตุ" enterkeyhint="search" autocomplete="off" spellcheck="false"></label></form>${hvFlow()}</div>`;
 }
 
 // แบบ B: เส้นเวลารายปีงบ แท่งซ้อนตามแหล่ง · แตะปีเพื่อดูรายการของปีนั้น
@@ -2549,6 +2596,8 @@ let lastPath = null;
 
 const SUB_T = { areas: 'อันตรายประจำพื้นที่', airmanship: 'Wing 2 Airmanship', theory: 'ทฤษฎีนิรภัย', regs: 'กฎระเบียบและคู่มือ', pap: 'แผน PAP' };
 let navCount = 0; // จำนวนหน้าที่เปิดในแอปรอบนี้ — ปุ่มย้อนกลับของ .m-sub ใช้ history.back() ได้เมื่อ > 1
+// toggle ไม่ bubble ต้องจับแบบ capture · จำว่าเปิดแถบผังประเภทรายงานไว้หรือไม่
+document.addEventListener('toggle', (e) => { if (e.target.matches?.('[data-hflow]')) LS.set('histFlow', e.target.open); }, true);
 document.addEventListener('click', (e) => {
   if (!e.target.closest('[data-sub-back]')) return;
   if (navCount > 1) history.back(); else location.replace('#/');
