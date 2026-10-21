@@ -1619,8 +1619,11 @@ const FLOW_OUT = {
 };
 function hvFlow() {
   const out = (k) => `<span class="fl-out ${k}"><i></i>${FLOW_OUT[k]}</span>`;
-  const step = (body, k, last) => `<li class="fl-step"><div class="fl-q">${body}</div>
-    <div class="fl-yes"><span class="fl-lb">ใช่</span>${icon('next')}${out(k)}</div>${last ? '' : '<span class="fl-no">ไม่ใช่ ↓</span>'}</li>`;
+  const node = (k) => `<span class="fl-node ${k}"><i></i>${FLOW_OUT[k]}</span>`;
+  // เส้นต่อ: ค่าเริ่มเป็นแนวตั้งมีหัวลูกศร · .fl-x เปลี่ยนเป็นแนวนอนเมื่อแถบกว้างพอ (container query ใน styles.css)
+  const wire = (lb, cls = '') => `<span class="fl-wire${cls}"${lb ? '' : ' aria-hidden="true"'}>${lb ? `<span class="fl-lb">${lb}</span>` : ''}</span>`;
+  const step = (body, k, last, lb = 'ใช่') => `<li class="fl-step"><div class="fl-q">${body}</div>
+    <div class="fl-yes">${wire(lb, ' fl-x')}${node(k)}</div>${last ? '' : `<div class="fl-no">${wire('ไม่ใช่')}</div>`}</li>`;
   const ul = (xs) => `<ul>${xs.map((x) => `<li>${x}</li>`).join('')}</ul>`;
   const hurt = [
     step('<b>บาดเจ็บ:</b> เสียชีวิต หรือบาดเจ็บสาหัส<br><b>ความชำรุดเสียหาย:</b> ขั้นจำหน่าย หรือเสียหายมาก', 'acc'),
@@ -1635,23 +1638,25 @@ function hvFlow() {
       'ย.ดับ หรือดับ ย.ในอากาศ', 'ระบบ Pitot-Static ใช้งานไม่ได้', 'บุคคล (นอกจาก นบ.) Hypoxia, G-LOC, Decompression Sickness',
       'อาคาร ทรัพย์สินของราชการ เอกชน พลเรือน เสียหาย', 'Near CFIT', 'Severe abnormal performance', 'Declare Emergency Fuel',
       'ประตู หน้าต่าง หรือประทุนเปิดออกในอากาศโดยไม่ตั้งใจ', 'Controllability Problem']), 'inc'),
-    `<li class="fl-step"><div class="fl-q">รายงานที่เหลือ เช่น${ul(['รายงาน บ.ชนนก', 'รายงาน อ.ใกล้จะชนกัน (Near-Miss)', 'รายงาน Runway Incursion / Excursion'])}
-      <span class="fl-fn">** การบันทึกสถิติให้บันทึกเป็นรายงานอันตราย</span></div>
-      <div class="fl-yes"><span class="fl-lb">บันทึกเป็น</span>${icon('next')}${out('haz')}</div></li>`,
+    step('รายงานที่เหลือ เช่น' + ul(['รายงาน บ.ชนนก', 'รายงาน อ.ใกล้จะชนกัน (Near-Miss)', 'รายงาน Runway Incursion / Excursion'])
+      + '<span class="fl-fn">** การบันทึกสถิติให้บันทึกเป็นรายงานอันตราย</span>', 'haz', true, 'บันทึกเป็น'),
   ];
+  const branch = (lb, lbl, steps) => `<section class="fl-col" aria-label="${lbl}">
+    <div class="fl-br"><span class="fl-chip">${lb}</span>${wire('')}</div><ol>${steps.join('')}</ol></section>`;
+  const inv = (ks, who) => `<div class="fl-iv"><div class="fl-ivn">${ks.map(node).join('')}</div>${wire('', ' fl-x')}
+    <p class="fl-ivt">สอบสวนโดย คจท.สอบสวนด้านนิรภัยการบิน <b>${who}</b></p></div>`;
   return `<details class="h-flow" data-hflow${LS.get('histFlow', false) ? ' open' : ''}>
     <summary>${icon('grid3')}<span class="fl-sum"><b>ผังพิจารณาประเภทรายงานและการสอบสวน</b>
-      <span class="fl-chips">${Object.keys(FLOW_OUT).map(out).join('')}</span></span>${icon('down', 'ic fl-cv')}</summary>
+      <span class="fl-chips">${Object.keys(FLOW_OUT).map(out).join('')}</span></span>
+      <span class="fl-hint"><span class="c">ดูผัง</span><span class="o">ย่อผัง</span>${icon('down', 'ic fl-cv')}</span></summary>
     <div class="fl-body">
-      <p class="fl-start"><span>เกิดเหตุการณ์ด้านนิรภัยการบิน</span>${icon('down')}<b>มีผู้บาดเจ็บ และ/หรือ อ.ชำรุดเสียหายหรือไม่</b></p>
+      <div class="fl-top"><span class="fl-start">เกิดเหตุการณ์ด้านนิรภัยการบิน</span>${wire('')}
+        <b class="fl-dec">มีผู้บาดเจ็บ และ/หรือ อ.ชำรุดเสียหายหรือไม่</b></div>
       <div class="fl-cols">
-        <section aria-label="มีผู้บาดเจ็บหรือ อ.ชำรุดเสียหาย"><h3 class="fl-h">ใช่ · มีบาดเจ็บหรือเสียหาย</h3><ol>${hurt.join('')}</ol></section>
-        <section aria-label="ไม่มีผู้บาดเจ็บและ อ.ไม่ชำรุดเสียหาย"><h3 class="fl-h">ไม่ใช่ · ไม่มีบาดเจ็บหรือเสียหาย</h3><ol>${none.join('')}</ol></section>
+        ${branch('ใช่ · มีบาดเจ็บหรือเสียหาย', 'มีผู้บาดเจ็บหรือ อ.ชำรุดเสียหาย', hurt)}
+        ${branch('ไม่ใช่ · ไม่มีบาดเจ็บหรือเสียหาย', 'ไม่มีผู้บาดเจ็บและ อ.ไม่ชำรุดเสียหาย', none)}
       </div>
-      <dl class="fl-inv">
-        <dt>${out('acc')}${out('ser')}</dt><dd>สอบสวนโดย คจท.สอบสวนด้านนิรภัยการบิน <b>สนภ.ทอ.</b></dd>
-        <dt>${out('inc')}${out('haz')}</dt><dd>สอบสวนโดย คจท.สอบสวนด้านนิรภัยการบิน <b>หน่วยบิน</b></dd>
-      </dl>
+      <div class="fl-inv"><h3 class="fl-invh">ผู้สอบสวน</h3>${inv(['acc', 'ser'], 'สนภ.ทอ.')}${inv(['inc', 'haz'], 'หน่วยบิน')}</div>
       <p class="note fl-ref">ที่มา: คู่มือการสอบสวนอากาศยานอุบัติเหตุ ประกอบระเบียบ ทอ.ว่าด้วยนิรภัยการบิน พ.ศ.๒๕๖๕ (ฉบับปรับปรุง พ.ศ.๒๕๖๘)
         หน้า ๔ ข้อ ๕ แผนผังกระบวนการรายงานและสอบสวน อ.อุบัติเหตุ ·
         <a href="${FLOW_SRC}" target="_blank" rel="noopener">เปิดคู่มือ (PDF)</a> · <a href="#/regs">กฎระเบียบและคู่มือทั้งหมด</a></p>

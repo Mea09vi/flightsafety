@@ -3280,50 +3280,117 @@ button.wd-n:hover, .wd-n.lk { border-color: var(--c); }
 .pap-lsn-i details p:last-child { margin-bottom: 0; }
 
 /* ── แถบผังพิจารณาประเภทรายงาน (หัวหน้าประวัติเหตุ) · คู่มือการสอบสวน อ.อุบัติเหตุ หน้า ๔ ข้อ ๕ ── */
-/* สี 4 ผลลัพธ์ตามผังต้นฉบับ แดง/ส้ม/เหลือง/ม่วง ใช้เป็นจุดสี+พื้นจาง ตัวอักษรเป็น --text เสมอ */
-:root, :root[data-theme="night"] { --fl-acc: #ff6b6b; --fl-ser: #f4a259; --fl-inc: #f2d24b; --fl-haz: #b993ff; }
-:root[data-theme="day"] { --fl-acc: #c62828; --fl-ser: #d9730d; --fl-inc: #b89200; --fl-haz: #6d3fc0; }
-.h-flow { margin: 14px 0 0; border: 1px solid var(--line2); border-radius: 14px; background: var(--surface); }
+/* สี 4 ผลลัพธ์ตามผังต้นฉบับ แดง/ส้ม/เหลือง/ม่วง ใช้เป็นจุดสี ขอบ และพื้นจาง ตัวอักษรเป็น --text เสมอ (ชื่อประเภทเป็นคำทุกครั้ง)
+   เส้นต่อ (--fl-w) วาดด้วย ::before เป็นเส้น + ::after เป็นหัวลูกศร · ผังเปลี่ยนรูปตามความกว้างของแถบเอง (container fl) ไม่ใช่ความกว้างจอ
+   ≥860 สองสายคู่กันมีราวแยกทาง · 520–859 สายเดียว ลูกศร "ใช่" แนวนอน · <520 ลูกศร "ใช่" และ "ไม่ใช่" แนวตั้งคนละช่อง */
+:root, :root[data-theme="night"] { --fl-acc: #ff6b6b; --fl-ser: #f4a259; --fl-inc: #f2d24b; --fl-haz: #b993ff; --fl-w: #7cc4ff; }
+:root[data-theme="day"] { --fl-acc: #c62828; --fl-ser: #d9730d; --fl-inc: #b89200; --fl-haz: #6d3fc0; --fl-w: #2f6db5; }
+.h-flow { margin: 14px 0 0; container: fl / inline-size; border: 1px solid color-mix(in srgb, var(--fl-w) 45%, var(--line2)); border-radius: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fl-w) 9%, var(--surface)), var(--surface)); overflow: hidden; }
 .hv-top > .h-flow { grid-column: 1 / -1; }
-.h-flow > summary { list-style: none; cursor: pointer; min-height: 52px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.h-flow > summary { list-style: none; cursor: pointer; min-height: 56px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
 .h-flow > summary::-webkit-details-marker { display: none; }
-.h-flow > summary > .ic { flex: none; width: 18px; height: 18px; color: var(--sky); }
-.h-flow > summary > .fl-cv { color: var(--text2); margin-left: auto; transition: transform .2s var(--ease); }
-.h-flow[open] > summary > .fl-cv { transform: rotate(180deg); }
-.fl-sum { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
-.fl-sum > b { font: 600 15px/1.4 var(--f-b); color: var(--text); }
+.h-flow > summary > .ic { flex: none; width: 22px; height: 22px; color: var(--fl-w); }
+.fl-sum { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.fl-sum > b { font: 600 16px/1.4 var(--f-d); color: var(--text); }
 .fl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fl-hint { flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px 0 12px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--fl-w) 55%, transparent); color: var(--fl-w); font: 600 13px/1.4 var(--f-b); }
+.fl-hint .o, .h-flow[open] .fl-hint .c { display: none; }
+.h-flow[open] .fl-hint .o { display: inline; }
+.fl-cv { width: 16px; height: 16px; transition: transform .2s var(--ease); }
+.h-flow[open] .fl-cv { transform: rotate(180deg); }
 .fl-out { display: inline-flex; align-items: center; gap: 6px; min-height: 26px; padding: 2px 10px; border-radius: 999px;
   font: 600 13px/1.4 var(--f-b); color: var(--text); background: color-mix(in srgb, var(--c) 16%, transparent); border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); }
-.fl-out > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
-.fl-out.acc { --c: var(--fl-acc); } .fl-out.ser { --c: var(--fl-ser); } .fl-out.inc { --c: var(--fl-inc); } .fl-out.haz { --c: var(--fl-haz); }
-.fl-body { padding: 4px 14px 16px; display: grid; gap: 14px; border-top: 1px solid var(--line); }
-.fl-start { margin: 10px 0 0; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; font: 400 14px/1.5 var(--f-b); color: var(--text2); }
-.fl-start > b { font-weight: 600; color: var(--text); padding: 8px 14px; border: 1px solid var(--line2); border-radius: 10px; background: var(--surface2); }
-.fl-start > .ic { width: 16px; height: 16px; color: var(--muted); }
-.fl-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.fl-cols > section { min-width: 0; }
-.fl-h { margin: 0 0 8px; font: 600 14px/1.4 var(--f-b); color: var(--text2); text-align: center; }
-.fl-cols ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
-.fl-step { display: grid; gap: 8px; }
-.fl-q { padding: 10px 12px; border: 1px solid var(--line2); border-radius: 10px; background: var(--surface2); font: 400 14px/1.6 var(--f-b); color: var(--text); }
+.fl-out > i, .fl-node > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+:is(.fl-out, .fl-node).acc { --c: var(--fl-acc); } :is(.fl-out, .fl-node).ser { --c: var(--fl-ser); }
+:is(.fl-out, .fl-node).inc { --c: var(--fl-inc); } :is(.fl-out, .fl-node).haz { --c: var(--fl-haz); }
+
+/* ผืนผัง: ตารางจุดจาง ๆ แบบกระดาษผังวงจร */
+.fl-body { padding: 18px 16px 16px; display: grid; border-top: 1px solid var(--line);
+  background: radial-gradient(circle, color-mix(in srgb, var(--text2) 22%, transparent) 1px, transparent 1.5px) 0 0 / 18px 18px, var(--surface); }
+
+/* เส้นต่อ — ค่าเริ่มแนวตั้ง หัวลูกศรชี้ลง */
+.fl-wire { position: relative; display: grid; place-items: center; min-height: 34px; min-width: 24px; }
+.fl-wire::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 6px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--fl-w); }
+.fl-wire::after { content: ''; position: absolute; left: 50%; bottom: 0; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top: 7px solid var(--fl-w); }
+.fl-lb { position: relative; z-index: 1; padding: 0 8px; border-radius: 999px; border: 1px solid var(--fl-w); background: var(--surface);
+  font: 600 12px/1.5 var(--f-b); color: var(--text); white-space: nowrap; }
+
+/* จุดเริ่ม → คำถามแยกทาง */
+.fl-top { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.fl-start { padding: 6px 16px; border-radius: 999px; border: 2px solid var(--text2); background: var(--surface2); font: 600 14px/1.5 var(--f-b); color: var(--text); }
+.fl-dec { position: relative; max-width: 30em; padding: 10px 18px 10px 34px; border-radius: 10px; border: 2px solid var(--fl-w); background: var(--surface2);
+  font: 600 15px/1.5 var(--f-b); color: var(--text); box-shadow: 0 0 0 4px color-mix(in srgb, var(--fl-w) 14%, transparent); }
+.fl-dec::before { content: ''; position: absolute; left: 13px; top: 50%; width: 9px; height: 9px; margin-top: -5px; transform: rotate(45deg); border: 2px solid var(--fl-w); }
+
+/* สองสาย */
+.fl-cols { --fo: 212px; --g: 28px; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.fl-col { min-width: 0; }
+.fl-col ol { margin: 0; padding: 0; list-style: none; }
+.fl-br { display: flex; flex-direction: column; align-items: center; }
+.fl-chip { position: relative; padding: 4px 14px; border-radius: 999px; background: var(--fl-w); color: var(--surface); font: 600 14px/1.4 var(--f-b); }
+.fl-br > .fl-wire { min-height: 26px; }
+.fl-col:first-child { margin-top: 22px; }
+.fl-col:first-child .fl-chip::before { content: ''; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 22px; margin-left: -1px; background: var(--fl-w); }
+.fl-col + .fl-col { padding-top: 18px; border-top: 1px dashed var(--line2); }
+
+/* ขั้นเกณฑ์: กล่อง → (ใช่) → ผล · ใต้กล่อง (ไม่ใช่) → กล่องถัดไป */
+.fl-step { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+.fl-q { grid-column: 1 / -1; padding: 10px 14px; border: 1.5px solid var(--line2); border-radius: 10px; background: var(--surface2);
+  font: 400 14px/1.6 var(--f-b); color: var(--text); }
 .fl-q b { font-weight: 600; }
 .fl-q ul { margin: 4px 0 0; padding-left: 18px; }
 .fl-q li { margin: 2px 0; }
 .fl-fn { display: block; margin-top: 6px; font: 400 13px/1.5 var(--f-b); color: var(--muted); }
-.fl-yes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-left: 12px; }
-.fl-yes > .ic { width: 14px; height: 14px; color: var(--muted); }
-.fl-lb { font: 400 13px/1.4 var(--f-b); color: var(--text2); }
-.fl-no { display: block; margin: 4px 0 8px; text-align: center; font: 400 13px/1.4 var(--f-b); color: var(--muted); }
-.fl-inv { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 12px; align-items: center; padding-top: 12px; border-top: 1px dashed var(--line2); }
-.fl-inv dt { display: flex; flex-wrap: wrap; gap: 6px; }
-.fl-inv dd { margin: 0; font: 400 14px/1.6 var(--f-b); color: var(--text); }
-.fl-inv dd b { font-weight: 600; }
-.fl-ref { margin: 0; }
+.fl-no { grid-column: 1; grid-row: 2; display: grid; width: 64px; }
+.fl-no > .fl-wire { min-height: 100%; }
+.fl-yes { grid-column: 2; grid-row: 2; justify-self: end; display: flex; flex-direction: column; align-items: center; padding-bottom: 6px; }
+.fl-yes > .fl-wire { min-height: 30px; }
+.fl-node { display: flex; align-items: center; gap: 8px; white-space: nowrap; min-height: 40px; padding: 6px 12px; border-radius: 10px; border: 2px solid var(--c);
+  background: color-mix(in srgb, var(--c) 18%, var(--surface)); font: 600 14px/1.4 var(--f-b); color: var(--text); }
+.fl-node > i { width: 10px; height: 10px; }
+
+/* ผู้สอบสวน */
+.fl-inv { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--line2); display: grid; gap: 12px; }
+.fl-invh { margin: 0; font: 600 14px/1.4 var(--f-b); color: var(--text2); }
+.fl-iv { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; }
+.fl-ivn { display: flex; flex-wrap: wrap; gap: 6px; }
+.fl-iv > .fl-wire { width: 64px; }
+.fl-ivt { margin: 0; justify-self: stretch; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--line2); background: var(--surface2);
+  font: 400 14px/1.6 var(--f-b); color: var(--text); }
+.fl-ivt b { font-weight: 600; }
+.fl-ref { margin: 16px 0 0; }
 .fl-ref a { color: var(--sky); }
+
+/* ลูกศรแนวนอน (ใช่ → ผล, ผล → ผู้สอบสวน) เมื่อแถบกว้าง ≥520 */
+@container fl (min-width: 520px) {
+  .fl-step { grid-template-columns: minmax(0, 1fr) var(--fo); align-items: center; }
+  .fl-q { grid-column: 1; grid-row: 1; }
+  .fl-yes { grid-column: 2; grid-row: 1; justify-self: stretch; display: grid; grid-template-columns: 50px minmax(0, 1fr); align-items: center; padding: 0; }
+  .fl-no { grid-column: 1; width: auto; }
+  .fl-no > .fl-wire { min-height: 40px; }
+  .fl-br { width: calc(100% - var(--fo)); }
+  .fl-x { min-height: 30px; }
+  .fl-x::before { left: 0; right: 6px; top: 50%; bottom: auto; width: auto; height: 2px; margin: -1px 0 0; }
+  .fl-x::after { left: auto; right: 0; top: 50%; bottom: auto; margin: -6px 0 0; border: 6px solid transparent; border-right: 0; border-left: 7px solid var(--fl-w); }
+  .fl-x > .fl-lb { transform: translateY(-15px); }
+  .fl-iv { grid-template-columns: 172px 58px minmax(0, 1fr); align-items: center; }
+  .fl-ivn { flex-direction: column; align-items: stretch; }
+  .fl-iv > .fl-wire { width: auto; }
+}
+/* สองสายคู่กัน: คำถาม ─┬─ ราวแยกทางไปกลางช่องกล่องเกณฑ์ของแต่ละสาย */
+@container fl (min-width: 860px) {
+  .fl-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--g); padding-top: 22px; }
+  .fl-cols::before { content: ''; position: absolute; top: 0; left: 50%; width: 2px; height: 22px; margin-left: -1px; background: var(--fl-w); }
+  .fl-cols::after { content: ''; position: absolute; top: 20px; height: 2px; border-radius: 1px; background: var(--fl-w);
+    left: calc((50% - var(--g) / 2 - var(--fo)) / 2); width: calc(50% + var(--g) / 2); }
+  .fl-col:first-child { margin-top: 0; }
+  .fl-col + .fl-col { padding-top: 0; border-top: 0; }
+  .fl-col .fl-chip::before { content: ''; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 14px; margin-left: -1px; background: var(--fl-w); }
+  .fl-br { padding-top: 14px; }
+}
 @media (max-width: 639px) {
-  .fl-cols { grid-template-columns: minmax(0, 1fr); }
-  .fl-inv { grid-template-columns: minmax(0, 1fr); }
-  .fl-inv dd { margin-bottom: 4px; }
-  .h-flow > summary { align-items: flex-start; }
+  .h-flow > summary { align-items: flex-start; flex-wrap: wrap; }
+  .fl-hint { margin-left: 34px; }
 }
