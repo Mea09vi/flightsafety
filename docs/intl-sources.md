@@ -643,7 +643,58 @@ BEA-É (Bureau enquêtes accidents pour la sécurité de l'aéronautique d'État
 | INTL-0316 | AS365 N3 อพยพผู้ประสบภัยน้ำท่วม ร่อนลงลานจอดที่สูง 8,200 ฟุต ด้วยน้ำ… (2013) | AAIB India | ALL · HADR/SAR | published |
 
 - INTL-0289 SH-60K ชนกันกลางอากาศ (JMSDF 2024): มีแค่ข่าวแจกผลสอบสวนของ JMSDF ไม่ใช่รายงานสอบสวนฉบับเต็ม → คง `draft`
+  (ชุดที่ 13 ยกระดับเป็น `published` จากเอกสารสรุปผลสอบสวนทางการ)
 - INTL-0310 EC135 ถูกโดรนชน: เที่ยวบินไม่มีผู้ป่วย จึงติด TRANSPORT ไม่ใช่ MEDEVAC
+
+
+## ชุดที่ 13 (26 เคสใหม่ + ยกระดับ 2 เคส, ฮ. ทหาร: กลาโหมญี่ปุ่น / UK MOD Service Inquiry / NSIA นอร์เวย์, 21 ต.ค. 2569)
+
+ผู้ใช้สั่ง 21 ต.ค. 2569 (ข้อ 1 ผลสอบสวน ฮ. ของกองกำลังป้องกันตนเองญี่ปุ่น · ข้อ 2 Service Inquiry ของกระทรวงกลาโหมอังกฤษ
+· เพิ่ม NSIA นอร์เวย์ เน้น S-92) agent อ่านเอกสารต้นฉบับเองทุกเคส ผู้ประสานงานตรวจรหัส กฎถ้อยคำ และข้อห้ามซ้ำ
+กลุ่ม: MOD Japan 3 ใหม่ + 2 ยกระดับ · UK MOD 13 · NSIA 10 (S-92 6 · H135 2 · H225M 1 · BK117 1)
+
+| id | เหตุการณ์ | หน่วยงาน | แบบ · ภารกิจ | สถานะ |
+|---|---|---|---|---|
+| INTL-0317 | AH-64D บินทดสอบหลังซ่อมบำรุงตามระยะ สลักเกลียวที่หัวใบพัดหลักขาด ใบพ… (2018) | MOD Japan | ALL · FCF | published |
+| INTL-0318 | CH-47J ฝึกบินทบทวน ประตูสินค้าหลุดตกขณะบินตรวจพื้นที่ก่อนลงจอดที่ลาน… (2018) | MOD Japan | ALL · PROFICIENCY | published |
+| INTL-0319 | OH-1 กำลังเครื่องยนต์หนึ่งในสองเครื่องลดลงระหว่างบิน ลงจอดแบบ Precau… (2015) | MOD Japan | ALL · ALL | draft |
+| INTL-0320 | Merlin HC4 เครื่องยนต์หนึ่งเร่งรอบเกินเองตอนเข้าหาเรือบรรทุกเครื่องบ… (2024) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0321 | Griffin HT1 (Bell 412EP) ฐานรองเกียร์บ็อกซ์หลักแตกขณะลงแบบสกีเบาบนยอ… (2016) | UK MOD SI | B412EP · STUDENT/TRANSPORT | published |
+| INTL-0322 | Lynx AH9A กองทัพบกอังกฤษ ฝึกยิงปืนประจำอากาศยานในหุบเขาที่อัฟกานิสถา… (2014) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0323 | Chinook HC2A ส่งสัมภาระแขวนใต้ท้องที่ฐานลาดตระเวนในอัฟกานิสถาน เข้าฝ… (2010) | UK MOD SI | ALL · SLING/TRANSPORT | published |
+| INTL-0324 | Chinook HC2 ฝึกลงจอดในฝุ่นทะเลทรายที่สหรัฐฯ ก่อนวางกำลัง ลดระดับเร็ว… (2012) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0325 | Chinook HC3 หมู่บินฝึกบินต่ำผ่านเหนือคนขี่ม้าที่ถูกแนวรั้วต้นไม้บัง … (2011) | UK MOD SI | ALL · STUDENT/FORMATION | published |
+| INTL-0326 | Puma HC1 (ตระกูล Puma ต้นแบบของ Super Puma/H225M) ฝาครอบเกียร์ใบพัดห… (2011) | UK MOD SI | H225M · PROFICIENCY | published |
+| INTL-0327 | Puma HC1 (ตระกูล Puma ต้นแบบของ Super Puma/H225M) บินพาทหารเที่ยวสุด… (2007) | UK MOD SI | H225M · TRANSPORT | published |
+| INTL-0328 | Sea King Mk4 ฝึกเครื่องยนต์ดับ 1 เครื่องจากการลอยตัวต่ำในสนามบิน กดห… (2013) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0329 | Lynx AH7 เครื่องยนต์ระเบิดกลางอากาศ ไฟไหม้และควันเต็มห้องนักบินจนมอง… (2011) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0330 | Squirrel HT1 นักเรียนการบินเดี่ยวฝึก Quick Stop กระแทกพื้นครั้งแรกแต… (2012) | UK MOD SI | ALL · STUDENT | published |
+| INTL-0331 | Gazelle HT3 ฝึกลงจอดแบบเครื่องยนต์ดับ (Engine Off Landing) ใบพัดหลัก… (2014) | UK MOD SI | ALL · PROFICIENCY | published |
+| INTL-0332 | Squirrel ฝึกศิษย์การบินกองทัพบกอังกฤษ บินผ่านหุบเขาที่ความสูงต่ำ ชนส… (2008) | UK MOD BOI | ALL · STUDENT/FORMATION | published |
+| INTL-0333 | ฝึกกว้านกู้ภัยกลางคืนลงเรือในคลื่นสูง ผู้ช่วยเหลือ (Rescue Swimmer) … (2021) | NSIA Norway | S-92 · SAR/HOIST/PROFICIENCY | published |
+| INTL-0334 | ไฟเตือนปั๊มน้ำมันกระปุกเกียร์หลักดับทั้งสองตัวกลางทะเล Checklist ไม่… (2013) | NSIA Norway | S-92 · TRANSPORT | published |
+| INTL-0335 | แรงดันน้ำมันกระปุกเกียร์หลักต่ำและร้อนจัด ลงจอดแบบ Run-on Landing ใน… (2020) | NSIA Norway | S-92 · TRANSPORT | published |
+| INTL-0336 | แรงดันน้ำมันกระปุกเกียร์หลักหายเกือบหมดใน 33 วินาทีหลังฝึกกู้ภัย ลงจ… (2021) | NSIA Norway | S-92 · SAR/PROFICIENCY | published |
+| INTL-0337 | Taxi บนลานจอดสนามบิน ใบพัดหลักฟาดรถก่อสร้างที่จอดใกล้แนวกึ่งกลาง แท่… (2016) | NSIA Norway | S-92 · TRANSPORT | published |
+| INTL-0338 | เครื่องยนต์ซ้ายดับหลังวิ่งขึ้นจากแท่นขุดเจาะพร้อมผู้โดยสาร 14 คน บิน… (2023) | NSIA Norway | S-92 · TRANSPORT | published |
+| INTL-0339 | ฮ. การแพทย์ฉุกเฉินชนสายไฟฟ้าแรงสูงขณะเข้าลงจุดเกิดเหตุจราจร ทั้งที่แ… (2014) | NSIA Norway | H135 · MEDEVAC/CONFINED | published |
+| INTL-0340 | ระบบไฮดรอลิกรั่วหลังวิ่งขึ้นกลางคืน ลงจอดบนแท่นลอยน้ำในพายุ แล้ว ฮ. … (2012) | NSIA Norway | H225M · TRANSPORT | published |
+| INTL-0341 | ฮ. การแพทย์ฉุกเฉินลงจอดบนหิมะนุ่มในแสงแบน หางกดหิมะเข้าใบพัดหาง Fene… (2006) | NSIA Norway | H135 · MEDEVAC/CONFINED | published |
+| INTL-0342 | Hover รอผู้ประสบภัยนานในหิมะกลางคืนด้วย NVG น้ำแข็งจากตัวกรองอากาศเข… (2021) | NSIA Norway | ALL · SAR | published |
+
+- ยกระดับจาก `draft` เป็น `published` ด้วยเอกสารผลสอบสวนทางการของกลาโหมญี่ปุ่น (เขียนเนื้อเรื่องใหม่):
+  INTL-0289 SH-60K ชนกันกลางอากาศ (JMSDF 2024, เอกสารกองเสนาธิการ 10 หน้า: ข่าวแจก + สรุปรายงานสอบสวน + สไลด์) ·
+  INTL-0039 UH-60JA ตกทะเลใกล้เกาะมิยาโกะ (JGSDF 2023, ประกาศผลสอบสวน 2 หน้า ลิงก์เดิมใน `ref` เก่าเปิดไม่ได้แล้ว เปลี่ยนเป็นลิงก์ที่ใช้ได้)
+- เอกสารของกลาโหมญี่ปุ่นเป็น "สรุปผลการสอบสวน" ที่หน่วยงานสอบสวนเผยแพร่เอง ไม่ใช่รายงานฉบับเต็มแบบ JTSB
+  จึงมีรายละเอียดน้อยกว่า · 0318 CH-47J อ่านจากสำเนา Wayback Machine เพราะลิงก์ mod.go.jp เดิมใช้ไม่ได้แล้ว
+- INTL-0319 OH-1 (JGSDF 2015) คง `draft`: เอกสารที่หาได้มีแค่หน้าเดียวเรื่องกลับมาบินต่อ ไม่พอเป็นเคสบรีฟ
+- INTL-0332 Squirrel ชนสายไฟ (2008) เป็น Board of Inquiry (รูปแบบก่อน Service Inquiry) `ref_label` = "UK MOD Board of Inquiry"
+  หน้าภาพรวมนับรวมกับ MOD-SI
+- แบบ ฮ.: Puma HC1 → H225M · Griffin HT1 → B412EP · EC135 → H135 · EC225 → H225M · Merlin / Lynx / Chinook /
+  Sea King / Squirrel / Gazelle / AH-64D / CH-47J / OH-1 / BK117 → ALL
+- ไม่ได้ใส่: Puma Kabul 2015 (มีแล้ว INTL-0035) · Lynx 2004 (เผยแพร่แค่สรุป) ·
+  Service Inquiry ของอากาศยานไร้คนขับและเครื่องบินปีกตรึงทั้งหมด
+- ผู้สมัครชุดถัดไป: Sea King Rescue 137 ที่ Ben Nevis (2013)
 
 ## ผู้สมัครชุดถัดไป (ยังไม่ได้ตรวจ)
 - BEA-É ที่ยังไม่ได้อ่าน: G-2014-018-A, S-2015-010-I, G-2023-02-A, G-2022-17-I, S-2024-17-I,
@@ -680,7 +731,7 @@ BEA-É (Bureau enquêtes accidents pour la sécurité de l'aéronautique d'État
 - safety.af.mil (DoD HFACS 8.0 Guide PDF) และ navalsafetycommand: 403
 - mod.go.jp หน้า kisha และ PDF ข่าวของ JGSDF: 403 / 404 (ใช้หน้าสมุดปกขาวแทน)
 - canada.ca: curl ค้าง ต้องเปิดผ่านเบราว์เซอร์
-- JMSDF SH-60K (2024): ยังไม่มีรายงานฉบับสุดท้าย — ใส่เป็น INTL-0289 แบบ `draft` จากข่าวแจก
+- ~~JMSDF SH-60K (2024): ยังไม่มีรายงานฉบับสุดท้าย — ใส่เป็น INTL-0289 แบบ `draft` จากข่าวแจก~~ ชุดที่ 13 ใช้เอกสารสรุปผลสอบสวนของกองเสนาธิการ JMSDF → `published`
 - S-76C++ ชนนก (2009): ไม่มี AAR แต่ใช้รายงาน CAROL CEN09MA117 ได้ ใส่เป็น INTL-0237 แล้ว (ชุดที่ 10)
 - NTSB AAR-10/03 เป็นรายงานของ US Airways 1549 ไม่ใช่ ฮ. — ไม่ได้ใช้
 - archives.defense.gouv.fr (คลังรายงาน BEA-É เก่า): NXDOMAIN ใช้ลิงก์บน defense.gouv.fr แทน

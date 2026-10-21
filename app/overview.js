@@ -131,6 +131,7 @@ export async function mountOverview(host, { state }) {
     'TSB Canada': { code: 'TSB', th: 'แคนาดา', name: 'Transportation Safety Board' },
     'NSIA Norway': { code: 'NSIA', th: 'นอร์เวย์', name: 'Norwegian Safety Investigation Authority' },
     'UK MOD Service Inquiry': { code: 'MOD-SI', th: 'สหราชอาณาจักร', name: 'UK MOD Service Inquiry' },
+    'UK MOD Board of Inquiry': { code: 'MOD-SI', th: 'สหราชอาณาจักร', name: 'UK MOD Board of Inquiry' },
     'MOD Japan': { code: 'JMOD', th: 'ญี่ปุ่น', name: 'กระทรวงกลาโหมญี่ปุ่น' },
     'AAIB India': { code: 'AAIB-I', th: 'อินเดีย', name: 'Aircraft Accident Investigation Bureau' },
     'SHK Sweden': { code: 'SHK', th: 'สวีเดน', name: 'Swedish Accident Investigation Authority' },

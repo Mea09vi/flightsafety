@@ -86,6 +86,9 @@ def ref_label(url):
     # gov.uk มีทั้ง AAIB และ Service Inquiry ของกระทรวงกลาโหม
     if host.endswith("gov.uk") and "/service-inquiry" in u.path:
         return "UK MOD Service Inquiry"
+    # Board of Inquiry = รูปแบบการสอบสวนของกระทรวงกลาโหมอังกฤษก่อนมี Service Inquiry (ปี 2008)
+    if host.endswith("gov.uk") and "/board-of-inquiry" in u.path:
+        return "UK MOD Board of Inquiry"
     for key, label in REF_HOSTS.items():
         if host.endswith(key):
             return label
