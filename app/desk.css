@@ -84,6 +84,9 @@
 }
 .annun::before { content: ''; display: block; flex: none; height: 4px; margin: 0 -14px; background: var(--d-flag); }
 .annun .logo { display: none; }
+body.sub .annun .brand { display: flex; }
+.annun .m-sub, body.sub .annun .m-sub { display: none; }
+body.sub .annun .tabbar { display: flex; }
 .annun .brand { flex: none; gap: 12px; padding: 18px 6px; margin-bottom: 6px; border-bottom: 1px solid var(--line); min-height: 0; color: var(--text); }
 .annun .emblem { display: block; flex: none; width: 54px; height: 57px; filter: drop-shadow(0 6px 12px hsl(var(--d-navy-1000) / .8)); animation: d-pop .7s var(--d-ease) both; }
 .annun .b-t { display: block; min-width: 0; }

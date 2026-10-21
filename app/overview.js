@@ -717,7 +717,7 @@ export async function mountOverview(host, { state }) {
     s += ORDER.map((k) => `<path class="rd-hi" data-ph="${k}" d="${wedgeD(RX, RY, R0, R1, SEC[k][0], SEC[k][1])}"/>`).join('');
     s += `<g aria-hidden="true">${DOTS.map((c) => `<g class="rd-p" data-id="${c.id}"><circle class="rd-dot ${tcls(c.type)}" cx="${f(c._rd.x)}" cy="${f(c._rd.y)}" r="4" style="animation-delay:${f(c._rd.deg / 90 - 4)}s"/></g>`).join('')}</g>`;
     s += RINGS.map((y) => `<text class="rd-yl" x="${RX}" y="${f(RY - yrR(y) + 5)}">${y}</text>`).join('');
-    s += ORDER.map((k) => { const p = labPos(k); return `<text class="rd-lab" data-ph="${k}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="${p.a}" aria-hidden="true">${esc(PH[k])} <tspan class="n">0</tspan></text>`; }).join('');
+    s += ORDER.map((k) => { const p = labPos(k); return `<text class="rd-lab" data-ph="${k}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="${p.a}" aria-hidden="true">${esc(PH_EN[k])} <tspan class="n">0</tspan></text>`; }).join('');
     s += ORDER.map((k) => `<path class="rd-hit" data-ph="${k}" role="button" tabindex="0" aria-pressed="false" d="${wedgeD(RX, RY, R0, R1 + 40, SEC[k][0] - 1, SEC[k][1] + 1)}"/>`).join('');
     return s;
   };
@@ -740,16 +740,16 @@ export async function mountOverview(host, { state }) {
       <svg id="rd-svg" viewBox="0 0 1160 900" role="group" aria-label="เรดาร์ช่วงของเที่ยวบิน — เลือกช่วงเพื่อกรอง">${rdSvg()}</svg>
       <div class="rd-ctr" id="rd-ctr" aria-hidden="true"></div></div></div>
     <div class="rd-side">
-      <h3 class="sd-h">ช่วงของเที่ยวบิน</h3>
-      <div class="rd-list">${ORDER.map((k) => lbtn('phase', k, esc(PH[k]) + en(PH_EN[k]))).join('')}</div>
+      <h3 class="sd-h">Flight phase</h3>
+      <div class="rd-list">${ORDER.map((k) => lbtn('phase', k, esc(PH_EN[k]) + en(PH[k]))).join('')}</div>
       <div class="yr">
-        <div class="yr-h"><span id="yr-l">ปีที่เกิดเหตุ</span><b id="yr-b">ทุกปี</b></div>
-        <input type="range" id="yr-in" min="${U.Y0}" max="${U.Y1}" step="1" value="${U.Y1}" aria-labelledby="yr-l" aria-valuetext="ทุกปี">
+        <div class="yr-h"><span id="yr-l">Year of occurrence</span><b id="yr-b"><small>All years</small></b></div>
+        <input type="range" id="yr-in" min="${U.Y0}" max="${U.Y1}" step="1" value="${U.Y1}" aria-labelledby="yr-l" aria-valuetext="All years">
         <div class="yr-t"><span class="mono">${U.Y0}</span><span class="mono">${U.Y1}</span></div>
         <button type="button" class="btn btn-line yr-play" id="yr-play" aria-pressed="false"></button>
-        <p class="yr-note" id="yr-note">เล่นเพื่อดูเคสสะสมทีละปีตั้งแต่ ${U.Y0} — ตัวกรองอื่นยังทำงานตามปกติ</p>
+        <p class="yr-note" id="yr-note">Play to build up cases year by year from ${U.Y0} — other filters still apply</p>
       </div>
-      <div class="rd-lg"><span><i class="d" style="background:var(--bad)"></i>อุบัติเหตุ</span><span><i class="d" style="background:var(--warn)"></i>อุบัติการณ์</span><span>วงใน = ปีเก่า · วงนอก = ปีใหม่</span></div>
+      <div class="rd-lg"><span><i class="d" style="background:var(--bad)"></i>Accident</span><span><i class="d" style="background:var(--warn)"></i>Incident</span><span>Inner ring = older · outer ring = newer</span></div>
     </div>
   </div>
 </section>`);
@@ -768,9 +768,9 @@ export async function mountOverview(host, { state }) {
     const box = $('#rd-ctr');
     if (HOVPH) {
       const mp = M('phase'), n = mp.filter((c) => c._ph === HOVPH).length;
-      box.innerHTML = `<span class="l">${esc(PH[HOVPH])}</span><b>${U.fmt(n)}</b><span class="c">${pctOf(n, mp.length)}% ของ ${U.fmt(mp.length)} เคส</span>`;
+      box.innerHTML = `<span class="l">${esc(PH_EN[HOVPH])}</span><b>${U.fmt(n)}</b><span class="c">${pctOf(n, mp.length)}% of ${U.fmt(mp.length)} cases</span>`;
     } else {
-      box.innerHTML = `<span class="l">${S.phase ? esc(PH[S.phase]) : 'ทุกช่วง'}</span><b>${U.fmt(M().length)}</b><span class="c">เคสที่ตรงตัวกรอง</span>`;
+      box.innerHTML = `<span class="l">${S.phase ? esc(PH_EN[S.phase]) : 'All phases'}</span><b>${U.fmt(M().length)}</b><span class="c">matching cases</span>`;
     }
   };
   const hoverPh = (k) => {
@@ -830,16 +830,16 @@ export async function mountOverview(host, { state }) {
     else if (tp.length === 1) h = `ทั้ง ${U.fmt(base)} เคสเกิดช่วง${U.sp(PH[tp[0][0]])}`;
     else h = `ช่วง${U.sp(PH[tp[0][0]])}และ${U.sp(PH[tp[1][0]])} รวมกัน ${pct(tp[0][1] + tp[1][1], base)}% ของ ${U.fmt(base)} เคส`;
     $('#h-radar').innerHTML = U.tx(h);
-    const yin = $('#yr-in'), yv = Y || U.Y1, yt = Y ? `ถึงปี ${Y}` : 'ทุกปี';
+    const yin = $('#yr-in'), yv = Y || U.Y1, yt = Y ? `Up to ${Y}` : 'All years';
     yin.value = yv;
     yin.style.setProperty('--p', `${((yv - U.Y0) / (U.Y1 - U.Y0)) * 100}%`);
     yin.setAttribute('aria-valuetext', yt);
-    $('#yr-b').textContent = yt;
+    $('#yr-b').innerHTML = Y ? `<small>Up to</small> ${Y}` : '<small>All years</small>'; // คำใช้ --f-d เลขปีใช้ Mono
     const pb = $('#yr-play');
     if (pb.dataset.s !== String(PLAY)) {
       pb.dataset.s = String(PLAY);
       pb.setAttribute('aria-pressed', String(PLAY));
-      pb.innerHTML = PLAY ? `${ic('pause', 'sm')}<span>หยุด</span>` : `${ic('play', 'sm')}<span>เล่น ${U.Y1 - U.Y0} ปี</span>`;
+      pb.innerHTML = PLAY ? `${ic('pause', 'sm')}<span>Pause</span>` : `${ic('play', 'sm')}<span>Play ${U.Y1 - U.Y0} years</span>`;
     }
   });
 
@@ -916,7 +916,7 @@ export async function mountOverview(host, { state }) {
     $('#yr-play').addEventListener('click', () => { if (PLAY) { stopPlay(); update(); } else startPlay(); });
     if (U.reduced) {
       $('#yr-play').disabled = true;
-      $('#yr-note').textContent = 'ปิดการเล่นอัตโนมัติตามการตั้งค่าลดการเคลื่อนไหว — เลื่อนแถบปีเองได้';
+      $('#yr-note').textContent = 'Autoplay is off (reduced motion) — drag the year slider instead';
     }
   });
 

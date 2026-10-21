@@ -2513,6 +2513,13 @@ wide.addEventListener('change', () => { if (!location.hash.replace(/^#\/?/, ''))
 const scrollMemo = {};
 let lastPath = null;
 
+const SUB_T = { areas: 'อันตรายประจำพื้นที่', airmanship: 'Wing 2 Airmanship', theory: 'ทฤษฎีนิรภัย', regs: 'กฎระเบียบและคู่มือ' };
+let navCount = 0; // จำนวนหน้าที่เปิดในแอปรอบนี้ — ปุ่มย้อนกลับของ .m-sub ใช้ history.back() ได้เมื่อ > 1
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-sub-back]')) return;
+  if (navCount > 1) history.back(); else location.replace('#/');
+});
+
 function route() {
   const path = location.hash.replace(/^#/, '').split('?')[0] || '/';
   const parts = path.split('/').filter(Boolean);
@@ -2556,14 +2563,16 @@ function route() {
     default: viewHome();
   }
 
-  const tab = page === 'case' && state.caseBack ? 'home'
-    : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief'
-      : ['dashboard', 'areas', 'about'].includes(page) ? page : 'home';
-  // แถบเมนูจอคอมฯ มีลิงก์ประวัติเหตุ/ทฤษฎีของตัวเอง
-  const dtab = ['history', 'theory', 'regs', 'airmanship'].includes(page) ? page : null;
+  const tab = page === 'case' && state.caseBack ? 'history'
+    : ['filter', 'results', 'case', 'brief'].includes(page) ? 'brief' : page || 'home';
   for (const a of $$('.tabbar a')) {
-    if (a.dataset.tab === tab || a.dataset.tab === dtab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
+  // จอแคบ: หน้าที่ไม่มีในแถบล่าง ใช้หัวเรื่อง + ปุ่มย้อนกลับแทน (body.sub · desk.css ไม่ใช้)
+  const subT = SUB_T[page] && !lesson ? SUB_T[page] : '';
+  document.body.classList.toggle('sub', !!subT);
+  $('.m-sub-t').textContent = subT;
+  navCount++;
   setBadges();
   const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs', 'airmanship'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
