@@ -541,6 +541,12 @@ const TIERS = [
     'สิ่งที่ผู้ปฏิบัติงานหน้างานทำหรือละเลย จนนำไปสู่เหตุโดยตรง แบ่งเป็นความผิดพลาดที่ไม่ได้ตั้งใจ (ทักษะ การตัดสินใจ) กับการฝ่าฝืนโดยรู้ตัว',
     'ใครทำอะไร หรือไม่ได้ทำอะไร ก่อนเกิดเหตุ'],
 ];
+const TIER_META = [
+  { tag: 'รูแฝงรากลึก (Latent)', type: 'latent', lvl: 4 },
+  { tag: 'รูแฝงบังคับบัญชา (Latent)', type: 'latent', lvl: 3 },
+  { tag: 'รูแฝงสภาพแวดล้อม (Latent)', type: 'latent', lvl: 2 },
+  { tag: 'รูหน้างาน (Active)', type: 'active-fail', lvl: 1 },
+];
 const HF_TH = {
   AD000: 'ฝ่าฝืนโดยรู้ตัว', AE100: 'พลาดที่ทักษะการปฏิบัติ', AE200: 'พลาดที่การตัดสินใจ',
   PC100: 'การรับรู้และความตื่นตัว', PC200: 'สภาพจิตใจ', PC300: 'ร่างกายไม่พร้อม',
@@ -719,6 +725,7 @@ const WIDGETS = {
 
   hfacs() {
     const st = (ws[key()] ||= { open: 3 });
+    if (st.open < 0 || st.open > 3) st.open = 3;
     const rows = H.tax?.hfacs || [];
     const cats = rows.filter((r) => r.level === 'category');
     const of = (tier) => {
@@ -727,21 +734,79 @@ const WIDGETS = {
     };
     const cat = (r) => {
       const nano = rows.filter((x) => x.level === 'nanocode' && x.category === r.code);
-      return `<li><details class="hf-c">
-        <summary><code>${H.esc(r.code)}</code><span><b>${HF_TH[r.code] || H.esc(r.label)}</b>${r.label ? `<small>${H.esc(r.label)}</small>` : ''}</span>${nano.length ? `<em>${nano.length} รหัสย่อย</em>` : ''}</summary>
-        ${CAT_D[r.code] ? `<p>${CAT_D[r.code]}</p>` : ''}
-        ${nano.length ? `<ul>${nano.map((x) => `<li><code>${H.esc(x.code)}</code><span>${NANO_TH[x.code] || H.esc(x.label)}<small>${H.esc(x.label)}</small></span></li>`).join('')}</ul>` : ''}
-      </details></li>`;
-    };
-    return `<ol class="hf">${TIERS.map(([en, th, d, ask], k) => {
-      const open = st.open === k;
-      const list = of(en);
-      return `<li class="hf-t${open ? ' open' : ''}" style="--w:${100 - (3 - k) * 7}%">
-        <button class="hf-b" data-lw="hf:${k}" aria-expanded="${open}">
-          <span class="n">${4 - k}</span><span class="t"><b>${th}</b><small>${en} · ${list.length} หมวด</small></span>${H.icon('down')}</button>
-        ${open ? `<div class="hf-p"><p>${d}</p><p class="hf-q"><b>ถามว่า</b>${ask}</p><ul class="hf-cs">${list.map(cat).join('')}</ul></div>` : ''}
+      return `<li class="hf-cat-item">
+        <div class="hf-cat-top">
+          <code class="hf-cat-code">${H.esc(r.code)}</code>
+          ${nano.length ? `<span class="hf-cat-nano-badge">${nano.length} รหัสย่อย (DoD 8.0)</span>` : ''}
+        </div>
+        <div class="hf-cat-name">${HF_TH[r.code] || H.esc(r.label)}${r.label ? ` <small class="hf-cat-en">(${H.esc(r.label)})</small>` : ''}</div>
+        ${CAT_D[r.code] ? `<p class="hf-cat-desc">${CAT_D[r.code]}</p>` : ''}
+        ${nano.length ? `<details class="hf-c">
+          <summary><span>ดูรหัสย่อยทั้ง ${nano.length} รหัส</span></summary>
+          <ul>${nano.map((x) => `<li><code>${H.esc(x.code)}</code><span>${NANO_TH[x.code] || H.esc(x.label)}<small>${H.esc(x.label)}</small></span></li>`).join('')}</ul>
+        </details>` : ''}
       </li>`;
-    }).join('')}</ol>`;
+    };
+
+    const curK = st.open;
+    const [curEn, curTh, curD, curAsk] = TIERS[curK];
+    const curList = of(curEn);
+    const curMeta = TIER_META[curK];
+
+    return `<div class="hf-wrap">
+      <div class="hf-strip">
+        <div class="hf-strip-tag"><i class="hf-dot"></i><span>HFACS 8.0 FRAMEWORK · 4-TIER DEFENSE-IN-DEPTH</span></div>
+        <div class="hf-strip-tag">ระดับปัจจุบัน: <span class="hf-sub">LEVEL ${curMeta.lvl} · ${curTh}</span></div>
+      </div>
+      <div class="hf-grid">
+        <div class="hf-pyr-col">
+          <div class="pyr-legend">
+            <span><span class="arr">▼</span> ห่วงโซ่สาเหตุ (CAUSAL TRAJECTORY)</span>
+            <span>4 ระดับ</span>
+          </div>
+          <div class="pyr-stack">
+            <div class="causal-line" aria-hidden="true"></div>
+            <div class="causal-arrow" aria-hidden="true"></div>
+            ${TIERS.map(([en, th, d, ask], k) => {
+              const active = st.open === k;
+              const meta = TIER_META[k];
+              const list = of(en);
+              return `<button class="tier-card${active ? ' active' : ''}" data-t="${meta.lvl}" data-lw="hf:${k}" aria-pressed="${active}">
+                <span class="tc-badge">${meta.lvl}</span>
+                <div class="tc-info">
+                  <div class="tc-title">
+                    <span>${th}</span>
+                    <span class="tc-type ${meta.type}">${meta.tag}</span>
+                  </div>
+                  <div class="tc-en">${en} · ${list.length} หมวด</div>
+                </div>
+                <span class="tc-arrow" aria-hidden="true">›</span>
+              </button>`;
+            }).join('')}
+          </div>
+          <div class="mishap-band">
+            <span class="mishap-icon" aria-hidden="true">⚠️</span>
+            <span><b>ปลายทางห่วงโซ่สาเหตุ:</b> ทะลุชั้นป้องกันจนเกิดอุบัติเหตุ (Mishap)</span>
+          </div>
+        </div>
+        <div class="hf-insp-col">
+          <div class="dt-header">
+            <div>
+              <div class="dt-level-tag">LEVEL 0${curMeta.lvl} // ${curK === 3 ? 'SHARP END OF AVIATION' : 'DEFENSE-IN-DEPTH BARRIER'}</div>
+              <h3 class="dt-title">${curTh} <span class="dt-en">(${curEn})</span></h3>
+            </div>
+            <span class="dt-cat-count">${curList.length} หมวดหลัก</span>
+          </div>
+          <p class="dt-desc">${curD}</p>
+          <div class="dt-ask-box">
+            <span class="dt-ask-lbl">ถามว่า</span>
+            <span><b>"${curAsk}"</b></span>
+          </div>
+          <div class="dt-cats-title">หมวดหมู่ย่อยในระดับนี้ (Categories & Nanocodes)</div>
+          <ul class="dt-cats-list">${curList.map(cat).join('')}</ul>
+        </div>
+      </div>
+    </div>`;
   },
 
   shell() {
@@ -960,7 +1025,7 @@ function onWidget(v) {
   if (w === 'sw') {
     if (a === 'reset') st.plug = [];
     else { const k = +a; st.plug = st.plug.includes(k) ? st.plug.filter((x) => x !== k) : [...st.plug, k]; }
-  } else if (w === 'hf') st.open = st.open === +a ? -1 : +a;
+  } else if (w === 'hf') st.open = +a;
   else if (w === 'sh') st.k = a;
   else if (w === 'tm') {
     if (a === 'reset') st.m = [];

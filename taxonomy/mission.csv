@@ -11,3 +11,5 @@ CONFINED,ลงพื้นที่จำกัด / ไม่เตรีย�
 FORMATION,บินหมู่
 FCF,ทดสอบหลังซ่อม (FCF)
 FERRY,บินเดินทาง / ferry
+MEDEVAC,ส่งกลับสายแพทย์ / HEMS
+HADR,ช่วยเหลือภัยพิบัติ (HADR)

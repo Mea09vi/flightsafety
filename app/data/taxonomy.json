@@ -1,5 +1,5 @@
 {
- "version": "2026-10-16",
+ "version": "2026-10-21",
  "aircraft": [
   {
    "code": "S-70I",
@@ -98,6 +98,14 @@
   {
    "code": "FERRY",
    "label": "บินเดินทาง / ferry"
+  },
+  {
+   "code": "MEDEVAC",
+   "label": "ส่งกลับสายแพทย์ / HEMS"
+  },
+  {
+   "code": "HADR",
+   "label": "ช่วยเหลือภัยพิบัติ (HADR)"
   }
  ],
  "environment": [
