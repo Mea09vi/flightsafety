@@ -449,6 +449,30 @@ function scenarioHits(scn, D) {
   return D.filter((d) => counts(d) && (scn.kw || []).some((w) => `${d.scenario} ${d.note || ''}`.includes(w)));
 }
 
+// ข้อเน้นย้ำ: ข้อบกพร่องจากการซ้อมทุกปีจัดเป็นเรื่อง (build_pap.py) เรื่องที่พบซ้ำหลายปีงบขึ้นก่อน
+function lessons(L, fys, esc) {
+  if (!L?.length) return '';
+  const rows = L.map((l) => {
+    const fy = [...new Set(l.items.map((i) => fyOf(i.date)?.fy).filter(Boolean))];
+    const last = l.items.map((i) => i.date).sort().at(-1);
+    const byDate = {};
+    for (const i of l.items) (byDate[i.date] ||= []).push(i.t);
+    return { ...l, fy, last, byDate };
+  }).sort((a, b) => (a.key === 'etc') - (b.key === 'etc') || b.fy.length - a.fy.length || b.last.localeCompare(a.last));
+  const yrs = fys.length ? fys : [];
+  const card = (l, n) => `<li class="pap-lsn-i${l.fy.length > 1 ? ' rep' : ''}">
+    <div class="pap-lsn-h"><span class="pap-lsn-n">${l.key === 'etc' ? '' : n + 1}</span><h3>${esc(l.title)}</h3></div>
+    ${l.do ? `<p class="pap-lsn-do">${esc(l.do)}</p>` : ''}
+    <div class="pap-lsn-r"><span class="pap-lsn-b">${l.fy.length > 1 ? `พบซ้ำ ${l.fy.length} ปีงบ` : 'พบ 1 ปีงบ'}</span>
+    <div class="pap-lsn-fy" role="img" aria-label="ปีงบที่พบ ${l.fy.map((y) => String(y).slice(2)).join(' ')}">${yrs.map((y) => `<span class="${l.fy.includes(y) ? 'on' : ''}">${String(y).slice(2)}</span>`).join('')}</div></div>
+    <details><summary>ข้อบกพร่องที่พบ ${l.items.length} ข้อ · ล่าสุด ${fmtDate(l.last)}</summary>
+      <ul>${Object.keys(l.byDate).sort().reverse().map((d) => `<li><span class="pap-lsn-d">${fmtDate(d)}</span><div>${l.byDate[d].map((t) => `<p>${esc(t)}</p>`).join('')}</div></li>`).join('')}</ul>
+    </details></li>`;
+  return `<section class="pap-sec2"><h2 class="sec-h">ข้อเน้นย้ำจากการซ้อม <span>ข้อบกพร่องที่พบซ้ำหลายปีขึ้นก่อน ทบทวนก่อนซ้อมทุกครั้ง</span></h2>
+    <ol class="pap-lsn">${rows.map(card).join('')}</ol>
+    <p class="pap-note">แถบตัวเลขคือปีงบ ${String(yrs[0] ?? '').slice(2)}–${String(yrs.at(-1) ?? '').slice(2)} ช่องสีคือปีที่พบข้อบกพร่องเรื่องนั้น · จัดกลุ่มจากคำในข้อความ อาจคลาดเคลื่อน</p></section>`;
+}
+
 function plan(box, P, { esc, icon }) {
   const D = P.drills;
   const G = P.guide;
@@ -462,7 +486,8 @@ function plan(box, P, { esc, icon }) {
   }
   const scn = (G.scenario_types || []).filter((s) => s.name).map((s) => { const h = scenarioHits(s, D); return { s: s.name, n: h.length, last: h.map((d) => d.date).sort().at(-1) }; })
     .sort((a, b) => a.n - b.n);
-  const findings = D.flatMap((d) => (d.findings || []).map((f) => ({ f, date: d.date }))).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
+  // ไฟล์เข้ารหัสรุ่นก่อนไม่มี lessons: แสดงรายการล่าสุดแบบเดิม
+  const findings = P.lessons ? [] : D.flatMap((d) => (d.findings || []).map((f) => ({ f, date: d.date }))).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
 
   box.innerHTML = `
     <p class="rg-lede">ช่วยเลือกสถานการณ์ซ้อมครั้งถัดไปจากสิ่งที่ยังซ้อมน้อย และเตรียมแบบบันทึกผลหลังซ้อม</p>
@@ -470,6 +495,7 @@ function plan(box, P, { esc, icon }) {
       <div><small>ปีงบ ${String(fy).slice(2)} ยังไม่พบการซ้อม</small><b>${miss.length} เดือน</b><span>${miss.join(' ') || 'ครบ'}</span></div>
       <div><small>ซ้อมนอกเขตครั้งล่าสุด</small><b>${outLast ? fmtDate(outLast.date) : 'ไม่พบ'}</b><span>${outLast ? esc(outLast.place || outLast.scenario || '') : ''}</span></div>
     </div>
+    ${lessons(P.lessons, fys, esc)}
     ${scn.length ? `<section class="pap-sec2"><h2 class="sec-h">สถานการณ์ตามระเบียบ <span>เรียงจากซ้อมน้อยไปมาก</span></h2>
       <ul class="pap-scn">${scn.map((x) => `<li class="${x.n ? '' : 'zero'}"><span>${esc(x.s)}</span><b>${x.n ? `${x.n} ครั้ง` : 'ยังไม่พบ'}</b><small>${x.last ? `ล่าสุด ${fmtDate(x.last)}` : ''}</small></li>`).join('')}</ul>
       <p class="pap-note">นับจากคำในชื่อสถานการณ์ อาจคลาดเคลื่อน ใช้เป็นแนวทางเท่านั้น</p></section>` : ''}
