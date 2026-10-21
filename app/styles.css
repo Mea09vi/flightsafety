@@ -3043,3 +3043,140 @@ body.briefing .policy, body.lesson .policy { display: none; }
 .endq .end-air li .n { font: 700 1em/1 var(--f-d); color: var(--gold); }
 .endq .end-air li.hot, .endq .end-air li.hot .n { color: var(--warn); }
 .end-air .m { margin-top: clamp(8px, 1.4vh, 18px); font: 700 clamp(15px, min(1.5vw, 2.6vh), 30px)/1.2 var(--f-d); letter-spacing: .08em; }
+
+/* ── แผน PAP (#/pap) ─────────────────────────────────────────
+   DECISIONS.md หัวข้อ "แผน PAP": ข้อมูลเข้ารหัสทั้งไฟล์ · ไม่มีแผนที่ Crash Grid ข่ายวิทยุ เบอร์โทร ชื่อบุคคล */
+.pap-tabs { display: flex; gap: 6px; margin: 4px 0 18px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.pap-tabs a { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 10px; color: var(--text2); text-decoration: none; font: 600 14px/1.2 var(--f-d); }
+.pap-tabs a .ic { width: 17px; height: 17px; }
+.pap-tabs a[aria-current="page"] { background: var(--surface2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.pap-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.pap-jump a { padding: 6px 11px; border: 1px solid var(--line); border-radius: 99px; color: var(--text2); text-decoration: none; font-size: 13px; }
+.pap-jump a:hover { border-color: var(--sky); color: var(--text); }
+.pap-levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.pap-lv { padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 12px; background: var(--surface); }
+.pap-lv b { display: block; font: 600 15px/1.3 var(--f-d); }
+.pap-lv p { margin: 4px 0 0; font-size: 13.5px; color: var(--text2); }
+.pap-lv p.a { color: var(--text); }
+.pap-sec { margin-bottom: 8px; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface); scroll-margin-top: 70px; }
+.pap-sec > summary { display: flex; align-items: center; gap: 10px; padding: 13px 14px; cursor: pointer; list-style: none; }
+.pap-sec > summary::-webkit-details-marker { display: none; }
+.pap-ic { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 9px; background: var(--surface2); color: var(--tile-orange); }
+.pap-ic .ic { width: 18px; height: 18px; }
+.pap-h { flex: 1; font: 600 15.5px/1.3 var(--f-d); }
+.pap-sec .cn { font: 600 12px/1 var(--f-m); color: var(--muted); }
+.pap-chev { width: 18px; height: 18px; color: var(--muted); transition: transform .2s; }
+details[open] > summary .pap-chev { transform: rotate(180deg); }
+.pap-in { padding: 0 14px 14px; }
+.pap-p { margin-left: 6px; font: 500 11px/1 var(--f-m); color: var(--muted); white-space: nowrap; }
+.pap-ul, .pap-num { margin: 0; padding-left: 20px; }
+.pap-ul li, .pap-num li { margin: 5px 0; line-height: 1.55; }
+.pap-sh { margin: 14px 0 4px; font: 600 14px/1.3 var(--f-d); color: var(--text2); }
+.pap-sh:first-child { margin-top: 0; }
+.pap-flow { margin: 0; padding: 0; list-style: none; }
+.pap-flow li { position: relative; display: flex; gap: 12px; padding-bottom: 14px; }
+.pap-flow li::before { content: ""; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--line); }
+.pap-flow li:last-child::before { display: none; }
+.pap-st { position: relative; display: grid; place-items: center; flex: none; align-self: flex-start; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 14px; white-space: nowrap; background: var(--tile-orange); color: #fff; font: 600 13px/1 var(--f-m); }
+.pap-flow b { font: 600 14.5px/1.4 var(--f-d); }
+.pap-flow p { margin: 3px 0 0; line-height: 1.55; color: var(--text2); }
+.pap-t { display: inline-flex; align-items: center; gap: 3px; margin-left: 4px; padding: 2px 7px; border-radius: 99px; background: var(--surface2); font: 500 12px/1.3 var(--f-m); color: var(--warn); }
+.pap-t .ic { width: 12px; height: 12px; }
+.pap-roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+.pap-role { padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface2); }
+.pap-role h3 { display: flex; align-items: center; gap: 8px; margin: 0; font: 600 14.5px/1.35 var(--f-d); }
+.pap-vest { flex: none; width: 14px; height: 18px; border-radius: 3px 3px 5px 5px; background: var(--v); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .25); }
+.pap-vt { margin: 3px 0 0; font-size: 12.5px; color: var(--muted); }
+.pap-role ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; }
+.pap-role li { margin: 3px 0; line-height: 1.5; }
+.pap-photos { columns: 2 220px; column-gap: 24px; }
+.pap-photos li { break-inside: avoid; }
+.pap-tri { display: grid; gap: 6px; }
+.pap-tri > div { display: flex; align-items: baseline; gap: 10px; }
+.pap-tri i { flex: none; width: 12px; height: 12px; border-radius: 50%; background: var(--v); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .25); transform: translateY(1px); }
+.pap-tri b { flex: none; min-width: 60px; }
+.pap-tri span { color: var(--text2); }
+.pap-tb { width: 100%; border-collapse: collapse; font-size: 14px; }
+.pap-tb th, .pap-tb td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; line-height: 1.5; }
+.pap-tb th { width: 55%; font-weight: 500; color: var(--text2); }
+.pap-dl dt { margin-top: 10px; font-weight: 600; }
+.pap-dl dd { margin: 2px 0 0; color: var(--text2); line-height: 1.55; }
+.pap-form { display: grid; gap: 10px; }
+.pap-form label { display: grid; gap: 4px; font-size: 13.5px; color: var(--text2); }
+.pap-form input, .pap-form select, .pap-form textarea { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface2); color: var(--text); font: inherit; font-size: 15px; }
+.pap-form textarea { resize: vertical; }
+.pap-form :focus { border-color: var(--sky); outline: none; box-shadow: 0 0 0 3px var(--sky-d); }
+.pap-fb { display: flex; gap: 8px; flex-wrap: wrap; }
+.pap-fb .btn .ic { width: 17px; height: 17px; }
+.btn.ghost { background: transparent; color: var(--text2); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: 13px; }
+.pap-note { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+@media (min-width: 760px) { .pap-form { grid-template-columns: 1fr 1fr; } .pap-form label:has(textarea), .pap-fb, .pap-form .pap-note { grid-column: 1 / -1; } }
+
+/* ตารางการซ้อมรายเดือน */
+.pap-grid-w { margin-bottom: 20px; }
+.pap-gscroll { overflow-x: auto; margin: 0 -2px; padding: 2px; }
+.pap-grid { width: 100%; min-width: 560px; border-collapse: separate; border-spacing: 3px; font: 500 12px/1 var(--f-m); }
+.pap-grid th { padding: 4px 2px; color: var(--muted); font-weight: 500; text-align: center; white-space: nowrap; }
+.pap-grid tbody th { color: var(--text2); text-align: right; padding-right: 6px; }
+.pap-grid td { padding: 0; }
+.pap-grid td button { position: relative; display: block; width: 100%; height: 28px; border: 0; border-radius: 6px; background: var(--surface2); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.pap-grid td.ok button { background: var(--ok); }
+.pap-grid td.tt button { background: transparent; box-shadow: inset 0 0 0 2px var(--ok); color: var(--ok); }
+.pap-grid td.pl button { background: transparent; box-shadow: inset 0 0 0 1.5px var(--muted); }
+.pap-grid td.fu button { background: transparent; opacity: .35; box-shadow: inset 0 0 0 1px var(--line); }
+.pap-grid td button i { position: absolute; top: 3px; right: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 1.5px var(--surface); }
+.pap-grid td button:focus-visible { outline: 2px solid var(--sky); outline-offset: 1px; }
+.pap-grid td.sum { padding: 0 6px; color: var(--muted); text-align: center; white-space: nowrap; }
+.pap-grid td.sum.good { color: var(--ok); }
+.pap-grid td.sum .ic { width: 15px; height: 15px; }
+.pap-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 8px 0 0; font-size: 12.5px; color: var(--text2); }
+.pap-leg span { display: inline-block; width: 12px; height: 12px; margin-right: -6px; border-radius: 3px; vertical-align: -1px; }
+.pap-leg .ok { background: var(--ok); }
+.pap-leg .o { border-radius: 50%; width: 8px; height: 8px; background: var(--gold); }
+.pap-leg .tt { box-shadow: inset 0 0 0 2px var(--ok); }
+.pap-leg .pl { box-shadow: inset 0 0 0 1.5px var(--muted); }
+.pap-leg .no { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--line); }
+.pap-fy { margin-bottom: 14px; }
+
+/* รายการการซ้อม */
+.pap-dl-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.pap-dc details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.pap-dc summary { display: flex; align-items: flex-start; gap: 12px; padding: 12px; list-style: none; cursor: pointer; }
+.pap-dc details.flat summary { cursor: default; }
+.pap-dc summary::-webkit-details-marker { display: none; }
+.pap-dd { flex: none; width: 66px; }
+.pap-dd b { display: block; font: 600 14px/1.25 var(--f-d); }
+.pap-dd small { font: 500 12px/1.4 var(--f-m); color: var(--muted); }
+.pap-db { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.pap-dt { font-weight: 500; line-height: 1.45; }
+.pap-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.pap-tags span { padding: 2px 7px; border-radius: 6px; background: var(--surface2); font-size: 12px; color: var(--text2); }
+.pap-tags .l-out { color: var(--gold); }
+.pap-tags .s-planned, .pap-tags .s-postponed { color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); background: transparent; }
+.pap-pl { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.pap-pl .ic { width: 13px; height: 13px; }
+.pap-dx { padding: 0 12px 12px 90px; font-size: 14px; line-height: 1.55; }
+.pap-dx p { margin: 6px 0 0; }
+.pap-dx ul { margin: 4px 0 0; padding-left: 18px; }
+.pap-imgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-top: 10px; }
+.pap-imgs a { display: block; border-radius: 8px; overflow: hidden; }
+.pap-imgs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: var(--surface2); }
+.pap-tags .pap-ph { display: inline-flex; align-items: center; gap: 3px; color: var(--tile-orange); }
+.pap-tags .pap-ph .ic { width: 13px; height: 13px; }
+@media (max-width: 560px) { .pap-dx { padding-left: 12px; } .pap-dd { width: 56px; } }
+
+/* วางแผนซ้อม */
+.pap-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 18px; }
+.pap-kpis > div { padding: 14px; border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surface); }
+.pap-kpis small { display: block; font-size: 12.5px; color: var(--muted); }
+.pap-kpis b { display: block; margin: 4px 0; font: 600 22px/1.2 var(--f-d); }
+.pap-kpis span { font-size: 13px; color: var(--text2); }
+.pap-sec2 { margin-bottom: 20px; }
+.pap-scn { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.pap-scn li { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.pap-scn li:first-child { border-top: 0; }
+.pap-scn span { flex: 1; line-height: 1.45; }
+.pap-scn b { flex: none; font: 600 13px/1 var(--f-m); color: var(--ok); }
+.pap-scn li.zero b { color: var(--bad); }
+.pap-scn small { flex: none; min-width: 84px; text-align: right; font-size: 12px; color: var(--muted); }

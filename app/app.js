@@ -4,6 +4,7 @@
 
 import { mountOverview } from './overview.js';
 import * as AIR from './airmanship.js';
+import * as PAP from './pap.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -58,6 +59,7 @@ const state = {
   open: {}, // กลุ่มผลลัพธ์ที่กด "ดูอีก" ไว้ { a, b, c }
   rtab: 'cards', // แท็บหน้ารายการ: cards = บทเรียน · mor = การ์ดจากแบบฟอร์ม MOR/HR บน.2 (W2M-)
   from: '', // results — หน้าที่เปิดเคสมา ใช้กับปุ่มย้อนกลับและก่อนหน้า/ถัดไป
+  pap: null, // แผน PAP โหลดตอนเปิดหน้าครั้งแรก { status, data }
   hist: null, // ประวัติเหตุ บน.2 โหลดตอนเปิดหน้าครั้งแรก { status, data }
   // หน้าประวัติเหตุ: ปีงบที่เลือก · แหล่งที่กรองในปีนั้น · ฝูงของตารางหัวข้อ · ช่องที่กด { tp, fy }
   // back = หน้าที่เปิดรายละเอียดมา · ret = หน้านอก #/history ที่เข้ามา (เช่น หน้าเคส)
@@ -137,6 +139,7 @@ async function unlock(pass, remember = true) {
   if (remember) { LS.set('key', raw); SS.del('key'); } else { SS.set('key', raw); LS.del('key'); }
   if (state.hist?.status === 'locked') state.hist = null;
   if (state.regs?.status === 'locked') state.regs = null;
+  if (state.pap?.status === 'locked') state.pap = null;
   // ถอดรหัสประวัติเหตุต่อเลยโดยไม่รอ ให้ไฟล์เข้าแคชไว้เปิดตอนไม่มีสัญญาณ
   loadHistory().catch(() => {});
 }
@@ -171,6 +174,36 @@ async function readHistory() {
       ? await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).text()
       : new TextDecoder().decode(pt);
     return { status: 'ok', data: prepHistory(JSON.parse(txt)) };
+  } catch { return { status: 'locked' }; }
+}
+// แผน PAP (#/pap): คู่มือย่อจากระเบียบ บน.2 + ทะเบียนการซ้อม เข้ารหัสทั้งไฟล์ด้วยกุญแจหน่วย (data/pap.enc.json)
+// localhost: `node tools/serve.mjs --pap <ไฟล์นอก repo>`
+let papLoading = null;
+function loadPap() {
+  if (state.pap) return Promise.resolve(state.pap);
+  return (papLoading ??= readPap().then((r) => { state.pap = r; papLoading = null; return r; }));
+}
+async function readPap() {
+  if (IS_LOCAL) {
+    try {
+      const r = await fetch('data/pap.dev.json', { cache: 'no-store' });
+      if (r.ok) return { status: 'ok', data: await r.json(), dev: true };
+    } catch { /* ไม่ได้รันแบบ --pap */ }
+  }
+  let enc;
+  try {
+    const r = await fetch('data/pap.enc.json');
+    if (!r.ok) return { status: 'missing' };
+    enc = await r.json();
+  } catch { return { status: 'missing' }; }
+  const raw = LS.get('key', null) || SS.get('key', null);
+  if (!raw) return { status: 'locked' };
+  if (typeof DecompressionStream === 'undefined') return { status: 'unsupported' };
+  try {
+    const key = await crypto.subtle.importKey('raw', b64.dec(raw), 'AES-GCM', false, ['decrypt']);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(enc.iv) }, key, b64.dec(enc.ct));
+    const txt = await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    return { status: 'ok', data: JSON.parse(txt) };
   } catch { return { status: 'locked' }; }
 }
 // กฎระเบียบและคู่มือ (#/regs): ระเบียบ ทอ./คู่มือจากเว็บ สนภ.ทอ. เป็นข้อมูลสาธารณะ (data/regs.json)
@@ -216,7 +249,7 @@ function ieUrl(id) {
   if (!ieUrls.has(id)) {
     ieUrls.set(id, (async () => {
       ieKey ??= crypto.subtle.importKey('raw', b64.dec(LS.get('key', null) || SS.get('key', null)), 'AES-GCM', false, ['decrypt']);
-      const r = await fetch(`data/hie/${id}.bin`);
+      const r = await fetch(id.includes('/') ? `data/${id}.bin` : `data/hie/${id}.bin`); // pie/<id> = รูปซ้อม PAP
       if (!r.ok) throw new Error(r.status);
       const b = new Uint8Array(await r.arrayBuffer());
       const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b.subarray(0, 12) }, await ieKey, b.subarray(12));
@@ -1230,6 +1263,7 @@ const APPS = [
   { href: '#/regs', ic: 'doc', th: 'กฎระเบียบ', c: 'rose' },
   { href: '#/areas', ic: 'pin', th: 'พื้นที่บิน', c: 'green' },
   { href: '#/airmanship', ic: 'target', th: 'Airmanship', c: 'indigo' },
+  { href: '#/pap', ic: 'warn', th: 'แผน PAP', c: 'orange' },
   { href: '#/about', ic: 'info', th: 'ข้อมูล', c: 'grey' },
 ];
 const appTile = (a) => {
@@ -2513,7 +2547,7 @@ wide.addEventListener('change', () => { if (!location.hash.replace(/^#\/?/, ''))
 const scrollMemo = {};
 let lastPath = null;
 
-const SUB_T = { areas: 'อันตรายประจำพื้นที่', airmanship: 'Wing 2 Airmanship', theory: 'ทฤษฎีนิรภัย', regs: 'กฎระเบียบและคู่มือ' };
+const SUB_T = { areas: 'อันตรายประจำพื้นที่', airmanship: 'Wing 2 Airmanship', theory: 'ทฤษฎีนิรภัย', regs: 'กฎระเบียบและคู่มือ', pap: 'แผน PAP' };
 let navCount = 0; // จำนวนหน้าที่เปิดในแอปรอบนี้ — ปุ่มย้อนกลับของ .m-sub ใช้ history.back() ได้เมื่อ > 1
 document.addEventListener('click', (e) => {
   if (!e.target.closest('[data-sub-back]')) return;
@@ -2558,6 +2592,7 @@ function route() {
     case 'about': viewAbout(); break;
     case 'regs': viewRegs(); break;
     case 'airmanship': AIR.render(main, { esc, icon }); break;
+    case 'pap': PAP.render(main, { esc, icon, loadPap, hydrateImgs }, arg); break;
     case 'theory': viewTheory(arg, parts[2], lastPath); break;
     case 'history': viewHist(arg, parts[2], lastPath); break;
     default: viewHome();
@@ -2574,7 +2609,7 @@ function route() {
   $('.m-sub-t').textContent = subT;
   navCount++;
   setBadges();
-  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs', 'airmanship'].includes(page) && !lesson && scrollMemo[path] != null;
+  const keep = ['', 'filter', 'results', 'dashboard', 'theory', 'history', 'regs', 'airmanship', 'pap'].includes(page) && !lesson && scrollMemo[path] != null;
   scrollTo(0, keep ? scrollMemo[path] : 0);
   // หน้าภาพรวมวาดหลังโหลด CSS เสร็จ — คืนตำแหน่งเลื่อนอีกครั้งเมื่อเนื้อหามาแล้ว
   if (keep && page === 'dashboard') { const y = scrollMemo[path]; OV.ready.then(() => scrollTo(0, y)); }

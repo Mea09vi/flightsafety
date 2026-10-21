@@ -29,7 +29,8 @@ jobs:
       - name: Block unencrypted unit data
         run: |
           if find app -name 'unit.dev.json' -o -name 'unit_cases*.json' -o -name 'history.dev.json' \
-               -o -name 'history.json' -o -name 'regs.dev.json' -o -name 'rpp*' -o -name 'himg' | grep -q .; then
+               -o -name 'history.json' -o -name 'regs.dev.json' -o -name 'rpp*' -o -name 'himg' \
+               -o -name 'pap.dev.json' -o -name 'pap.json' -o -name 'papimg' | grep -q .; then
             echo "พบไฟล์หน่วยแบบไม่เข้ารหัสใน app/ — หยุดการเผยแพร่"; exit 1
           fi
       - uses: actions/configure-pages@v5

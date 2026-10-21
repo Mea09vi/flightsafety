@@ -24,3 +24,8 @@ __pycache__/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# แผน PAP: ไฟล์ dev ไม่เข้ารหัส และไฟล์ต้นฉบับของหน่วย
+app/data/pap.dev.json
+app/data/papimg/
+งานทั้งหมด/
