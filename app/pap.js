@@ -24,7 +24,8 @@ const fmtDate = (s) => {
   return `${m[3] ? +m[3] + ' ' : ''}${mon} ${m[1].slice(2)}`;
 };
 
-const st = { tab: 'guide', fy: '', q: '', open: null };
+const st = { tab: 'guide', fy: '', q: '', open: null, loc: 'in', sel: null };
+const pg = (p) => (p ? `<span class="pap-p">(หน้า ${p})</span>` : '');
 
 export function render(main, H, sub) {
   const { esc, icon } = H;
@@ -56,8 +57,8 @@ export function render(main, H, sub) {
 
 /* ── คู่มือ ─────────────────────────────────────────────── */
 
-function guide(box, G, { esc, icon }) {
-  const pg = (p) => (p ? `<span class="pap-p">หน้า ${p}</span>` : '');
+function guide(box, G, H) {
+  const { esc, icon } = H;
   const list = (a, f = (x) => esc(x.text)) => `<ul class="pap-ul">${a.map((x) => `<li>${f(x)}${pg(x.p)}</li>`).join('')}</ul>`;
   const flow = (a) => `<ol class="pap-flow">${a.map((x) => `<li><span class="pap-st">${x.step}</span><div><b>${esc(x.who)}</b>${x.time ? ` <span class="pap-t">${icon('clock')}${esc(x.time)}</span>` : ''}<p>${esc(x.do)}</p>${pg(x.p)}</div></li>`).join('')}</ol>`;
   const sec = (id, ic, h, body, n, open = false) => body ? `<details class="pap-sec" id="pg-${id}"${open ? ' open' : ''}>
@@ -68,12 +69,20 @@ function guide(box, G, { esc, icon }) {
   box.innerHTML = `
     ${G.purpose ? `<p class="rg-lede">${esc(G.purpose)}</p>` : ''}
     <div class="pap-jump">${[
-      ['flow_in', 'ในเขตสนามบิน'], ['flow_out', 'นอกเขตสนามบิน'], ['roles', 'หน่วยและหน้าที่'], ['short_brief', 'บรีฟสั้น'],
+      ['wd', 'ผังสั่งการ'], ['roles', 'หน่วยและหน้าที่'], ['short_brief', 'บรีฟสั้น'],
       ['photos', 'ภาพหลักฐาน'], ['wreckage', 'รักษาซาก'], ['alarm_form', 'แบบรับแจ้งข่าว'],
-    ].filter(([k]) => has(G[k])).map(([k, th]) => `<a href="#pg-${k}" data-jump="pg-${k}">${th}</a>`).join('')}</div>
+    ].filter(([k]) => k === 'wd' ? has(G.flow_in) || has(G.flow_out) : has(G[k])).map(([k, th]) => `<a href="#pg-${k}" data-jump="pg-${k}">${th}</a>`).join('')}</div>
     ${has(G.alert_levels) ? `<div class="pap-levels">${G.alert_levels.map((x) => `<div class="pap-lv"><b>${esc(x.name)}</b><p>${esc(x.when)}</p>${x.action ? `<p class="a">${esc(x.action)}</p>` : ''}</div>`).join('')}</div>` : ''}
-    ${sec('flow_in', 'pin', 'เกิดเหตุในเขตสนามบิน', has(G.flow_in) && flow(G.flow_in), G.flow_in?.length, true)}
-    ${sec('flow_out', 'mtn', 'เกิดเหตุนอกเขตสนามบิน', has(G.flow_out) && flow(G.flow_out), G.flow_out?.length)}
+    ${has(G.flow_in) || has(G.flow_out) ? `<section class="wd-sec" id="pg-wd">
+      <div class="wd-bar"><div class="wd-seg" role="group" aria-label="สถานที่เกิดเหตุ">${[['in', 'ในเขตสนามบิน'], ['out', 'นอกเขตสนามบิน']]
+        .filter(([k]) => has(G['flow_' + k])).map(([k, th]) => `<button type="button" data-loc="${k}" aria-pressed="${st.loc === k}">${th}</button>`).join('')}</div>
+        <ul class="wd-lg">${[['cmd', 'สั่งการ'], ['co', 'ประสาน'], ['sup', 'สนับสนุน'], ['info', 'ข้อมูล ๗ รายการ'], ['car', 'รถรับส่ง']]
+          .map(([k, th]) => `<li><svg viewBox="0 0 26 8" aria-hidden="true"><path class="${k}" d="M1 4H25"/></svg>${th}</li>`).join('')}</ul></div>
+      <div class="wd-wrap"><div class="wd-host"></div><aside class="wd-dx" aria-live="polite"></aside></div>
+      <p class="wd-hint">แตะหน่วยเพื่อดูหน้าที่ทุกข้อตามระเบียบ · เส้นข้อมูล ๗ รายการและรถรับส่งแสดงเมื่อเลือกหน่วยที่เกี่ยวข้อง · การแบ่งชั้นเป็นการจัดกลุ่มให้อ่านง่าย ระเบียบเรียงตามหน่วย</p>
+    </section>` : ''}
+    ${sec('flow_in', 'pin', 'ทุกข้อเรียงตามระเบียบ · ในเขตสนามบิน', has(G.flow_in) && flow(G.flow_in), G.flow_in?.length)}
+    ${sec('flow_out', 'mtn', 'ทุกข้อเรียงตามระเบียบ · นอกเขตสนามบิน', has(G.flow_out) && flow(G.flow_out), G.flow_out?.length)}
     ${sec('roles', 'crew', 'หน่วยและหน้าที่', has(G.roles) && `<div class="pap-roles">${G.roles.map((r) => `<div class="pap-role">
         <h3>${r.vest ? `<i class="pap-vest" style="--v:${vestColor(r.vest)}" title="${esc(r.vest)}"></i>` : ''}${esc(r.unit)}</h3>
         ${r.vest ? `<p class="pap-vt">เสื้อ/ปลอกแขน ${esc(r.vest)}</p>` : ''}
@@ -96,7 +105,18 @@ function guide(box, G, { esc, icon }) {
     ${sec('definitions', 'info', 'นิยามศัพท์', has(G.definitions) && `<dl class="pap-dl">${G.definitions.map((x) => `<dt>${esc(x.term)}</dt><dd>${esc(x.def)}${pg(x.p)}</dd>`).join('')}</dl>`, G.definitions?.length)}
     <p class="rg-src">${esc(G.title || '')}${G.issued ? ` · ${esc(G.issued)}` : ''} · คู่มือนี้ย่อจากระเบียบ ถ้าต่างกันให้ถือระเบียบฉบับจริง</p>`;
 
+  wdMount(box, G, H);
+
   box.addEventListener('click', (e) => {
+    const n = e.target.closest('button[data-n]');
+    if (n) { wdPick?.(n.dataset.n, !n.closest('.wd-dx')); return; }
+    const l = e.target.closest('[data-loc]');
+    if (l) {
+      st.loc = l.dataset.loc; st.sel = null;
+      box.querySelectorAll('[data-loc]').forEach((b) => b.setAttribute('aria-pressed', String(b === l)));
+      wdMount(box, G, H);
+      return;
+    }
     const j = e.target.closest('[data-jump]');
     if (j) {
       e.preventDefault();
@@ -107,6 +127,186 @@ function guide(box, G, { esc, icon }) {
     if (e.target.closest('#af-copy')) copyForm(box, e.target.closest('#af-copy'));
     if (e.target.closest('#af-clear')) box.querySelectorAll('[data-af]').forEach((i) => { i.value = ''; });
   });
+}
+
+/* ── ผังสั่งการแบบ wiring diagram ───────────────────────────
+   รวมข้อของระเบียบเป็น 1 กล่องต่อหน่วย แล้วจัดชั้นตามบทบาท (จัดกลุ่มเพื่ออ่านง่าย ไม่ใช่สายบังคับบัญชาทางการ)
+   เส้นวาดหลังจัดหน้าเสร็จ เดินแบบตั้งฉาก: เส้นสั่งการใช้รางซ้าย เส้นข้อมูล/รถรับส่งใช้รางขวา */
+
+// หน่วย → ชั้น + คำอธิบายสั้น (เขียนเองแบบกว้าง ๆ รายละเอียดจริงอ่านจากข้อมูลที่ถอดรหัสแล้ว) [ใน, นอก]
+const UNITS = [
+  ['atc', /สนับสนุนการบิน|บังคับการบิน/, 1, ['ประกาศเหตุ · แจ้งข้อมูล ๗ รายการ']],
+  ['hq', /สนง\.?\s*ผบ/, 1, ['รายงานผู้บังคับบัญชา']],
+  ['sqn', /ฝูง/, 1, ['กดกริ่งฉุกเฉิน · Controller/SOF ไปกับนิรภัย', 'กดกริ่ง · Controller/SOF ไปกับ Convoy']],
+  ['safety', /นิรภัย/, 2, ['หัวหน้าชุด Crash Crews · ควบคุม ณ ที่เกิดเหตุ', 'ไปจุดนัดพบ · ให้คำแนะนำ หน.ยก.']],
+  ['ops', /^ยก\.?$/, 2, ['ไปที่เกิดเหตุ · ประสานนิรภัย', 'หัวหน้าชุด Convoy · Short-Brief ที่จุดนัดพบ']],
+  ['fire', /ดับเพลิง/, 3, ['ดับไฟ · กู้ภัย · จัดวางรถ']],
+  ['med', /รพ\.|พยาบาล/, 3, ['ตั้ง Triage Area · รักษาต่อ']],
+  ['mp', /^สห/, 3, ['กั้นเขต · วางยาม', 'รถนำขบวน · กั้นเขต · วางยาม']],
+  ['guard', /พัน\.?\s*อย/, 3, ['ค้นหาและรักษาชิ้นส่วน']],
+  ['civil', /โยธา/, 3, ['รถยก-กู้ภัย · เคลื่อนย้ายซาก']],
+  ['tech', /เทคนิค/, 3, ['รถลากอากาศยานและซาก']],
+  ['trans', /ขนส่ง/, 4, ['รถรับส่งกำลังพล · รถน้ำสำรอง']],
+  ['pr', /กิจการพลเรือน|ประชาสัมพันธ์/, 4, ['ประชาสัมพันธ์ · ถ่ายภาพ']],
+  ['wel', /สวัสดิการ/, 4, ['พื้นที่พักรอ · สวัสดิการ']],
+];
+const TIER = [['เหตุ'], ['แจ้งเหตุและสั่งการ'], ['ควบคุม ณ ที่เกิดเหตุ', 'ควบคุม · จุดนัดพบ'], ['ชุดปฏิบัติ'], ['สนับสนุน']];
+const WIRE = { cmd: 'สั่งการ', co: 'ประสาน', sup: 'สนับสนุน', info: 'ข้อมูล ๗ รายการ', car: 'รถรับส่ง' };
+let wdPick = null, wdRO = null;
+
+function wdModel(G, loc) {
+  const steps = G['flow_' + loc] || [];
+  const out = loc === 'out';
+  const nodes = [], by = {};
+  for (const s of steps) {
+    const who = String(s.who || '').trim();
+    const u = UNITS.find(([, re]) => re.test(who));
+    const k = u ? u[0] : 'u' + who;
+    if (!by[k]) {
+      by[k] = { k, who, tier: u ? u[2] : 4, tag: u ? (u[3][out ? 1 : 0] || u[3][0]) : '', steps: [], order: u ? UNITS.indexOf(u) : 99 };
+      nodes.push(by[k]);
+    }
+    by[k].steps.push(s);
+  }
+  for (const n of nodes) {
+    if (!n.tag) n.tag = String(n.steps[0].do || '').slice(0, 34) + '…';
+    const a = String(n.steps[0].step).split('–')[0], b = String(n.steps.at(-1).step).split('–').pop();
+    n.range = a === b ? a : `${a}–${b}`;
+    const ps = n.steps.map((s) => +s.p).filter(Boolean);
+    n.p = ps.length ? (Math.min(...ps) === Math.max(...ps) ? `${ps[0]}` : `${Math.min(...ps)}–${Math.max(...ps)}`) : '';
+  }
+  // หัวหน้าชุด: ในเขต = นิรภัย, นอกเขต = ยก. (หน.ยก. เป็นหัวหน้าชุด Convoy)
+  const hub = by[out ? 'ops' : 'safety'] || by.safety || by.ops;
+  const mate = hub && by[hub.k === 'safety' ? 'ops' : 'safety'];
+  if (hub) hub.hub = true;
+  nodes.sort((a, b) => a.tier - b.tier || (b.hub ? 1 : 0) - (a.hub ? 1 : 0) || a.order - b.order);
+
+  const wires = [];
+  const add = (a, b, t) => a && b && a !== b && wires.push({ a: a.k, b: b.k, t });
+  for (const n of nodes) {
+    if (n.tier === 1) { add({ k: 't0' }, n, 'cmd'); if (hub) add(n, hub, 'cmd'); }
+    else if (n.tier === 3) add(hub, n, 'cmd');
+    else if (n.tier === 4) add(hub, n, 'sup');
+  }
+  add(hub, mate, 'co');
+  // เส้นข้อมูล: หน่วยที่ระเบียบระบุให้รับ/ขอข้อมูล ๗ (หรือ ๔) รายการ
+  if (by.atc) for (const n of nodes) if (n !== by.atc && n.steps.some((s) => /[๗๔7]\s*รายการ/.test(s.do || ''))) add(by.atc, n, 'info');
+  // รถรับส่ง: ขนส่งพาใครไปบ้าง อ่านจากข้อความของขนส่งเอง
+  if (by.trans) {
+    const t = by.trans.steps.map((s) => s.do).join(' ');
+    [[/พัน\.?\s*อย|ทหาร/, 'guard'], [/ถ่ายภาพ|ประชาสัมพันธ์/, 'pr'], [/หน\.ยก/, 'ops'], [/ดับเพลิง/, 'fire']]
+      .forEach(([re, k]) => { if (re.test(t)) add(by.trans, by[k], 'car'); });
+  }
+  return { nodes, wires, hub, by };
+}
+
+function wdMount(box, G, H) {
+  const host = box.querySelector('.wd-host'), dx = box.querySelector('.wd-dx');
+  if (!host) return;
+  const { esc } = H;
+  if (!G['flow_' + st.loc]?.length) st.loc = st.loc === 'in' ? 'out' : 'in';
+  const M = wdModel(G, st.loc);
+  const tiers = [[], [], [], [], []];
+  M.nodes.forEach((n) => tiers[n.tier].push(n));
+  const node = (n) => `<button type="button" class="wd-n t${n.tier}${n.hub ? ' hub' : ''}" data-n="${esc(n.k)}" aria-pressed="false">
+      <span class="wd-top"><span class="wd-no">${esc(n.range)}</span>${n.hub ? '<span class="wd-hb">หัวหน้าชุด</span>' : ''}</span>
+      <b>${esc(n.who)}</b><span class="wd-tg">${esc(n.tag)}</span>${pg(n.p)}</button>`;
+  host.innerHTML = `<svg class="wd-svg" aria-hidden="true"></svg><div class="wd-grid">${tiers.map((ns, i) => i === 0
+    ? `<div class="wd-tier t0"><p class="wd-tl"><span class="wd-tn">0</span>${TIER[0][0]}</p><div class="wd-row"><div class="wd-n t0" data-n="t0"><b>อากาศยานเกิดเหตุ</b><span class="wd-tg">${LOC[st.loc]}</span></div></div></div>`
+    : ns.length ? `<div class="wd-tier t${i}"><p class="wd-tl"><span class="wd-tn">${i}</span>${TIER[i][st.loc === 'out' ? 1 : 0] || TIER[i][0]}</p><div class="wd-row">${ns.map(node).join('')}</div></div>` : '').join('')}</div>`;
+  const svg = host.querySelector('svg');
+
+  const draw = () => {
+    const H0 = host.getBoundingClientRect();
+    if (!H0.width) return;
+    svg.setAttribute('viewBox', `0 0 ${H0.width} ${H0.height}`);
+    const grid = host.querySelector('.wd-grid').getBoundingClientRect();
+    const gL = grid.left - H0.left - 9, gR = grid.right - H0.left + 9;
+    const R = {};
+    host.querySelectorAll('.wd-n').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      const row = el.parentElement, rows = [...new Set([...row.children].map((c) => c.offsetTop))];
+      R[el.dataset.n] = { l: r.left - H0.left, r: r.right - H0.left, t: r.top - H0.top, b: r.bottom - H0.top,
+        x: (r.left + r.right) / 2 - H0.left, tier: +el.className.match(/t(\d)/)[1], ri: rows.indexOf(el.offsetTop), rn: rows.length };
+    });
+    const path = (pts) => {
+      // เส้นตั้งฉาก มุมโค้ง 6px
+      let d = `M${pts[0][0]} ${pts[0][1]}`;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], [x2, y2] = pts[i + 1];
+        const r1 = Math.min(6, Math.hypot(x1 - x0, y1 - y0) / 2), r2 = Math.min(6, Math.hypot(x2 - x1, y2 - y1) / 2);
+        const ux = Math.sign(x1 - x0), uy = Math.sign(y1 - y0), vx = Math.sign(x2 - x1), vy = Math.sign(y2 - y1);
+        d += ` L${x1 - ux * r1} ${y1 - uy * r1} Q${x1} ${y1} ${x1 + vx * r2} ${y1 + vy * r2}`;
+      }
+      const e = pts.at(-1);
+      return d + ` L${e[0]} ${e[1]}`;
+    };
+    const route = (a, b, t) => {
+      const side = t === 'info' || t === 'car' ? gR : gL, off = side === gR ? 11 : 7;
+      if (a.tier === b.tier && a.ri === b.ri) {
+        const [p, q] = a.x < b.x ? [a, b] : [b, a], y = (Math.max(p.t, q.t) + Math.min(p.b, q.b)) / 2;
+        return path([[p.r, y], [q.l, y]]);
+      }
+      if (b.t > a.b) {
+        // ลงล่าง: ชั้นติดกันและไม่มีกล่องขวางใช้ทางตรง ไม่งั้นไปตามราง
+        if (b.tier === a.tier + 1 && b.ri === 0 && a.ri === a.rn - 1 && t !== 'info' && t !== 'car') {
+          const y = b.t - off;
+          return path([[a.x, a.b], [a.x, y], [b.x, y], [b.x, b.t]]);
+        }
+        return path([[a.x, a.b], [a.x, a.b + off], [side, a.b + off], [side, b.t - off], [b.x, b.t - off], [b.x, b.t]]);
+      }
+      // ขึ้นบน (เช่น รถรับส่งจากชั้นสนับสนุน): ออกด้านบนของต้นทาง ไปตามราง แล้วเข้าด้านบนของปลายทาง
+      return path([[a.x, a.t], [a.x, a.t - off], [side, a.t - off], [side, b.t - off], [b.x, b.t - off], [b.x, b.t]]);
+    };
+    svg.innerHTML = M.wires.filter((w) => R[w.a] && R[w.b]).map((w) =>
+      `<path class="wire ${w.t}${w.t === 'info' || w.t === 'car' ? ' x' : ''}" data-a="${esc(w.a)}" data-b="${esc(w.b)}" d="${route(R[w.a], R[w.b], w.t)}"/>`).join('');
+    mark();
+  };
+
+  const mark = () => {
+    const k = st.sel;
+    host.classList.toggle('focusing', !!k);
+    const linked = new Set();
+    svg.querySelectorAll('.wire').forEach((p) => {
+      const on = p.dataset.a === k || p.dataset.b === k;
+      p.classList.toggle('on', on);
+      if (on) { linked.add(p.dataset.a); linked.add(p.dataset.b); }
+    });
+    // เส้นที่เลือกวาดทับเส้นอื่น
+    svg.querySelectorAll('.wire.on').forEach((p) => svg.appendChild(p));
+    host.querySelectorAll('.wd-n').forEach((el) => {
+      el.classList.toggle('lk', el.dataset.n !== k && linked.has(el.dataset.n));
+      if (el.tagName === 'BUTTON') el.setAttribute('aria-pressed', String(el.dataset.n === k));
+    });
+  };
+
+  const detail = () => {
+    const n = M.by[st.sel] || M.nodes.find((x) => x.k === st.sel);
+    if (!n || !dx) { if (dx) dx.innerHTML = ''; return; }
+    const links = M.wires.filter((w) => w.a === n.k || w.b === n.k).map((w) => ({ t: w.t, o: w.a === n.k ? w.b : w.a, dir: w.a === n.k }))
+      .filter((l) => l.o !== 't0');
+    const nm = (k) => (M.nodes.find((x) => x.k === k) || {}).who || k;
+    const showBrief = (n.k === 'atc' || n.hub) && G.short_brief?.length;
+    dx.innerHTML = `<p class="wd-dk"><span class="wd-tn">${n.tier}</span>${esc(TIER[n.tier][st.loc === 'out' ? 1 : 0] || TIER[n.tier][0])}</p>
+      <h3>${esc(n.who)}${n.hub ? ' <span class="wd-hb">หัวหน้าชุด</span>' : ''}</h3>
+      <p class="wd-dt">${esc(n.tag)}</p>
+      <ol class="wd-steps">${n.steps.map((s) => `<li><span class="wd-sn">${esc(s.step)}</span><p>${esc(s.do)}${pg(s.p)}</p></li>`).join('')}</ol>
+      ${showBrief ? `<h4>ข้อมูล ๗ รายการ สำหรับ Short-Brief</h4><ol class="wd-brief">${G.short_brief.map((x) => `<li>${esc(x.text)}</li>`).join('')}</ol>${pg(G.short_brief[0].p)}` : ''}
+      ${links.length ? `<h4>เชื่อมกับ</h4><div class="wd-links">${links.map((l) => `<button type="button" data-n="${esc(l.o)}"><svg viewBox="0 0 22 8" aria-hidden="true"><path class="${l.t}" d="M1 4H21"/></svg><span>${esc(nm(l.o))}</span><small>${WIRE[l.t]}${l.dir ? '' : ' (รับ)'}</small></button>`).join('')}</div>` : ''}`;
+  };
+
+  wdPick = (k, fromMap) => {
+    if (!M.nodes.some((x) => x.k === k)) return;
+    st.sel = k; mark(); detail();
+    if (fromMap && dx && !matchMedia('(min-width: 1024px)').matches) dx.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  if (!M.nodes.some((x) => x.k === st.sel)) st.sel = M.hub?.k || M.nodes[0]?.k || null;
+  detail();
+  wdRO?.disconnect();
+  wdRO = new ResizeObserver(() => requestAnimationFrame(draw));
+  wdRO.observe(host);
+  document.fonts?.ready.then(draw);
+  draw();
 }
 
 // สีเสื้อ/ป้ายจากข้อความไทย (ไม่รู้จัก = เทา)
