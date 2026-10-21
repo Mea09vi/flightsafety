@@ -3198,6 +3198,8 @@ button.wd-n:hover, .wd-n.lk { border-color: var(--c); }
 .pap-grid td.sum { padding: 0 6px; color: var(--muted); text-align: center; white-space: nowrap; }
 .pap-grid td.sum.good { color: var(--ok); }
 .pap-grid td.sum .ic { width: 15px; height: 15px; }
+.pap-grid td.sum.rp { color: var(--sky); }
+.pap-grid td button u { position: absolute; left: 50%; bottom: 3px; width: 12px; height: 2.5px; margin-left: -6px; border-radius: 2px; background: var(--sky); box-shadow: 0 0 0 1px var(--surface); }
 .pap-leg { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 8px 0 0; font-size: 12.5px; color: var(--text2); }
 .pap-leg span { display: inline-block; width: 12px; height: 12px; margin-right: -6px; border-radius: 3px; vertical-align: -1px; }
 .pap-leg .ok { background: var(--ok); }
@@ -3205,6 +3207,7 @@ button.wd-n:hover, .wd-n.lk { border-color: var(--c); }
 .pap-leg .tt { box-shadow: inset 0 0 0 2px var(--ok); }
 .pap-leg .pl { box-shadow: inset 0 0 0 1.5px var(--muted); }
 .pap-leg .no { background: var(--surface2); box-shadow: inset 0 0 0 1px var(--line); }
+.pap-leg .rp { width: 12px; height: 3px; border-radius: 2px; background: var(--sky); vertical-align: 3px; }
 .pap-fy { margin-bottom: 14px; }
 
 /* รายการการซ้อม */
@@ -3232,6 +3235,8 @@ button.wd-n:hover, .wd-n.lk { border-color: var(--c); }
 .pap-imgs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; background: var(--surface2); }
 .pap-tags .pap-ph { display: inline-flex; align-items: center; gap: 3px; color: var(--tile-orange); }
 .pap-tags .pap-ph .ic { width: 13px; height: 13px; }
+.pap-tags .pap-rp { display: inline-flex; align-items: center; gap: 3px; color: var(--sky); }
+.pap-tags .pap-rp .ic { width: 13px; height: 13px; }
 @media (max-width: 560px) { .pap-dx { padding-left: 12px; } .pap-dd { width: 56px; } }
 
 /* วางแผนซ้อม */

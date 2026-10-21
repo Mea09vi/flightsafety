@@ -351,7 +351,8 @@ function grid(D) {
   for (const d of D) {
     const f = fyOf(d.date);
     if (!f) continue;
-    const c = (cell[`${f.fy}-${f.mi}`] ??= { held: 0, out: 0, plan: 0, tt: 0 });
+    const c = (cell[`${f.fy}-${f.mi}`] ??= { held: 0, out: 0, plan: 0, tt: 0, rep: 0 });
+    if (d.report) c.rep++;
     if (counts(d)) { c.held++; if (d.loc === 'out') c.out++; }
     else if (d.kind === 'tabletop' && d.status === 'held') c.tt++;
     else if (d.status !== 'held') c.plan++;
@@ -366,17 +367,18 @@ function drills(box, P, H) {
   const today = fyOf(new Date(Date.now() + 25200000).toISOString().replace(/^(\d{4})/, (y) => +y + 543));
   const future = (fy, mi) => today && (fy > today.fy || (fy === today.fy && mi > today.mi));
   const rows = fys.slice().reverse().map((fy) => {
-    let inOk = 0, out = 0, past = 0;
+    let inOk = 0, out = 0, past = 0, rep = 0;
     const tds = MONTHS.map((m, mi) => {
       const c = cell[`${fy}-${mi}`];
       if (!future(fy, mi)) past++;
       if (c?.held) inOk++;
       out += c?.out || 0;
+      if (c?.rep) rep++;
       const cls = c?.held ? 'ok' : c?.tt ? 'tt' : c?.plan ? 'pl' : future(fy, mi) ? 'fu' : 'no';
-      const t = c ? [c.held && `ซ้อม ${c.held}`, c.out && `นอกเขต ${c.out}`, c.tt && `บนโต๊ะ ${c.tt}`, c.plan && `ตามแผน/เลื่อน ${c.plan}`].filter(Boolean).join(' · ') : 'ไม่พบบันทึก';
-      return `<td class="${cls}"><button data-cell="${fy}-${mi}" title="${m} ${String(fy).slice(2)}: ${t}" aria-label="${m} ปีงบ ${String(fy).slice(2)}: ${t}">${c?.held || ''}${c?.out ? '<i></i>' : ''}</button></td>`;
+      const t = c ? [c.held && `ซ้อม ${c.held}`, c.out && `นอกเขต ${c.out}`, c.tt && `บนโต๊ะ ${c.tt}`, c.plan && `ตามแผน/เลื่อน ${c.plan}`, c.rep && 'มีรายงานผลประจำเดือน'].filter(Boolean).join(' · ') : 'ไม่พบบันทึก';
+      return `<td class="${cls}"><button data-cell="${fy}-${mi}" title="${m} ${String(fy).slice(2)}: ${t}" aria-label="${m} ปีงบ ${String(fy).slice(2)}: ${t}">${c?.held || ''}${c?.out ? '<i></i>' : ''}${c?.rep ? '<u></u>' : ''}</button></td>`;
     }).join('');
-    return `<tr><th scope="row">${String(fy).slice(2)}</th>${tds}<td class="sum${inOk >= past ? ' good' : ''}">${inOk}/${past}</td><td class="sum${out ? ' good' : ''}">${out ? icon('check') : '–'}</td></tr>`;
+    return `<tr><th scope="row">${String(fy).slice(2)}</th>${tds}<td class="sum${inOk >= past ? ' good' : ''}">${inOk}/${past}</td><td class="sum${out ? ' good' : ''}">${out ? icon('check') : '–'}</td><td class="sum${rep ? ' rp' : ''}">${rep || '–'}</td></tr>`;
   }).join('');
 
   box.innerHTML = `
@@ -384,9 +386,9 @@ function drills(box, P, H) {
     <section class="pap-grid-w" aria-labelledby="pap-g-h">
       <h2 class="sec-h" id="pap-g-h">ตารางการซ้อมรายเดือน <span>เกณฑ์ ซ้อมในเขตเดือนละครั้ง นอกเขตปีละครั้ง</span></h2>
       <div class="pap-gscroll"><table class="pap-grid">
-        <thead><tr><th>ปีงบ</th>${MONTHS.map((m) => `<th>${m}</th>`).join('')}<th>ครบเดือน</th><th>นอกเขต</th></tr></thead>
+        <thead><tr><th>ปีงบ</th>${MONTHS.map((m) => `<th>${m}</th>`).join('')}<th>ครบเดือน</th><th>นอกเขต</th><th>รายงานผล</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
-      <p class="pap-leg"><span class="ok"></span>ซ้อมแล้ว (ตัวเลข = ครั้ง) <span class="o"></span>มีนอกเขต <span class="tt"></span>ซ้อมบนโต๊ะ <span class="pl"></span>มีแค่แผน/เลื่อน <span class="no"></span>ไม่พบบันทึก</p>
+      <p class="pap-leg"><span class="ok"></span>ซ้อมแล้ว (ตัวเลข = ครั้ง) <span class="o"></span>มีนอกเขต <span class="tt"></span>ซ้อมบนโต๊ะ <span class="pl"></span>มีแค่แผน/เลื่อน <span class="no"></span>ไม่พบบันทึก <span class="rp"></span>มีบันทึกรายงานผลการซ้อมประจำเดือน</p>
     </section>
     <form class="h-q" role="search" onsubmit="return false"><label>${icon('search')}<input type="search" id="pap-q" placeholder="ค้นเครื่อง ฝูง สถานการณ์ ข้อบกพร่อง" value="${esc(st.q)}" autocomplete="off" aria-label="ค้นการซ้อม"></label></form>
     <div class="chips pap-fy"><button class="chip" data-fy="" aria-pressed="${!st.fy}">ทุกปี</button>${fys.slice().reverse().map((fy) => `<button class="chip" data-fy="${fy}" aria-pressed="${st.fy === String(fy)}">ปีงบ ${String(fy).slice(2)}</button>`).join('')}</div>
@@ -421,9 +423,10 @@ function drillCard(d, esc, icon) {
     d.status && d.status !== 'held' && `<span class="s-${d.status}">${STATUS[d.status]}</span>`,
     d.loc && `<span class="l-${d.loc}">${LOC[d.loc]}</span>`,
     d.ac && `<span>${esc(d.ac)}</span>`, d.sqn && `<span>${esc(d.sqn)}</span>`,
+    d.report && `<span class="pap-rp">${icon('doc')}รายงานผล ${MONTHS[fyOf(d.report.month + '-01')?.mi] || ''} ${String(d.report.month).slice(2, 4)}</span>`,
     d.img?.length && `<span class="pap-ph">${icon('image')}ภาพ ${d.img.length}</span>`,
   ].filter(Boolean).join('');
-  const more = (d.findings?.length || d.units?.length || d.casualties || d.note || d.img?.length);
+  const more = (d.findings?.length || d.units?.length || d.casualties || d.result || d.note || d.img?.length);
   return `<li class="pap-dc"><details${more ? '' : ' class="flat"'}>
     <summary><span class="pap-dd"><b>${fmtDate(d.date)}</b>${d.time ? `<small>${esc(d.time)}</small>` : ''}</span>
       <span class="pap-db"><span class="pap-dt">${esc(d.scenario || 'ไม่ระบุสถานการณ์')}</span><span class="pap-tags">${tags}</span>
@@ -431,6 +434,7 @@ function drillCard(d, esc, icon) {
       ${more ? icon('down', 'ic pap-chev') : ''}</summary>
     ${more ? `<div class="pap-dx">
       ${d.casualties ? `<p><b>ผู้บาดเจ็บสมมติ</b> ${esc(d.casualties)}</p>` : ''}
+      ${d.result ? `<p><b>ผลการซ้อม</b> ${esc(d.result)}</p>` : ''}
       ${d.units?.length ? `<p><b>หน่วยที่ร่วม</b> ${d.units.map(esc).join(' · ')}</p>` : ''}
       ${d.findings?.length ? `<p><b>ข้อบกพร่อง/ข้อเสนอแนะ</b></p><ul>${d.findings.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
       ${d.note ? `<p class="pap-note">${esc(d.note)}</p>` : ''}
