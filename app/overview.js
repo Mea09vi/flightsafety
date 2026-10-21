@@ -132,6 +132,8 @@ export async function mountOverview(host, { state }) {
     'NSIA Norway': { code: 'NSIA', th: 'นอร์เวย์', name: 'Norwegian Safety Investigation Authority' },
     'UK MOD Service Inquiry': { code: 'MOD-SI', th: 'สหราชอาณาจักร', name: 'UK MOD Service Inquiry' },
     'MOD Japan': { code: 'JMOD', th: 'ญี่ปุ่น', name: 'กระทรวงกลาโหมญี่ปุ่น' },
+    'AAIB India': { code: 'AAIB-I', th: 'อินเดีย', name: 'Aircraft Accident Investigation Bureau' },
+    'SHK Sweden': { code: 'SHK', th: 'สวีเดน', name: 'Swedish Accident Investigation Authority' },
   };
   const U = {
     PH: { PREFLIGHT: 'ตรวจก่อนบิน', TAXI: 'ขับเคลื่อน', TAKEOFF: 'วิ่งขึ้น', ENROUTE: 'บินเดินทาง', HOVER: 'ลอยตัว', AUTOROTATION: 'ร่อนลงฉุกเฉิน', APPROACH: 'เข้าสู่สนาม', LANDING: 'ลงสนาม', SHUTDOWN: 'หลังบิน', GROUND: 'ภาคพื้น' },
@@ -1515,6 +1517,8 @@ export async function mountOverview(host, { state }) {
     'ไทย': '<rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.34" fill="#F4F5F8"/><rect y="6.67" width="30" height="6.66" fill="#2D2A4A"/>',
     'ไอร์แลนด์': '<rect width="10" height="20" fill="#169B62"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#FF883E"/>',
     'นอร์เวย์': '<rect width="30" height="20" fill="#BA0C2F"/><path d="M10.9 0v20M0 10h30" stroke="#fff" stroke-width="5"/><path d="M10.9 0v20M0 10h30" stroke="#00205B" stroke-width="2.6"/>',
+    'อินเดีย': '<rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#FF9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" stroke-width=".7"/><circle cx="15" cy="10" r=".6" fill="#000080"/>',
+    'สวีเดน': '<rect width="30" height="20" fill="#006AA7"/><path d="M11 0v20M0 10h30" stroke="#FECC00" stroke-width="3.6"/>',
   };
   const flag = (th) => (FLAG[th] ? `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" focusable="false">${FLAG[th]}</svg>` : '');
   const bdRow = (code) => {
