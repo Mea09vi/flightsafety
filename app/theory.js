@@ -86,7 +86,8 @@ function list() {
   const heroHtml = `
     <section class="th-command-hero" aria-label="ศูนย์การเรียนรู้ทฤษฎีนิรภัยการบิน">
       <div class="th-hero-media">
-        <img class="th-hero-img" src="img/theory-hero.jpg" alt="RTAF Helicopter Formation Flight" loading="eager" />
+        <img class="th-hero-img th-n" src="img/theory-night.webp" alt="ฮ. S-70i ฝูงบิน 201 กองบิน 2 ขณะบิน" width="1600" height="1067" />
+        <img class="th-hero-img th-d" src="img/theory-day.webp" alt="" width="1600" height="1067" />
         <div class="th-hero-overlay"></div>
         <div class="th-hero-grid-pattern"></div>
       </div>

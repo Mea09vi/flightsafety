@@ -1,6 +1,6 @@
 // Service worker — app shell แบบ cache-first, ข้อมูลแบบ stale-while-revalidate
 // เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ใน SHELL เพื่อให้เครื่องผู้ใช้โหลดของใหม่
-const VERSION = 'w2sb-2026-10-22a';
+const VERSION = 'w2sb-2026-10-22b';
 // ฟอนต์ฝังใน app/fonts/ (ชื่อไฟล์ <ฟอนต์>-<น้ำหนัก>-<ช่วงอักษร>.woff2) ต้องตรงกับ @font-face ใน styles.css
 const FONTS = ['baijamjuree-600', 'notoserifthai-600', 'plexsansthai-400', 'plexsansthai-500', 'plexsansthai-600']
   .flatMap((f) => ['thai', 'latin'].map((s) => `fonts/${f}-${s}.woff2`))
@@ -11,8 +11,8 @@ const IMG = ['night', 'day'].flatMap((t) => [`img/hero-${t}.webp`, `img/hero-${t
 const AC_IMGS = ['h225m', 'b412ep', 's92', 'h135', 's70i', 'other'].map((k) => `img/ac-${k}.webp`);
 // หน้าจอคอมฯ (desk.css): หัวเรื่อง Kanit
 const KANIT = [500, 600, 700].flatMap((w) => [`fonts/kanit-${w}-thai.woff2`, `fonts/kanit-${w}-latin.woff2`]);
-const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'overview.js', 'airmanship.js', 'pap.js', 'overview.css', 'login.js', 'theory.js', 'theory_diagrams.js', 'lessons.js', 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'desk.css', 'img/emblem.webp', 'img/team.webp', 'img/team-s.webp', 'img/theory-hero.jpg', ...AC_IMGS, ...KANIT, ...FONTS, ...IMG];
-const DATA = ['data/taxonomy.json', 'data/intl.json', 'data/regs.json'];
+const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'overview.js', 'airmanship.js', 'pap.js', 'overview.css', 'login.js', 'theory.js', 'theory_diagrams.js', 'lessons.js', 'manifest.webmanifest', 'icon.svg', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'desk.css', 'img/emblem.webp', 'img/team.webp', 'img/team-s.webp', 'img/theory-night.webp', 'img/theory-day.webp', ...AC_IMGS, ...KANIT, ...FONTS, ...IMG];
+const DATA = ['data/taxonomy.json', 'data/intl.json', 'data/regs.json', 'data/hero.json'];
 const UNIT = 'data/unit.enc.json';
 // ประวัติเหตุ บน.2 (~1 MB) ไม่โหลดตอนติดตั้ง — เก็บแคชเมื่อเปิดหน้าประวัติครั้งแรก แล้วใช้ออฟไลน์ได้
 const HIST = 'data/history.enc.json';
@@ -70,6 +70,8 @@ self.addEventListener('fetch', (e) => {
     // ไฟล์ dev (localhost เท่านั้น) ห้ามเข้าแคช — ข้อมูลไม่เข้ารหัส
     if (url.pathname.endsWith('/data/unit.dev.json') || url.pathname.endsWith('/data/history.dev.json') || url.pathname.endsWith('/data/regs.dev.json') || url.pathname.endsWith('/data/pap.dev.json')
       || url.pathname.includes('/data/himg/') || url.pathname.includes('/data/papimg/')) return;
+    // วิดีโอปกจอคอมฯ (~1–1.5 MB) ไม่เก็บแคช และให้เบราว์เซอร์จัดการ Range request เอง
+    if (url.pathname.endsWith('.mp4')) return;
     if (url.pathname.endsWith('/' + UNIT) || url.pathname.endsWith('/' + HIST)) { e.respondWith(networkFirst(req)); return; }
     if (url.pathname.includes('/data/')) { e.respondWith(staleWhileRevalidate(req, e)); return; }
     if (req.mode === 'navigate') {

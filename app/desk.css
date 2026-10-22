@@ -43,6 +43,7 @@
   --d-accent-t: var(--d-sky-400);
   --d-gt: linear-gradient(90deg, hsl(var(--d-slate-50)), hsl(var(--d-sky-200)));
   --d-hero-img: url(img/hero-night.webp);
+  --d-hero-halo: hsl(var(--d-navy-1000) / .9);
   --d-hero-ov: linear-gradient(90deg, hsl(var(--d-navy-1000) / .97) 0%, hsl(var(--d-navy-1000) / .8) 42%, hsl(var(--d-navy-1000) / .1) 100%),
                linear-gradient(0deg, hsl(var(--d-navy-1000) / .7), transparent 50%);
 }
@@ -66,7 +67,8 @@
   --d-accent-t: 206 85% 35%;
   --d-gt: linear-gradient(90deg, hsl(var(--d-navy-800)), hsl(206 85% 35%));
   --d-hero-img: url(img/hero-day.webp);
-  --d-hero-ov: linear-gradient(90deg, rgb(244 239 228 / .97) 0%, rgb(244 239 228 / .85) 42%, rgb(244 239 228 / .1) 100%),
+  --d-hero-halo: rgb(244 239 228 / .95);
+  --d-hero-ov: linear-gradient(90deg, rgb(244 239 228 / .97) 0%, rgb(244 239 228 / .88) 45%, rgb(244 239 228 / .45) 66%, rgb(244 239 228 / .08) 100%),
                linear-gradient(0deg, rgb(244 239 228 / .7), transparent 50%);
 }
 :root:not([data-theme="day"]) body { background: radial-gradient(900px 500px at 70% -200px, hsl(var(--d-sky-900) / .55), transparent 70%) fixed, var(--bg); }
@@ -199,11 +201,16 @@ main > .view.dh:not(#_) { max-width: none; }
 .dh-row1 { display: grid; grid-template-columns: 1.75fr 1fr; gap: 20px; }
 .dh-hero { position: relative; overflow: hidden; min-height: 340px; padding: 40px 44px; display: flex; flex-direction: column; justify-content: flex-end; border-color: var(--line2); }
 .dh-hero .bg { position: absolute; inset: 0; background: var(--d-hero-img) center / cover; animation: d-zoom 2.4s var(--d-ease) both; }
+/* วิดีโอปก (app.js heroVideo) วางทับภาพนิ่งใน .bg แล้วค่อยจางเข้าเมื่อเริ่มเล่น — ไม่มีเมื่อลดการเคลื่อนไหว/ประหยัดข้อมูล */
+.dh-hero .bg video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .8s var(--d-ease); }
+.dh-hero .bg video.on { opacity: 1; }
 .dh-hero::before { content: ''; position: absolute; inset: 0; z-index: 1; background: var(--d-hero-ov); }
 .dh-hero::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; z-index: 2; background: var(--d-flag); opacity: .9; }
 .dh-hero > :not(.bg) { position: relative; z-index: 2; }
 .dh-hero h1 { font: 700 50px/1.2 var(--f-k); margin: 12px 0 10px; letter-spacing: -.01em; }
-.dh-hero .sub { max-width: 540px; font-size: 16.5px; line-height: 1.6; color: var(--text2); }
+.dh-hero .sub { max-width: 460px; font-size: 16.5px; line-height: 1.6; color: var(--text2); }
+/* ลำ ฮ. ในภาพ/วิดีโออยู่ครึ่งขวา คำบรรยายยาวไปทับลำตัว — เงาสีพื้นรอบตัวอักษรช่วยให้อ่านออก */
+.dh-hero .sub, .dh-hero .eyebrow { text-shadow: 0 0 3px var(--d-hero-halo), 0 0 14px var(--d-hero-halo); }
 .dh-hero .acts { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
 .dh-tip { padding: 24px; display: flex; flex-direction: column; position: relative; overflow: hidden; color: var(--text); text-decoration: none;
   background: radial-gradient(80% 60% at 100% 0%, hsl(var(--d-glow) / .14), transparent 70%), var(--d-card-bg); }

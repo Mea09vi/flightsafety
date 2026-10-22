@@ -1287,6 +1287,41 @@ const appTile = (a) => {
 // เลขวันตามเวลาเครื่อง ใช้หมุนทฤษฎีวันนี้ (ทุกเครื่องในวันเดียวกันได้บทเดียวกัน)
 const dayNo = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
 
+// ปกหน้าหลัก: ภาพจริงของหน่วยจาก data/hero.json หมุนตามวันเหมือนทฤษฎีวันนี้
+// ก่อนโหลดเสร็จ (หรือออฟไลน์ครั้งแรก) ใช้ --hero / --d-hero-img ใน CSS ไปก่อน
+let heroPick = null;
+function loadHero() {
+  return loadJSON('data/hero.json').then((h) => {
+    const it = h.items?.length ? h.items[dayNo() % h.items.length] : null;
+    if (!it) return;
+    heroPick = it;
+    const vars = (v) => `--hero:url("${v.img}");--hero-s:url("${v.img_s}");--d-hero-img:url("${v.img}")`;
+    const el = $('#hero-rot') || document.head.appendChild(Object.assign(document.createElement('style'), { id: 'hero-rot' }));
+    el.textContent = `:root,:root[data-theme="night"]{${vars(it.night)}}:root[data-theme="day"]{${vars(it.day)}}`;
+    heroVideo();
+  });
+}
+
+// วิดีโอปกเฉพาะจอคอมฯ: วางทับภาพนิ่งใน .dh-hero .bg แล้วจางเข้าเมื่อเริ่มเล่น
+// ไม่เล่นเมื่อจอแคบ ลดการเคลื่อนไหว หรือประหยัดข้อมูล · sw.js ไม่เก็บ .mp4 ในแคช
+function heroVideo() {
+  const bg = $('.dh-hero .bg');
+  const old = bg?.querySelector('video');
+  const v = heroPick?.[document.documentElement.dataset.theme === 'day' ? 'day' : 'night'];
+  if (!bg || !v?.video || !wide.matches || reduced.matches || navigator.connection?.saveData) { old?.remove(); return; }
+  if (old?.dataset.src === v.video) return;
+  old?.remove();
+  const el = Object.assign(document.createElement('video'), { muted: true, loop: true, playsInline: true, autoplay: true, preload: 'auto', poster: v.img });
+  el.setAttribute('muted', ''); // บางเบราว์เซอร์ดูแอตทริบิวต์ ไม่ใช่ property ตอนตัดสินว่าเล่นอัตโนมัติได้
+  el.setAttribute('aria-hidden', 'true');
+  el.dataset.src = v.video;
+  el.addEventListener('playing', () => el.classList.add('on'), { once: true });
+  el.src = v.video;
+  bg.append(el);
+  el.play().catch(() => { /* เบราว์เซอร์ไม่ยอมเล่นอัตโนมัติ — ภาพนิ่งยังอยู่ */ });
+}
+reduced.addEventListener('change', heroVideo);
+
 // นับเลขขึ้นจาก 0 สำหรับ [data-count] · ปิดการเคลื่อนไหวแล้วแสดงค่าสุดท้ายเลย
 function countUp(root) {
   root.querySelectorAll('[data-count]').forEach((el, i) => {
@@ -1393,6 +1428,7 @@ function viewHomeDesk() {
     </a>
   </div>`;
   countUp(main);
+  heroVideo();
 
   import('./lessons.js').then(({ LESSONS }) => {
     if (!$('.dh')) return; // ผู้ใช้ไปหน้าอื่นแล้ว
@@ -2527,6 +2563,7 @@ function viewAbout() {
     <section class="panel">
       <h2>นโยบายข้อมูล</h2>
       <p style="margin:0">ทุกเคสไม่มีชื่อบุคคล · เคสของ บน.2 มีวันเวลา นามเรียกขาน หมายเลขเครื่อง และสถานที่เท่าที่บันทึกต้นฉบับมี ส่วนเคสของหน่วยอื่นใน ทอ. เก็บแค่ปี · เคส INTL สรุปจากรายงานสอบสวนที่เผยแพร่สาธารณะ กดลิงก์ในแต่ละเคสเพื่ออ่านต้นฉบับ · เคสที่มีป้าย "ร่าง" ยังไม่ผ่านการตรวจทาน</p>
+      <p style="margin:10px 0 0">ภาพ ฮ. S-70i หน้าหลักและหน้าทฤษฎี: ฝูงบิน 201 · ภาพแบบ ฮ.: ฝูงบิน 201 และ 202 · ปรับแสงสนธยาและทำวิดีโอด้วย AI (Higgsfield) จากภาพจริง เบลอห้องนักบินทุกภาพ</p>
     </section>
   </div>`;
 }
@@ -2567,6 +2604,7 @@ function applyTheme(pref) {
   document.documentElement.dataset.theme = t;
   $('meta[name="theme-color"]').content = t === 'day' ? '#f4efe4' : '#0b1120';
   syncThemeBtns();
+  heroVideo();
 }
 lightMq.addEventListener('change', () => { if (LS.get('theme', 'night') === 'auto') applyTheme('auto'); });
 
@@ -2797,6 +2835,7 @@ addEventListener('hashchange', route);
 
 async function boot() {
   applyTheme(LS.get('theme', 'night'));
+  loadHero().catch((err) => console.warn('hero', err));
   try {
     const [tax, intl] = await Promise.all([loadJSON('data/taxonomy.json'), loadJSON('data/intl.json')]);
     state.tax = tax;
