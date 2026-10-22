@@ -569,7 +569,7 @@ function syncFilter() {
   if (!ready(s)) {
     const miss = STEPS.find((st) => !(Array.isArray(s[st.k]) ? s[st.k].length : s[st.k]));
     go.className = 'btn btn-primary pending';
-    go.innerHTML = `เลือก${miss.th}ต่อ ${icon('next')}`;
+    go.innerHTML = `ต่อไป: เลือก${miss.th} ${icon('next')}`;
     go.dataset.miss = miss.k;
   } else {
     const { a, b, c } = match();
@@ -1518,8 +1518,8 @@ function viewHome() {
       <p class="w-eyebrow">บน.2 · ${esc(thDate())}</p>
       <h1 class="w-h">พร้อมบรีฟ<em>ก่อนบิน</em></h1>
       <div class="w-stats">
-        <div><b>${state.intl.length}</b><span>เคสต่างประเทศ</span></div>
-        <div><b>${st === 'unlocked' ? state.unit.length : '—'}</b><span>เคสของหน่วย</span></div>
+        <div><b>${state.intl.length.toLocaleString('en-US')}</b><span>เคสต่างประเทศ</span></div>
+        <div><b>${st === 'unlocked' ? state.unit.length.toLocaleString('en-US') : '—'}</b><span>เคสของหน่วย</span></div>
       </div>
       <p class="w-unit">${unitLine}</p>
     </section>
@@ -1838,6 +1838,7 @@ function hvTopics(h) {
     <section class="hv-l" aria-labelledby="h-hm-h">
       <h2 class="sec-h" id="h-hm-h">หัวข้อ × ปีงบ <span>${nTh(pool.length)} เรื่อง</span></h2>
       <div class="chips h-sq" role="group" aria-label="ฝูงบิน">${chips}</div>
+      <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งตาราง</p>
       <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × ปีงบ เลื่อนซ้ายขวาได้">
         <table class="hm">
           <thead><tr><th class="tp" scope="col">หัวข้อ</th>${fys.map((y) => `<th scope="col">${y}</th>`).join('')}<th class="tot" scope="col">รวม</th></tr></thead>
@@ -1998,6 +1999,7 @@ function hvMonths(h) {
       ${band}
       <div class="h-keys">${keys}</div>
       <h2 class="sec-h">หัวข้อ × เดือน</h2>
+      <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งตาราง</p>
       <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × เดือน เลื่อนซ้ายขวาได้">
         <table class="hm mo">
           <thead><tr><th class="tp" scope="col">หัวข้อ</th>${HMON_FY.map((m) => `<th scope="col" class="s-${monSea(m)}">${HMON[m - 1].replace(/\.$/, '')}</th>`).join('')}<th class="tot" scope="col">รวม</th></tr></thead>
@@ -2113,6 +2115,7 @@ function hvHours(h) {
       <div class="h-hrs big" role="group" aria-label="จำนวนเรื่องตามชั่วโมงของวัน">${hbars}</div>
       <div class="h-keys">${keys}<span><i class="sw dk"></i>ช่วงมืด</span><span><i class="sw tw"></i>สนธยา</span></div>
       <h2 class="sec-h">หัวข้อ × ช่วงเวลา <span>ช่วงละ 3 ชั่วโมง</span></h2>
+      <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งตาราง</p>
       <div class="hm-wrap" tabindex="0" role="region" aria-label="ตารางหัวข้อ × ช่วงเวลา เลื่อนซ้ายขวาได้">
         <table class="hm hr">
           <thead><tr><th class="tp" scope="col">หัวข้อ</th>${HBLK.map((r, b) => `<th scope="col"${r >= 18 || r < 6 ? ' class="p-dk"' : ''}>${blk(b)}</th>`).join('')}<th class="tot" scope="col">รวม</th></tr></thead>
@@ -2137,7 +2140,7 @@ function hvCard(h, cardId, s) {
   return `<div class="view hv hs${s}">
     <div class="case-top"><a class="back" href="${esc(back)}" aria-label="ย้อนกลับ">${icon('back')}</a></div>
     <p class="eyebrow">ประวัติเหตุ บน.2</p>
-    <h1 class="page-h">${nW ? `เกิดใน บน.2 มาแล้ว <em>${nTh(nW)} ครั้ง</em>` : `ยกมาเล่าในที่ประชุม บน.2 <em>${nTh(nR)} ครั้ง</em>`}</h1>
+    <h1 class="page-h">${nW ? `เกิดใน บน.2 มาแล้ว <em class="nw">${nTh(nW)} ครั้ง</em>` : `ยกมาเล่าในที่ประชุม บน.2 <em class="nw">${nTh(nR)} ครั้ง</em>`}</h1>
     <p class="lede">${card ? `เรื่องเดียวกับการ์ด “${esc(card.title)}”` : 'เรื่องเดียวกับการ์ดบทเรียนนี้'}${list.length ? ` · ปีงบ ${fySpan(list)}` : ''}${nR && nW ? ` · รวมเหตุ ทอ. ที่ยกมาเล่า ${nTh(nR)} ครั้ง` : ''}</p>
     ${hGroups(list, 'fy', cardId)}
   </div>`;

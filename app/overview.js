@@ -745,6 +745,7 @@ export async function mountOverview(host, { state }) {
       <h3><span class="chip votd">01A · FLIGHT PROFILE</span><span>เส้นโปรไฟล์การบินตามความสูง × สัดส่วนความรุนแรง</span></h3>
       <span class="ins" id="fp-ins" style="margin:0"></span>
     </div>
+    <p class="sx-hint w">ปัดซ้าย–ขวาเพื่อดูทั้งกราฟ</p>
     <div class="fp-w">
       <svg class="fp-svg" id="fp-svg" viewBox="0 0 1140 288" role="group" aria-label="เส้นโปรไฟล์การบินตามความสูง แตะโหนดช่วงการบินเพื่อกรอง">${fpSvgInit()}</svg>
     </div>
@@ -990,6 +991,7 @@ export async function mountOverview(host, { state }) {
   ${head('02', 'hfacs', '', 'แต่ละเส้นคือหนึ่งเคส ลากผ่านแผ่นชีส 4 ชั้นของ HFACS — ผ่านรูเมื่อรายงานระบุปัจจัยในชั้นนั้น ผ่านช่องเส้นประเมื่อไม่ได้ระบุ แล้วไปจบที่อุบัติเหตุหรืออุบัติการณ์ แตะรูหรือชื่อปัจจัยเพื่อกรองทั้งหน้า')}
   <div class="hf-card glass rv">
     <p class="ins" id="hf-ins"></p>
+    <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งกราฟ</p>
     <div class="hf-fig"><svg class="hf" id="hf-svg" viewBox="0 0 1180 620" role="group" aria-label="แผ่นชีส HFACS 4 ชั้น — เลือกรูเพื่อกรองตามชั้น">${hfSvg()}</svg></div>
     <div class="hf-fcl"><span class="fb-l">เคสที่ลงรหัสครบ 4 ชั้น</span>${FULL.map((c) => `<button type="button" class="fcb" data-open="${c.id}" data-fk="fc-${c.id}" title="${esc(c.title)}"><span class="mono">${c.year}</span><span class="t">${esc(c.title)}</span></button>`).join('')}</div>
     <div class="cb">${TK.map((t) => `<div><button type="button" class="cb-t" data-k="hf" data-v="tier:${t}" data-fk="hf-tier:${t}" aria-pressed="false"><b>${t}</b><span>${esc(TIER[t].th)}</span><span class="n">0</span></button>`
@@ -1003,6 +1005,7 @@ export async function mountOverview(host, { state }) {
       <span class="ins" style="margin:0">ชี้ที่แถบไหลเพื่อไล่ดูทั้งชั้น · คลิกชื่อหรือแท่งใดก็ได้เพื่อกรองทั้งหน้า</span>
     </div>
     <div class="sk-lg" id="sk-lg"><span class="sk-lg-t">สีของแถบไหล = ชั้นปัจจัยมนุษย์หลักของเคส</span>${SK_T.map((t) => `<span class="sk-lg-i" data-t="${t}"><i style="background:var(--sk-${t})"></i>${esc(skTier(t))}</span>`).join('')}</div>
+    <p class="sx-hint w">ปัดซ้าย–ขวาเพื่อดูทั้งกราฟ</p>
     <div class="sk-w">
       <svg class="sk-svg" id="sk-svg" viewBox="0 0 1140 440" role="group" aria-label="แผนภาพแอลลูเวียลความเสี่ยง 4 มิติ"></svg>
     </div>
@@ -1362,6 +1365,7 @@ export async function mountOverview(host, { state }) {
   <div class="wf-card glass rv">
     <div class="wf-top"><div class="wf-lg" id="wf-lg"></div>
       <div class="fb-g"><span class="fb-l" id="wf-ml">สีตาม</span><div class="seg sm" id="wf-mode" role="group" aria-labelledby="wf-ml"><button type="button" data-mode="type" aria-pressed="true">ประเภทเหตุ${ck}</button><button type="button" data-mode="cty" aria-pressed="false">ประเทศ${ck}</button></div></div></div>
+    <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งกราฟ</p>
     <div class="wf-w"><svg class="wf" id="wf-svg" data-mode="type" viewBox="0 0 1140 ${WB + 38}" role="img" aria-label="หนึ่งช่องต่อหนึ่งเคส เรียงตามปี ${U.Y0}–${U.Y1} รายการเคสด้านล่างมีข้อมูลเดียวกัน">${wfSvg()}</svg></div>
     <div class="cav"><span>${ic('info', 'sm')}<span>จำนวนเคสต่อปีในคลัง ไม่ใช่แนวโน้มการเกิดเหตุ</span></span>${Number.isFinite(OTH_Y0) ? `<span>${ic('globe', 'sm')}<span>เคสจากประเทศอื่นนอกจากญี่ปุ่นเริ่มตั้งแต่ปี <span class="mono">${OTH_Y0}</span></span></span>` : ''}</div>
   </div>

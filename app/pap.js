@@ -387,10 +387,11 @@ function drills(box, P, H) {
     <p class="rg-lede">รวบรวมจากแฟ้มงานของ FSO รุ่นก่อน ปีงบ ${String(fys[0]).slice(2)}–${String(fys.at(-1)).slice(2)} รวม ${D.length} รายการ · ช่องว่าง = ไม่พบเอกสาร ไม่ได้แปลว่าไม่ได้ซ้อม</p>
     <section class="pap-grid-w" aria-labelledby="pap-g-h">
       <h2 class="sec-h" id="pap-g-h">ตารางการซ้อมรายเดือน <span>เกณฑ์ ซ้อมในเขตเดือนละครั้ง นอกเขตปีละครั้ง</span></h2>
+      <p class="sx-hint">ปัดซ้าย–ขวาเพื่อดูทั้งตาราง</p>
       <div class="pap-gscroll"><table class="pap-grid">
         <thead><tr><th>ปีงบ</th>${MONTHS.map((m) => `<th>${m}</th>`).join('')}<th>ครบเดือน</th><th>นอกเขต</th><th>รายงานผล</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
-      <p class="pap-leg"><span class="ok"></span>ซ้อมแล้ว (ตัวเลข = ครั้ง) <span class="o"></span>มีนอกเขต <span class="tt"></span>ซ้อมบนโต๊ะ <span class="pl"></span>มีแค่แผน/เลื่อน <span class="no"></span>ไม่พบบันทึก <span class="rp"></span>มีบันทึกรายงานผลการซ้อมประจำเดือน</p>
+      <p class="pap-leg"><i class="lg"><span class="ok"></span>ซ้อมแล้ว (ตัวเลข = ครั้ง)</i> <i class="lg"><span class="o"></span>มีนอกเขต</i> <i class="lg"><span class="tt"></span>ซ้อมบนโต๊ะ</i> <i class="lg"><span class="pl"></span>มีแค่แผน/เลื่อน</i> <i class="lg"><span class="no"></span>ไม่พบบันทึก</i> <i class="lg"><span class="rp"></span>มีบันทึกรายงานผลการซ้อมประจำเดือน</i></p>
     </section>
     <form class="h-q" role="search" onsubmit="return false"><label>${icon('search')}<input type="search" id="pap-q" placeholder="ค้นเครื่อง ฝูง สถานการณ์ ข้อบกพร่อง" value="${esc(st.q)}" autocomplete="off" aria-label="ค้นการซ้อม"></label></form>
     <div class="chips pap-fy"><button class="chip" data-fy="" aria-pressed="${!st.fy}">ทุกปี</button>${fys.slice().reverse().map((fy) => `<button class="chip" data-fy="${fy}" aria-pressed="${st.fy === String(fy)}">ปีงบ ${String(fy).slice(2)}</button>`).join('')}</div>
