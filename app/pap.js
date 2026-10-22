@@ -3,6 +3,8 @@
 // ข้อมูลทั้งหมดเข้ารหัสด้วยกุญแจหน่วย (data/pap.enc.json) · ไม่มีแผนที่ Crash Grid ข่ายวิทยุ เบอร์โทร และชื่อบุคคล
 // DECISIONS.md หัวข้อ "แผน PAP"
 
+import { countUp } from './countup.js';
+
 const MONTHS = ['ต.ค.', 'พ.ย.', 'ธ.ค.', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.'];
 const KIND = { drill: 'ซ้อมปฏิบัติ', tabletop: 'ซ้อมบนโต๊ะ', joint: 'ซ้อมร่วม', stby: 'เตรียมพร้อม', other: 'อื่น ๆ' };
 const STATUS = { held: 'ซ้อมแล้ว', planned: 'ตามแผน', postponed: 'เลื่อน/งด' };
@@ -496,7 +498,7 @@ function plan(box, P, { esc, icon }) {
   box.innerHTML = `
     <p class="rg-lede">ช่วยเลือกสถานการณ์ซ้อมครั้งถัดไปจากสิ่งที่ยังซ้อมน้อย และเตรียมแบบบันทึกผลหลังซ้อม</p>
     <div class="pap-kpis">
-      <div><small>ปีงบ ${String(fy).slice(2)} ยังไม่พบการซ้อม</small><b>${miss.length} เดือน</b><span>${miss.join(' ') || 'ครบ'}</span></div>
+      <div><small>ปีงบ ${String(fy).slice(2)} ยังไม่พบการซ้อม</small><b><span data-count="${miss.length}">${miss.length}</span> เดือน</b><span>${miss.join(' ') || 'ครบ'}</span></div>
       <div><small>ซ้อมนอกเขตครั้งล่าสุด</small><b>${outLast ? fmtDate(outLast.date) : 'ไม่พบ'}</b><span>${outLast ? esc(outLast.place || outLast.scenario || '') : ''}</span></div>
     </div>
     ${lessons(P.lessons, fys, esc)}
@@ -508,6 +510,7 @@ function plan(box, P, { esc, icon }) {
     ${findings.length ? `<section class="pap-sec2"><h2 class="sec-h">ข้อบกพร่องที่พบล่าสุด <span>ควรซ้อมซ้ำเพื่อตรวจว่าแก้แล้ว</span></h2>
       <ul class="pap-ul">${findings.map((x) => `<li>${esc(x.f)}<span class="pap-p">${fmtDate(x.date)}</span></li>`).join('')}</ul></section>` : ''}
     <section class="pap-sec2"><h2 class="sec-h">บันทึกผลหลังซ้อม (AAR)</h2>${alarmForm(AAR, esc, icon).replace('แจ้งข่าว', 'ผลการซ้อม')}</section>`;
+  countUp(box);
   box.addEventListener('click', (e) => {
     const b = e.target.closest('#af-copy');
     if (b) copyForm(box, b);

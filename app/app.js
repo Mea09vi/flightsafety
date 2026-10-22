@@ -5,6 +5,7 @@
 import { mountOverview } from './overview.js';
 import * as AIR from './airmanship.js';
 import * as PAP from './pap.js';
+import { countUp } from './countup.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -1322,22 +1323,6 @@ function heroVideo() {
 }
 reduced.addEventListener('change', heroVideo);
 
-// นับเลขขึ้นจาก 0 สำหรับ [data-count] · ปิดการเคลื่อนไหวแล้วแสดงค่าสุดท้ายเลย
-function countUp(root) {
-  root.querySelectorAll('[data-count]').forEach((el, i) => {
-    const to = +el.dataset.count, fmt = (n) => n.toLocaleString('en-US');
-    if (reduced.matches) { el.textContent = fmt(to); return; }
-    const t0 = performance.now() + 250 + i * 60;
-    el.textContent = '0';
-    const step = (t) => {
-      const p = Math.min(1, Math.max(0, (t - t0) / 1100));
-      el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  });
-}
-
 // หน้าหลักจอคอมฯ (≥1024px): ปก + ทฤษฎีวันนี้ + ตัวเลข 4 ช่อง + บทเรียน + หัวข้อที่พบบ่อย · ตัวเลขทุกตัวมาจากข้อมูลจริง
 function viewHomeDesk() {
   const st = state.unitStatus;
@@ -1444,6 +1429,7 @@ function viewHomeDesk() {
     $('#dh-prog-l').innerHTML = `เรียนแล้ว ${nDone}/${LESSONS.length} บท<span class="dh-prog"><i style="width:${Math.round(nDone / LESSONS.length * 100)}%"></i></span>`;
     const v = $('#dh-th-v');
     v.dataset.count = LESSONS.length;
+    v.textContent = LESSONS.length.toLocaleString('en-US');
     $('#dh-th-d').textContent = `บท · เรียนแล้ว ${nDone}`;
     countUp(v.parentNode);
     $('#dh-les').innerHTML = LESSONS.map((x, i) => {
@@ -1765,7 +1751,7 @@ function hvYears(h) {
   const gaps = years.filter((y) => !per.get(y).m && !per.get(y).e && !per.get(y).r).sort((a, b) => a - b);
 
   const stat = HSRC_KEYS.map((k) => `<button data-hsrc="${k}" aria-pressed="${hv.src === k}"${cur[k] ? '' : ' disabled'}>`
-    + `${icon('check', 'ic ck')}<b>${nTh(cur[k])}</b><span><i class="seg-k ${k}"></i>${legend(k)}</span></button>`).join('');
+    + `${icon('check', 'ic ck')}<b data-count="${cur[k]}">${nTh(cur[k])}</b><span><i class="seg-k ${k}"></i>${legend(k)}</span></button>`).join('');
   const list = h.data.items.filter((x) => x.fy === hv.y && (!hv.src || x.src === hv.src))
     .sort((a, b) => HSRC_KEYS.indexOf(a.src) - HSRC_KEYS.indexOf(b.src) || (a.id < b.id ? -1 : 1));
 
@@ -2307,7 +2293,7 @@ function renderHist(arg, sub, still = false) {
   else if (arg === 'case' && sub) html = hvCard(h, decodeURIComponent(sub), s);
   else if (arg === 'topic' && sub) html = hvTopic(h, +decodeURIComponent(sub), s);
   else html = hvItem(h, arg, s);
-  if (html) { main.innerHTML = html; hydrateImgs(main); }
+  if (html) { main.innerHTML = html; hydrateImgs(main); if (!still) countUp(main); }
 }
 
 function viewHist(arg, sub, prev) {
@@ -2540,9 +2526,9 @@ function viewAbout() {
     <section class="panel">
       <h2>ฐานข้อมูล</h2>
       <div class="stats" style="margin-top:12px">
-        <div><b>${count('W2')}</b><span>บน.2</span></div>
-        <div><b>${count('RTAF')}</b><span>ทอ.</span></div>
-        <div><b>${count('INTL')}</b><span>ต่างประเทศ</span></div>
+        <div><b data-count="${count('W2')}">${count('W2')}</b><span>บน.2</span></div>
+        <div><b data-count="${count('RTAF')}">${count('RTAF')}</b><span>ทอ.</span></div>
+        <div><b data-count="${count('INTL')}">${count('INTL')}</b><span>ต่างประเทศ</span></div>
       </div>
       <dl class="kv">
         <dt>เคสต่างประเทศ</dt><dd>${esc(fmtVer(state.intlVersion))}</dd>
@@ -2566,6 +2552,7 @@ function viewAbout() {
       <p style="margin:10px 0 0">ภาพ ฮ. S-70i หน้าเข้าสู่ระบบ หน้าหลัก และหน้าทฤษฎี: ฝูงบิน 201 · ภาพแบบ ฮ.: ฝูงบิน 201 และ 202 · ปรับแสงสนธยาและทำวิดีโอด้วย AI (Higgsfield) จากภาพจริง เบลอห้องนักบินทุกภาพ</p>
     </section>
   </div>`;
+  countUp(main);
 }
 
 async function onUnlock(e) {

@@ -3,6 +3,7 @@
 // ปุ่มในไฟล์นี้ใช้ data-l* ทั้งหมด ไม่ชนกับ data-go / data-act ของโหมดบรีฟใน app.js
 import { LESSONS } from './lessons.js';
 import { THEORY_DIAGRAMS } from './theory_diagrams.js';
+import { countUp } from './countup.js';
 
 let H = null;          // ตัวช่วยจาก app.js: esc icon keepAwake main tax
 let L = null;          // บทที่เปิดอยู่
@@ -105,15 +106,15 @@ function list() {
         </p>
         <div class="th-hero-stats">
           <div class="th-stat-item">
-            <span class="th-stat-val">${N}</span>
+            <span class="th-stat-val" data-count="${N}">${N}</span>
             <span class="th-stat-lbl">โมเดลสากล</span>
           </div>
           <div class="th-stat-item">
-            <span class="th-stat-val">${nDone}/${N}</span>
+            <span class="th-stat-val"><span data-count="${nDone}">${nDone}</span>/${N}</span>
             <span class="th-stat-lbl">ผ่านการศึกษา</span>
           </div>
           <div class="th-stat-item">
-            <span class="th-stat-val">${left ? `${left} นาที` : 'ครบสมบูรณ์'}</span>
+            <span class="th-stat-val">${left ? `<span data-count="${left}">${left}</span> นาที` : 'ครบสมบูรณ์'}</span>
             <span class="th-stat-lbl">${left ? 'เวลาประเมินที่เหลือ' : 'สำเร็จทุกหลักสูตร'}</span>
           </div>
           <div class="th-stat-item th-stat-badge">
@@ -139,6 +140,7 @@ function list() {
     </div>
     <div class="legs">${legs}</div>
   </div>`;
+  countUp(main);
 }
 
 function routeMap(st, next) {

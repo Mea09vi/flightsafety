@@ -6,7 +6,8 @@
    - ปุ่ม "สุ่มเคสบรีฟ 1 นาที" (Pre-flight Brief Roulette) + ช่องค้นหาคำสำคัญสด (Live Keyword Search)
    - ตัวกรอง "เฉพาะ 5 แบบ บน.2" (WING2 Fleet Filter)
    - กราฟ 01A: เส้นโปรไฟล์การบินตามความสูง (Flight Profile Elevation Curve & Low-Altitude Risk Envelope)
-   - กราฟ 02B: สายธารความเสี่ยง 4 มิติ (Multi-Stage Alluvial / Sankey Flow: สภาพแวดล้อม → ช่วงบิน → HFACS → ผลลัพธ์)
+   - กราฟ 02B: แผนภาพแอลลูเวียลความเสี่ยง 4 มิติ (Multi-Stage Alluvial: สภาพแวดล้อม → ช่วงบิน → HFACS → ผลลัพธ์)
+     แถบไหลระบายสีตามชั้น HFACS หลักของเคส (ไล่ระดับฟ้าทางเดียว A เด่นสุด) ช่วงสุดท้ายไล่สีเข้าแดง/ส้มของผลลัพธ์
    - กราฟ 04B: ลายเซ็นภัยคุกคามการบินซ้ำซาก 8 หมวด × 46 ปี (Operational Hazard DNA Barcode Matrix)
    - กราฟ 05: การ์ดอากาศยานพร้อมภาพร่าง Blueprint SVG + แถบ DNA ช่วงการบิน
    - รายการเคสแสดงตัวอย่าง "คำถามบรีฟ" ทันที + ปุ่มคัดลอกประเด็นบรีฟในลิ้นชักเคส */
@@ -192,6 +193,9 @@ export async function mountOverview(host, { state }) {
   const TIER = Object.fromEntries(U.TIERS.map((t) => [t.k, t]));
   const TYPES = ['accident', 'incident'];
   const tcls = (t) => (t === 'accident' ? 'acc' : 'inc');
+  /* 02B: ลำดับชั้น HFACS หลักของเคส (N = ไม่ได้ลงรหัส) และชื่อที่แสดง */
+  const SK_T = ['A', 'P', 'S', 'O', 'N'];
+  const skTier = (t) => (t === 'N' ? 'ไม่ระบุรหัส' : t === 'A' ? 'A · การกระทำไม่ปลอดภัย' : `${t} · ${TIER[t].th}`);
   const polar = (cx, cy, deg, r) => { const a = ((deg - 90) * Math.PI) / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
   const wedgeD = (cx, cy, r0, r1, d0, d1) => {
     const lg = d1 - d0 > 180 ? 1 : 0;
@@ -987,111 +991,137 @@ export async function mountOverview(host, { state }) {
   <!-- NEW 02B: Multi-Stage Alluvial / Sankey Risk Flow -->
   <div class="sk-card glass rv" id="sk-card">
     <div class="sk-top">
-      <h3><span class="chip votd">02B · ALLUVIAL RISK FLOW</span><span>สายธารความเสี่ยง 4 มิติ: สภาพแวดล้อม → ช่วงบิน → ชั้น HFACS → ความรุนแรง</span></h3>
-      <span class="ins" style="margin:0">ชี้ที่สายธารเพื่อดูความเชื่อมโยง · คลิกที่กล่องใดก็ได้เพื่อกรองทั้งหน้า</span>
+      <h3><span class="chip votd">02B · ALLUVIAL RISK FLOW</span><span>แผนภาพแอลลูเวียล 4 มิติ: สภาพแวดล้อม → ช่วงบิน → ชั้น HFACS → ผลลัพธ์</span></h3>
+      <span class="ins" style="margin:0">ชี้ที่แถบไหลเพื่อไล่ดูทั้งชั้น · คลิกชื่อหรือแท่งใดก็ได้เพื่อกรองทั้งหน้า</span>
     </div>
+    <div class="sk-lg" id="sk-lg"><span class="sk-lg-t">สีของแถบไหล = ชั้นปัจจัยมนุษย์หลักของเคส</span>${SK_T.map((t) => `<span class="sk-lg-i" data-t="${t}"><i style="background:var(--sk-${t})"></i>${esc(skTier(t))}</span>`).join('')}</div>
     <div class="sk-w">
-      <svg class="sk-svg" id="sk-svg" viewBox="0 0 1140 420" role="group" aria-label="แผนภาพสายธารความเสี่ยง 4 มิติ"></svg>
+      <svg class="sk-svg" id="sk-svg" viewBox="0 0 1140 440" role="group" aria-label="แผนภาพแอลลูเวียลความเสี่ยง 4 มิติ"></svg>
     </div>
   </div>
 </section>`);
 
-  /* ฟังก์ชันคำนวณและวาด 02B Alluvial / Sankey Risk Flow สดตามเคส M() */
+  /* 02B แผนภาพแอลลูเวียล: คำนวณสดจากเคส M() ทุกครั้งที่ตัวกรองเปลี่ยน
+     แท่งโหนดบาง 12px · แถบไหลทึบกว้างตามจำนวนเคส · สีแถบไหล = ชั้น HFACS หลักของเคส (SK_T)
+     ช่วงสุดท้ายไล่สีจากชั้นไปเป็นสีผลลัพธ์ · ป้ายชื่อมีขอบสีพื้นเพื่อให้อ่านได้เมื่อทับแถบไหล */
+  const SK_X = [210, 485, 760, 1000], SK_BW = 12, SK_TOP = 58, SK_BOT = 428, SK_GAP = 8;
+  const SK_TI = Object.fromEntries(SK_T.map((t, i) => [t, i]));
+  const hfOfC = (c) => SK_T.find((t) => c._tiers.includes(t)) || 'N';
   const drawSankey = (m) => {
     const svg = $('#sk-svg');
     if (!svg) return;
-    if (!m.length) {
-      svg.innerHTML = '<text x="570" y="210" text-anchor="middle" fill="var(--muted)" font-size="15">ไม่มีเคสที่ตรงตัวกรอง</text>';
+    const fid = R.activeElement?.closest?.('.sk-node')?.dataset.nid;
+    svg.classList.remove('dim');
+    const tierN = U.count(m, hfOfC);
+    for (const el of $$('#sk-lg .sk-lg-i')) el.classList.toggle('off', !tierN.get(el.dataset.t));
+    const T = m.length;
+    svg.dataset.n = T;
+    if (!T) {
+      svg.innerHTML = '<text class="sk-empty" x="570" y="230" text-anchor="middle">ไม่มีเคสที่ตรงตัวกรอง</text>';
       return;
     }
-    const H_TOP = 46, H_BOT = 398, H_AVAIL = H_BOT - H_TOP;
-    // คอลัมน์ 1: Top 5 Environment
-    const envCnt = U.count(m, (c) => c.environment.filter((e) => e !== 'ALL'));
-    const topEnvs = byN(envCnt).slice(0, 5).map(([k]) => k);
+    // คอลัมน์ 1–2: 5 อันดับแรกตามจำนวนเคส ที่เหลือรวมเป็น "อื่น ๆ" ไว้ล่างสุด
+    const topEnvs = byN(U.count(m, (c) => c.environment.filter((e) => e !== 'ALL'))).slice(0, 5).map(([k]) => k);
     const envOfC = (c) => c.environment.find((e) => topEnvs.includes(e)) || 'OTHER_ENV';
-    // คอลัมน์ 2: Top 5 Phase
-    const phCnt = U.count(m, (c) => c._ph);
-    const topPhs = byN(phCnt).slice(0, 5).map(([k]) => k);
+    const topPhs = byN(U.count(m, (c) => c._ph)).slice(0, 5).map(([k]) => k);
     const phOfC = (c) => (topPhs.includes(c._ph) ? c._ph : 'OTHER_PH');
-    // คอลัมน์ 3: Dominant HFACS Tier (A -> P -> S -> O -> NONE)
-    const hfOfC = (c) => (c._tiers.includes('A') ? 'A' : c._tiers.includes('P') ? 'P' : c._tiers.includes('S') ? 'S' : c._tiers.includes('O') ? 'O' : 'NONE');
-    // คอลัมน์ 4: Outcome (accident / incident)
-    const outOfC = (c) => c.type;
-
-    const NW = 152;
     const cols = [
-      { x: 10, title: '1. สภาพแวดล้อม', sub: 'Environment', fk: 'env', fn: envOfC, label: (k) => (k === 'OTHER_ENV' ? 'สภาพอื่น / ไม่เจาะจง' : ENV[k] || k) },
-      { x: 356, title: '2. ช่วงของเที่ยวบิน', sub: 'Phase of Flight', fk: 'phase', fn: phOfC, label: (k) => (k === 'OTHER_PH' ? 'ช่วงอื่น ๆ' : PH[k] || k) },
-      { x: 696, title: '3. ชั้นปัจจัยมนุษย์หลัก', sub: 'Primary HFACS Tier', fk: 'hf', fn: hfOfC, label: (k) => (k === 'NONE' ? 'ไม่ระบุรหัส' : k === 'A' ? 'A · การกระทำไม่ปลอดภัย' : `${k} · ${TIER[k].th}`) },
-      { x: 978, title: '4. ผลลัพธ์', sub: 'Outcome', fk: 'type', fn: outOfC, label: (k) => U.TYPE[k] },
+      { title: '1. สภาพแวดล้อม', sub: 'Environment', fk: 'env', fn: envOfC, label: (k) => (k === 'OTHER_ENV' ? 'สภาพอื่น / ไม่เจาะจง' : ENV[k] || k) },
+      { title: '2. ช่วงของเที่ยวบิน', sub: 'Phase of Flight', fk: 'phase', fn: phOfC, label: (k) => (k === 'OTHER_PH' ? 'ช่วงอื่น ๆ' : PH[k] || k) },
+      { title: '3. ชั้นปัจจัยมนุษย์หลัก', sub: 'Primary HFACS Tier', fk: 'hf', fn: hfOfC, label: skTier, fixed: SK_T },
+      { title: '4. ผลลัพธ์', sub: 'Outcome', fk: 'type', fn: (c) => c.type, label: (k) => U.TYPE[k], fixed: TYPES },
     ];
-
-    const colNodes = cols.map((col) => {
+    // โหนด: มาตราส่วนเดียวทุกคอลัมน์ (ทุกคอลัมน์รวมได้ T เคส) แถบไหลจึงกว้างเท่ากันทั้งสองปลาย
+    const H = SK_BOT - SK_TOP;
+    const keys = cols.map((col) => {
       const cnt = U.count(m, col.fn);
-      const list = byN(cnt);
-      const pad = 10;
-      const totH = H_AVAIL - pad * Math.max(0, list.length - 1);
-      let y = H_TOP;
-      const map = new Map();
-      for (const [k, n] of list) {
-        const h = Math.max(16, (n / m.length) * totH);
-        map.set(k, { k, n, x: col.x, y, h, inY: y, outY: y, col });
-        y += h + pad;
-      }
-      return map;
+      const ks = col.fixed ? col.fixed.filter((k) => cnt.get(k)) : byN(cnt).map(([k]) => k).sort((a, b) => a.startsWith('OTHER_') - b.startsWith('OTHER_'));
+      return { cnt, ks };
     });
-
-    const links = [];
+    const sc = (H - SK_GAP * (Math.max(...keys.map((x) => x.ks.length)) - 1)) / T;
+    const nodes = keys.map(({ cnt, ks }, ci) => {
+      const gap = ks.length > 1 ? (H - T * sc) / (ks.length - 1) : 0;
+      let y = ks.length > 1 ? SK_TOP : SK_TOP + (H - T * sc) / 2;
+      return new Map(ks.map((key, i) => {
+        const n = cnt.get(key), nd = { key, i, n, h: n * sc, y, ci, oy: y, iy: y };
+        y += nd.h + gap;
+        return [key, nd];
+      }));
+    });
+    // แถบไหล: รวมตาม ต้นทาง|ปลายทาง|ชั้นหลัก แล้วเรียงซ้อนในโหนดตามลำดับโหนดฝั่งตรงข้าม → ชั้น
+    const ribs = [];
     for (let ci = 0; ci < 3; ci++) {
-      const cA = cols[ci], cB = cols[ci + 1], nA = colNodes[ci], nB = colNodes[ci + 1];
-      const pairMap = new Map();
+      const agg = new Map();
       for (const c of m) {
-        const ka = cA.fn(c), kb = cB.fn(c);
-        const key = `${ka}|${kb}|${c.type}`;
-        pairMap.set(key, (pairMap.get(key) || 0) + 1);
+        const key = `${cols[ci].fn(c)}|${cols[ci + 1].fn(c)}|${hfOfC(c)}`;
+        agg.set(key, (agg.get(key) || 0) + 1);
       }
-      for (const [key, cnt] of pairMap) {
-        const [ka, kb, ty] = key.split('|');
-        const a = nA.get(ka), b = nB.get(kb);
-        if (!a || !b) continue;
-        const wA = (cnt / a.n) * a.h, wB = (cnt / b.n) * b.h, w = Math.max(1.8, (wA + wB) / 2);
-        const y0 = a.outY + wA / 2, y1 = b.inY + wB / 2;
-        a.outY += wA;
-        b.inY += wB;
-        const x0 = a.x + NW, x1 = b.x, xm = f((x0 + x1) / 2);
-        links.push({
-          d: `M${x0} ${f(y0)} C${xm} ${f(y0)}, ${xm} ${f(y1)}, ${x1} ${f(y1)}`,
-          w: f(w),
-          ty,
-          cnt,
-          aLabel: cA.label(ka),
-          bLabel: cB.label(kb),
-          ka,
-          kb,
-        });
-      }
+      const ls = [...agg].map(([key, n]) => {
+        const [ka, kb, t] = key.split('|');
+        return { ci, a: nodes[ci].get(ka), b: nodes[ci + 1].get(kb), t, n, w: n * sc };
+      });
+      ls.sort((p, q) => p.a.i - q.a.i || p.b.i - q.b.i || SK_TI[p.t] - SK_TI[q.t]);
+      for (const l of ls) { l.y0 = l.a.oy; l.a.oy += l.w; }
+      ls.sort((p, q) => p.b.i - q.b.i || p.a.i - q.a.i || SK_TI[p.t] - SK_TI[q.t]);
+      for (const l of ls) { l.y1 = l.b.iy; l.b.iy += l.w; }
+      ribs.push(...ls);
     }
-
-    let html = cols.map((c) => `<text class="sk-col-h" x="${c.x}" y="18">${c.title}</text><text class="sk-col-sub" x="${c.x}" y="34">${c.sub}</text>`).join('');
-    html += `<g class="sk-links">${links.map((l) => `<path class="sk-link ${tcls(l.ty)}" d="${l.d}" stroke-width="${l.w}" data-a="${esc(l.aLabel)}" data-b="${esc(l.bLabel)}" data-n="${l.cnt}" data-ty="${U.TYPE[l.ty]}"/>`).join('')}</g>`;
-    for (let ci = 0; ci < cols.length; ci++) {
-      const col = cols[ci];
-      for (const nd of colNodes[ci].values()) {
-        const canFilter = !nd.k.startsWith('OTHER_') && nd.k !== 'NONE';
-        const fv = col.fk === 'hf' ? `tier:${nd.k}` : nd.k;
-        const isSel = canFilter && S[col.fk] === fv;
-        const fillCol = col.fk === 'type' ? (nd.k === 'accident' ? 'var(--bad)' : 'var(--warn)') : 'var(--sky)';
-        const twoLines = nd.h >= 34;
-        const lblTxt = twoLines ? col.label(nd.k) : `${col.label(nd.k)} (${U.fmt(nd.n)})`;
-        html += `<g class="sk-node${isSel ? ' sel' : ''}" ${canFilter ? `data-k="${col.fk}" data-v="${esc(fv)}" role="button" tabindex="0" aria-pressed="${isSel}"` : ''} transform="translate(${nd.x},${f(nd.y)})">
-          <rect width="${NW}" height="${f(nd.h)}"/>
-          <rect class="bar" width="5" height="${f(nd.h)}" style="fill:${fillCol}"/>
-          <text class="nm" x="12" y="${f(twoLines ? nd.h / 2 - 3 : nd.h / 2 + 4.5)}">${esc(lblTxt)}</text>
-          ${twoLines ? `<text class="cnt" x="12" y="${f(nd.h / 2 + 14)}">${U.fmt(nd.n)} เคส</text>` : ''}
-        </g>`;
+    const ribD = (l) => {
+      const x0 = SK_X[l.ci] + SK_BW, x1 = SK_X[l.ci + 1], xm = f((x0 + x1) / 2);
+      const a0 = f(l.y0), a1 = f(l.y0 + l.w), b0 = f(l.y1), b1 = f(l.y1 + l.w);
+      return `M${x0} ${a0}C${xm} ${a0} ${xm} ${b0} ${x1} ${b0}L${x1} ${b1}C${xm} ${b1} ${xm} ${a1} ${x0} ${a1}Z`;
+    };
+    const defs = '<defs>' + SK_T.flatMap((t) => TYPES.map((ty) => `<linearGradient id="skg-${t}-${tcls(ty)}"><stop offset=".3" style="stop-color:var(--sk-${t})"/><stop offset="1" style="stop-color:var(--ov-${tcls(ty)})"/></linearGradient>`)).join('') + '</defs>';
+    const hd = cols.map((col, ci) => {
+      const x = ci === 0 ? SK_X[0] + SK_BW : SK_X[ci], a = ci === 0 ? ' text-anchor="end"' : '';
+      return `<text class="sk-col-h" x="${x}" y="22"${a}>${col.title}</text><text class="sk-col-sub" x="${x}" y="40"${a}>${col.sub}</text>`;
+    }).join('');
+    const rh = ribs.map((l) => `<path class="sk-rib" d="${ribD(l)}" data-t="${l.t}" data-na="${l.ci}:${esc(l.a.key)}" data-nb="${l.ci + 1}:${esc(l.b.key)}"`
+      + ` data-a="${esc(cols[l.ci].label(l.a.key))}" data-b="${esc(cols[l.ci + 1].label(l.b.key))}" data-n="${l.n}"`
+      + ` style="fill:${l.ci === 2 ? `url(#skg-${l.t}-${tcls(l.b.key)}) ` : ''}var(--sk-${l.t})"/>`).join('');
+    // ป้ายชื่อ: คอลัมน์แรกอยู่ซ้ายแท่ง ที่เหลืออยู่ขวาแท่ง · 2 บรรทัดเมื่อโหนดสูงพอ · ดันป้ายที่ชนกันออกจากกัน
+    const barC = (ci, k) => (ci === 2 ? `var(--sk-${k})` : ci === 3 ? `var(--ov-${tcls(k)})` : 'var(--ov-hf0)');
+    let nh = '';
+    nodes.forEach((map, ci) => {
+      const col = cols[ci], x = SK_X[ci], left = ci === 0;
+      const tx = left ? x - 9 : x + SK_BW + 9, anc = left ? 'end' : 'start';
+      const items = [...map.values()].map((nd) => {
+        const two = nd.h >= 40, lh = two ? 40 : 22;
+        return { nd, two, lh, top: nd.y + nd.h / 2 - lh / 2 };
+      });
+      for (let i = 1; i < items.length; i++) items[i].top = Math.max(items[i].top, items[i - 1].top + items[i - 1].lh + 1);
+      const last = items[items.length - 1];
+      last.top = Math.min(last.top, SK_BOT + 8 - last.lh);
+      for (let i = items.length - 2; i >= 0; i--) items[i].top = Math.min(items[i].top, items[i + 1].top - items[i].lh - 1);
+      for (const { nd, two, top } of items) {
+        const fv = col.fk === 'hf' ? `tier:${nd.key}` : nd.key;
+        const can = !nd.key.startsWith('OTHER_') && nd.key !== 'N', on = can && S[col.fk] === fv;
+        const nm = col.label(nd.key), bh = Math.max(3, nd.h), by = nd.y + nd.h / 2 - bh / 2;
+        const tA = `x="${tx}" text-anchor="${anc}"`;
+        nh += `<g class="sk-node${on ? ' sel' : ''}" data-nid="${ci}:${esc(nd.key)}"${ci === 2 ? ` data-t="${nd.key}"` : ''} data-l="${esc(nm)}" data-n="${nd.n}"`
+          + (can ? ` data-k="${col.fk}" data-v="${esc(fv)}" role="button" tabindex="0" aria-pressed="${on}" aria-label="${esc(`${nm} ${U.fmt(nd.n)} เคส`)}"` : '')
+          + ` style="--c:${barC(ci, nd.key)}"><rect class="hit"/><rect class="bar" x="${x}" y="${f(by)}" width="${SK_BW}" height="${f(bh)}"/>`
+          + (two
+            ? `<text class="nm" ${tA} y="${f(top + 15)}">${esc(nm)}</text><text class="cnt" ${tA} y="${f(top + 35)}">${U.fmt(nd.n)} เคส · ${pctOf(nd.n, T)}%</text>`
+            : `<text class="nm" ${tA} y="${f(top + 16)}">${esc(nm)}<tspan class="cnt" dx="7">${U.fmt(nd.n)}</tspan></text>`)
+          + '</g>';
       }
+    });
+    svg.innerHTML = defs + hd + `<g class="sk-ribs">${rh}</g>` + nh;
+    // พื้นที่คลิกของโหนด = แท่ง + ป้ายชื่อ (วัดจากที่วาดจริง)
+    for (const g of $$('.sk-node', svg)) {
+      try {
+        let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+        for (const el of g.querySelectorAll('.bar, text')) {
+          const b = el.getBBox();
+          x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+        }
+        const r = g.firstElementChild;
+        r.setAttribute('x', f(x0 - 4)); r.setAttribute('y', f(y0 - 3));
+        r.setAttribute('width', f(x1 - x0 + 8)); r.setAttribute('height', f(y1 - y0 + 6));
+      } catch { /* ยังไม่แสดงผลบนจอ */ }
     }
-    svg.innerHTML = html;
+    if (fid) $(`.sk-node[data-nid="${CSS.escape(fid)}"]`, svg)?.focus();
   };
 
   let HFS = [], HFC = [];
@@ -1160,23 +1190,42 @@ export async function mountOverview(host, { state }) {
       b.addEventListener('blur', () => hov(b.dataset.open, false));
     }
 
-    /* Tooltip บน Sankey Flow */
-    const skSvg = $('#sk-svg');
+    /* 02B: ชี้แถบไหลหรือชั้น HFACS = ไล่ทั้งชั้น · ชี้โหนดอื่น = แถบไหลที่เข้า–ออกโหนดนั้น */
+    const skSvg = $('#sk-svg'), skLg = $('#sk-lg');
+    const skOn = (t, nid, hot) => {
+      const on = !!(t || nid);
+      skSvg.classList.toggle('dim', on);
+      skLg.classList.toggle('dim', !!t);
+      for (const p of $$('.sk-rib', skSvg)) {
+        p.classList.toggle('hi', on && (t ? p.dataset.t === t : p.dataset.na === nid || p.dataset.nb === nid));
+        p.classList.toggle('hot', p === hot);
+      }
+      for (const el of $$('.sk-lg-i', skLg)) el.classList.toggle('hi', !!t && el.dataset.t === t);
+      for (const g of $$('.sk-node', skSvg)) g.classList.toggle('hi', !!nid && g.dataset.nid === nid);
+    };
+    const skNode = (g) => skOn(g.dataset.t, g.dataset.t ? null : g.dataset.nid);
+    const skNodeTip = (g) => `<div class="tp-t">${esc(g.dataset.l)}</div>`
+      + `<div class="tp-m"><span class="mono">${U.fmt(+g.dataset.n)}</span> เคส · <span class="mono">${pctOf(+g.dataset.n, +skSvg.dataset.n)}%</span> ของเคสที่แสดง${g.dataset.k ? ' · คลิกเพื่อกรอง' : ''}</div>`;
+    const skRibTip = (p) => `<div class="tp-t">${esc(p.dataset.a)} → ${esc(p.dataset.b)}</div>`
+      + `<div class="tp-m"><span class="mono">${U.fmt(+p.dataset.n)}</span> เคส · ชั้นหลัก ${esc(skTier(p.dataset.t))}</div>`;
+    let skCur = null;
     skSvg.addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse') return;
-      const p = e.target.closest('.sk-link');
-      for (const x of $$('.sk-link', skSvg)) x.classList.toggle('hi', x === p);
-      skSvg.classList.toggle('dim', !!p);
-      if (p) {
-        tip(`<div class="tp-t">${esc(p.dataset.a)} → ${esc(p.dataset.b)}</div>`
-          + `<div class="tp-m"><span class="mono">${p.dataset.n}</span> เคส (${esc(p.dataset.ty)})</div>`, e);
-      } else untip();
+      const g = e.target.closest('.sk-node'), p = !g && e.target.closest('.sk-rib');
+      const cur = g || p || null;
+      if (cur !== skCur) {
+        skCur = cur;
+        if (g) skNode(g); else if (p) skOn(p.dataset.t, null, p); else skOn();
+      }
+      if (g) tip(skNodeTip(g), e); else if (p) tip(skRibTip(p), e); else untip();
     });
-    skSvg.addEventListener('pointerleave', () => {
-      skSvg.classList.remove('dim');
-      for (const x of $$('.sk-link', skSvg)) x.classList.remove('hi');
-      untip();
-    });
+    skSvg.addEventListener('pointerleave', () => { skCur = null; skOn(); untip(); });
+    skSvg.addEventListener('focusin', (e) => { const g = e.target.closest('.sk-node'); if (g) { skNode(g); tip(skNodeTip(g), g); } });
+    skSvg.addEventListener('focusout', () => { skOn(); untip(); });
+    for (const el of $$('.sk-lg-i', skLg)) {
+      el.addEventListener('pointerenter', () => skOn(el.dataset.t));
+      el.addEventListener('pointerleave', () => skOn());
+    }
   });
 
   /* ═════ 03 ตารางความร้อน: แถว = สภาพแวดล้อม · คอลัมน์ = ช่วงของเที่ยวบิน ═════ */
