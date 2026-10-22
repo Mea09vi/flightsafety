@@ -1194,20 +1194,34 @@ function exitBrief() {
   else location.replace('#/results');
 }
 
+// เต็มจอที่เปิดจากแถบข้างจอคอมฯ คงอยู่ข้ามหน้า · ที่เปิดในโหมดบรีฟปิดเองเมื่อออกจากบรีฟ
+let fullKeep = false;
 function toggleFull() {
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-  else document.documentElement.requestFullscreen?.().catch(() => {});
+  else {
+    fullKeep = !document.body.classList.contains('briefing');
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }
 }
 document.addEventListener('fullscreenchange', () => {
-  const b = $('#full');
-  if (!b) return;
-  b.innerHTML = icon(document.fullscreenElement ? 'shrink' : 'full');
-  b.setAttribute('aria-label', fullLabel());
-  b.title = fullLabel();
+  const on = !!document.fullscreenElement;
+  if (!on) fullKeep = false;
+  for (const b of $$('#full, #dFull')) {
+    b.innerHTML = icon(on ? 'shrink' : 'full');
+    b.setAttribute('aria-label', fullLabel());
+    b.title = fullLabel();
+    if (b.id === 'dFull') b.setAttribute('aria-pressed', String(on));
+  }
 });
+if (!document.fullscreenEnabled) $('#dFull')?.remove();
 
 document.addEventListener('keydown', (e) => {
-  if (!document.body.classList.contains('briefing') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!document.body.classList.contains('briefing')) {
+    // จอคอมฯ: F สลับเต็มจอได้ทุกหน้า ยกเว้นตอนพิมพ์ในช่องค้นหา/ฟอร์ม
+    if (e.code === 'KeyF' && wide.matches && $('#dFull') && !e.target.closest?.('input, textarea, select, [contenteditable]')) { e.preventDefault(); toggleFull(); }
+    return;
+  }
   // รีโมตพรีเซนเทชันส่ง PageUp/PageDown · ใช้ e.code กับ F เพื่อให้กดได้ตอนแป้นพิมพ์เป็นภาษาไทย
   if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); briefGo(1); }
   else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); briefGo(-1); }
@@ -2585,6 +2599,7 @@ function syncThemeBtns() {
   for (const b of $$('.annun [data-theme-set]')) b.setAttribute('aria-pressed', String(b.dataset.themeSet === cur));
 }
 $('.annun').addEventListener('click', (e) => {
+  if (e.target.closest('#dFull')) { toggleFull(); return; }
   const t = e.target.closest('[data-theme-set]');
   if (!t) return;
   LS.set('theme', t.dataset.themeSet);
@@ -2626,7 +2641,7 @@ function route() {
   document.body.classList.toggle('lesson', lesson);
   if (!briefing) {
     briefFromList = false;
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (document.fullscreenElement && !fullKeep) document.exitFullscreen().catch(() => {});
   }
   if (!briefing && !lesson) releaseAwake();
 

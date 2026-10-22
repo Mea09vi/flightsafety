@@ -126,6 +126,11 @@ body.sub .annun .tabbar { display: flex; }
 .d-toggle { display: inline-flex; border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; }
 .d-toggle button { padding: 4px 10px; border: 0; background: none; font: 500 12px/1.4 var(--f-b); color: var(--muted); cursor: pointer; }
 .d-toggle button:hover { color: var(--text); }
+.d-tools { display: inline-flex; align-items: center; gap: 6px; }
+.d-fs { display: inline-grid; place-items: center; width: 30px; height: 26px; padding: 0; border: 1px solid var(--line2); border-radius: 8px; background: none; color: var(--muted); cursor: pointer; }
+.d-fs .ic { width: 16px; height: 16px; }
+.d-fs:hover { color: var(--text); }
+.d-fs[aria-pressed="true"] { background: hsl(var(--d-navy-700)); color: var(--text); }
 .d-toggle button[aria-pressed="true"] { background: hsl(var(--d-navy-700)); color: var(--text); }
 
 /* ── พื้นที่เนื้อหา ───────────────────────────────────────── */
