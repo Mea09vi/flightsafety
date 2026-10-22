@@ -611,11 +611,15 @@ a.dh-bar:hover > span:first-child { color: var(--text); }
 .th-hero-content {
   padding: 38px 42px 32px;
 }
+/* หัวทฤษฎีใช้ Kanit เหมือน .page-h/.dh-hero h1 ของจอคอมฯ (ตัวเล็กยังเป็น Plex) */
 .th-hero-title {
   font-size: 34px;
+  font-family: var(--f-k);
 }
 .th-hero-hl {
   font-size: 22px;
+  font-family: var(--f-k);
+  font-weight: 500;
 }
 .ls-title-grid {
   min-height: 480px;

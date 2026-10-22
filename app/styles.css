@@ -291,7 +291,7 @@ main {
 .eyebrow { font-size: 12.5px; line-height: 1.4; color: var(--muted); margin-bottom: 8px; }
 .page-h { margin: 0 0 18px; font: 600 28px/1.3 var(--f-d); }
 .page-h em { font-style: normal; color: var(--gold); }
-.page-h em.nw { white-space: nowrap; } /* "123 ครั้ง" ไม่แยกบรรทัด */
+.page-h em.nw, .th-hero-desc .nw { white-space: nowrap; } /* "123 ครั้ง" ไม่แยกบรรทัด */
 .lede { color: var(--text2); margin: -8px 0 20px; }
 
 /* ── ขั้นที่เลือก (แตะเพื่อกลับไปแก้) ─────────────────────── */
