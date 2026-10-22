@@ -2665,27 +2665,30 @@ html.ov-lock { overflow: hidden; }
 @media (max-width: 400px) { .net .ver { display: none; } }
 
 /* ── หน้าเข้าสู่ระบบ (login.js) ─────────────────────────────────
-   DECISIONS.md หัวข้อ "หน้าเข้าสู่ระบบ": ธีมกลางคืนเสมอ ฉากนี้ยกเว้นกฎห้ามแสงเรือง
+   DECISIONS.md หัวข้อ "หน้าเข้าสู่ระบบ": แก้ 22 ต.ค. 2569 เป็นพื้นหลังวิดีโอ ฮ. กลางวัน + ชุดสีกลางวันเสมอ
    ทุก class ขึ้นต้น g- และอยู่ใต้ .gate จะได้ไม่ชนกับหน้าอื่นของแอป */
-:root { --app-bg: var(--bg); } /* พื้นของแอปตามธีมที่เลือก ให้วาบตอนปลดล็อกจบที่สีเดียวกับแอป */
-body.gated { overflow: hidden; background: #060a13; }
+:root { --app-bg: var(--bg); } /* พื้นของแอปตามธีมที่เลือก ให้ตอนปลดล็อกจางไปเป็นสีเดียวกับแอป */
+body.gated { overflow: hidden; background: #f4efe4; }
 /* ซ่อนแอปข้างหลังทั้งจากสายตา การกด Tab และโปรแกรมอ่านหน้าจอ */
 body.gated > :not(.gate) { visibility: hidden; }
 .gate {
-  --bg: #060a13;
-  --surface: #0d1528;
-  --line: rgb(150 180 230 / .12);
-  --line2: rgb(150 180 230 / .22);
-  --text: #e9eef8;
-  --text2: #b5c1d6;
-  --muted: #8794ad; /* สว่างกว่าของแอปเล็กน้อย ตัวอักษรเล็กบนการ์ดกระจกยังผ่าน 4.5:1 */
-  --sky: #6cc9ff;
-  --gold: #f2c66d;
-  --ok: #5fd39a;
-  --bad: #ff7a85;
-  --on-pri: #1b1300;
-  --g-bar: 32px; /* ต้องตรงกับ BAR_H ใน login.js */
-  color-scheme: dark;
+  /* ชุดสีกลางวันของแอป (:root[data-theme="day"]) ใช้ทุกครั้งไม่ว่าแอปตั้งธีมอะไร ให้เข้ากับภาพกลางวัน */
+  --bg: #f4efe4;
+  --surface: #faf6ec;
+  --line: rgb(40 35 25 / .12);
+  --line2: rgb(40 35 25 / .26);
+  --text: #1b1f27;
+  --text2: #3b4250;
+  --muted: #5a606e;
+  --sky: #0d64a6;
+  --gold: #8a5d00;
+  --ok: #17744b;
+  --bad: #b3311c;
+  --on-pri: hsl(40 100% 5%);
+  --g-pri: linear-gradient(180deg, hsl(41 100% 82%), hsl(40 84% 69%) 55%, hsl(37 58% 51%) 140%); /* = --d-pri-bg ใน desk.css */
+  --g-flag: linear-gradient(90deg, hsl(355 74% 53%) 0 16.6%, hsl(220 33% 97%) 0 33.3%, hsl(231 51% 36%) 0 66.6%, hsl(220 33% 97%) 0 83.3%, hsl(355 74% 53%) 0);
+  --g-bar: 32px;
+  color-scheme: light;
   position: fixed; inset: 0; z-index: 200;
   background: var(--bg); color: var(--text);
   font: 400 15px/1.6 var(--f-b);
@@ -2693,24 +2696,41 @@ body.gated > :not(.gate) { visibility: hidden; }
   transition: opacity .45s var(--ease);
 }
 .gate.out { opacity: 0; pointer-events: none; }
-.g-scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* แถบชั้นความลับ */
+/* ภาพพื้นหลัง: ภาพนิ่งอยู่ล่าง วิดีโอ (จอคอมฯ) ค่อย ๆ ขึ้นทับเมื่อเริ่มเล่น · ตัวเครื่องอยู่ครึ่งขวาของภาพ */
+.g-media { position: absolute; inset: 0; overflow: hidden; background: #8c9db1; }
+.g-media img, .g-media video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 100% 50%;
+  transition: transform 1.6s var(--ease);
+}
+.g-media video { opacity: 0; transition: opacity .8s var(--ease), transform 1.6s var(--ease); }
+.g-media video.on { opacity: 1; }
+/* ฝั่งการ์ดเป็นท้องฟ้าโล่ง ไล่สีครีมบาง ๆ ให้การ์ดกลืนกับภาพ ฝั่งตัวเครื่องไม่ถูกบัง */
+.g-media::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgb(244 239 228 / .5) 0%, rgb(244 239 228 / .18) 36%, transparent 56%),
+              linear-gradient(0deg, rgb(244 239 228 / .3), transparent 28%);
+}
+/* ปลดล็อกสำเร็จ: ภาพค่อย ๆ ขยายเข้าหาเครื่องเล็กน้อยก่อนจางเข้าแอป */
+.gate.pass .g-media img, .gate.pass .g-media video { transform: scale(1.04); }
+
+/* แถบชั้นความลับ: พื้นกรมท่า ตัวทอง โทนเดียวกับไอคอนทางลัด (.app-ic) */
 .g-cls {
   position: absolute; top: 0; left: 0; right: 0; z-index: 5;
   height: var(--g-bar);
   display: flex; align-items: center; justify-content: center; gap: 8px;
   padding: 0 16px;
-  background: rgb(6 10 19 / .82);
-  border-bottom: 1px solid rgb(242 198 109 / .35);
-  color: var(--gold);
+  background: rgb(13 21 40 / .9);
+  border-bottom: 1px solid rgb(242 198 109 / .4);
+  color: #f2c66d;
   font-size: 12.5px; letter-spacing: .01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .g-cls b { font-weight: 600; }
-.g-cls span { color: var(--text2); overflow: hidden; text-overflow: ellipsis; }
+.g-cls span { color: #c9d3e6; overflow: hidden; text-overflow: ellipsis; }
 
-/* การ์ดกระจก */
+/* การ์ดกระจกสีครีม */
 .g-stage {
   position: absolute; inset: var(--g-bar) 0 0 0; z-index: 4;
   display: flex; align-items: center;
@@ -2723,26 +2743,27 @@ body.gated > :not(.gate) { visibility: hidden; }
   width: min(440px, 100%);
   max-height: 100%;
   overflow: auto;
-  padding: 28px 28px 22px;
-  background: rgb(13 21 40 / .86);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  backdrop-filter: blur(16px) saturate(120%);
-  border: 1px solid rgb(150 180 230 / .26);
+  padding: 30px 28px 22px;
+  background: rgb(250 246 236 / .88);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / .7);
   border-radius: var(--r-l);
-  /* เส้นสว่างบาง ๆ ที่ขอบบนด้านใน ให้การ์ดดูเป็นกระจกมีความหนา */
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .07), 0 1px 0 rgb(0 0 0 / .4), 0 30px 70px -28px rgb(0 0 0 / .8);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .8), 0 0 0 1px rgb(40 35 25 / .05), 0 30px 60px -24px rgb(16 32 56 / .5);
   animation: g-rise .7s var(--ease) both;
 }
+/* แถบธงชาติบนขอบการ์ด เหมือนปกหน้าหลักจอคอมฯ */
+.g-box::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--g-flag); opacity: .9; }
 @keyframes g-rise { from { opacity: 0; transform: translateY(14px); } }
 
 .g-cover { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
-.g-cover img { width: 42px; height: auto; display: block; flex: none; filter: drop-shadow(0 2px 4px rgb(0 0 0 / .35)); }
+.g-cover img { width: 42px; height: auto; display: block; flex: none; filter: drop-shadow(0 2px 3px rgb(40 35 25 / .25)); }
 .g-who { line-height: 1.3; }
-.g-who b { display: block; font: 600 15px/1.3 var(--f-d); color: var(--text); }
+.g-who b { display: block; font: 600 15px/1.3 var(--f-k, var(--f-d)); color: var(--text); }
 .g-who small { color: var(--muted); font-size: 12.5px; }
 
 .g-kick { margin: 0 0 6px; color: var(--sky); font-size: 13px; font-weight: 500; }
-.gate h1 { margin: 0; font: 600 34px/1.22 var(--f-d); letter-spacing: -.005em; }
+.gate h1 { margin: 0; font: 600 34px/1.22 var(--f-k, var(--f-d)); letter-spacing: -.005em; color: var(--text); }
 .gate h1 span { color: var(--gold); display: block; }
 .g-sub {
   margin: 10px 0 20px; padding-bottom: 18px;
@@ -2756,23 +2777,23 @@ body.gated > :not(.gate) { visibility: hidden; }
 .g-pw input {
   width: 100%; height: 54px;
   padding: 0 56px 0 16px;
-  background: rgb(6 10 19 / .7);
+  background: rgb(255 255 255 / .92); color: var(--text);
   border: 1px solid var(--line2); border-radius: var(--r);
   font-size: 17px; letter-spacing: .04em;
   outline: none;
   transition: border-color .2s, box-shadow .2s;
 }
 .g-pw input::placeholder { color: var(--muted); letter-spacing: 0; font-size: 15px; }
-.g-pw input:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgb(108 201 255 / .18); }
+.g-pw input:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgb(13 100 166 / .18); }
 .g-pw input:disabled { opacity: .7; }
-.gate.err .g-pw input { border-color: var(--bad); box-shadow: 0 0 0 3px rgb(255 122 133 / .18); }
+.gate.err .g-pw input { border-color: var(--bad); box-shadow: 0 0 0 3px rgb(179 49 28 / .16); }
 .g-eye {
   position: absolute; right: 3px; top: 3px;
   width: 48px; height: 48px;
   display: grid; place-items: center;
   background: none; border: 0; border-radius: 6px; color: var(--muted);
 }
-.g-eye:hover, .g-eye:focus-visible { color: var(--text); background: rgb(150 180 230 / .08); outline: none; }
+.g-eye:hover, .g-eye:focus-visible { color: var(--text); background: rgb(40 35 25 / .06); outline: none; }
 .g-eye svg { width: 20px; height: 20px; }
 
 .g-rem {
@@ -2783,19 +2804,23 @@ body.gated > :not(.gate) { visibility: hidden; }
 .g-rem input { width: 20px; height: 20px; margin: 0; accent-color: var(--sky); }
 .g-rem small { color: var(--muted); font-size: 12.5px; }
 
+/* ปุ่มทองไล่สีแบบปุ่มหลักจอคอมฯ (.d-btn.pri) */
 .g-go {
   width: 100%; min-height: 56px;
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  background: var(--gold); color: var(--on-pri);
+  background: var(--g-pri); color: var(--on-pri);
   border: 0; border-radius: var(--r);
-  font: 600 17px/1 var(--f-d);
-  transition: transform .15s var(--ease), filter .15s;
+  box-shadow: 0 10px 24px -12px rgb(150 100 10 / .75), inset 0 1px 0 rgb(255 255 255 / .55);
+  font: 600 17px/1 var(--f-k, var(--f-d));
+  transition: transform .15s var(--ease), filter .15s, box-shadow .2s;
 }
-.g-go:hover { filter: brightness(1.06); }
+.g-go:hover { filter: brightness(1.04); box-shadow: 0 14px 30px -12px rgb(150 100 10 / .85), inset 0 1px 0 rgb(255 255 255 / .55); }
 .g-go:active { transform: translateY(1px); }
-.g-go:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
-.g-go[disabled] { cursor: progress; filter: saturate(.7) brightness(.92); }
-.g-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgb(27 19 0 / .25); border-top-color: var(--on-pri); animation: g-sp .7s linear infinite; display: none; }
+.g-go:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
+.g-go[disabled] { cursor: progress; filter: saturate(.75) brightness(.96); }
+/* ปลดล็อกแล้ว: ปุ่มเป็นสีเขียว */
+.g-go.ok, .g-go.ok[disabled] { background: var(--ok); color: #fff; filter: none; cursor: default; box-shadow: 0 10px 24px -12px rgb(23 116 75 / .7); }
+.g-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgb(26 17 0 / .25); border-top-color: var(--on-pri); animation: g-sp .7s linear infinite; display: none; }
 .g-go.busy .g-spin { display: block; }
 @keyframes g-sp { to { transform: rotate(360deg); } }
 
@@ -2823,19 +2848,17 @@ body.gated > :not(.gate) { visibility: hidden; }
 .g-edge { position: absolute; inset: 0; z-index: 6; pointer-events: none; border: 2px solid var(--bad); opacity: 0; transition: opacity .25s; }
 .gate.err .g-edge { opacity: 1; }
 
-/* ปลดล็อกสำเร็จ: แสงฟ้าอ่อนแทนวาบขาว ไม่แสบตาตอนบรีฟกลางคืน แล้วจางเป็นพื้นของแอป */
-.g-flash { position: absolute; inset: 0; z-index: 7; pointer-events: none; opacity: 0; }
+/* ปลดล็อกสำเร็จ: จางเป็นพื้นของแอปตามธีมที่ตั้งไว้ ไม่วาบขาว (ห้องบรีฟกลางคืนมืด) */
+.g-flash { position: absolute; inset: 0; z-index: 7; pointer-events: none; opacity: 0; background: var(--app-bg); }
 .gate.flash .g-flash { animation: g-flash .95s var(--ease) forwards; }
-@keyframes g-flash {
-  0% { opacity: 0; background: #9fd8ff; }
-  20% { opacity: .28; background: #9fd8ff; }
-  100% { opacity: 1; background: var(--app-bg); }
-}
+@keyframes g-flash { to { opacity: 1; } }
 
-/* จอแคบ: ฉากอยู่บน การ์ดอยู่ล่าง */
+/* จอแคบ: ภาพอยู่บน การ์ดอยู่ล่าง · สูงไม่เกินราวความกว้างจอ ตัวเครื่องจึงอยู่ในภาพทั้งลำ */
 @media (max-width: 899px) {
+  .g-media { inset: 0 0 auto; height: min(50vh, 96vw); }
+  .g-media::after { background: linear-gradient(180deg, transparent 55%, var(--bg) 96%); } /* ทึบก่อนถึงขอบ ไม่ให้เห็นรอยต่อเศษพิกเซล */
   .g-stage { align-items: flex-end; justify-content: center; padding: 16px 16px max(16px, env(safe-area-inset-bottom)); }
-  .g-box { width: min(480px, 100%); padding: 22px 20px 16px; }
+  .g-box { width: min(480px, 100%); padding: 24px 20px 16px; }
   .gate h1 { font-size: 28px; }
   .gate h1 span { display: inline; }
 }
@@ -2863,7 +2886,8 @@ body.gated > :not(.gate) { visibility: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .g-box, .g-box.shake { animation: none; }
-  .gate.flash .g-flash { animation: none; opacity: 1; background: var(--app-bg); }
+  .gate.pass .g-media img { transform: none; }
+  .gate.flash .g-flash { animation: none; opacity: 1; }
 }
 
 /* กลางคืน: ปุ่มกรอง ป้ายในรายการ กราฟรายชั่วโมง */
