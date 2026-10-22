@@ -160,6 +160,119 @@ body.ov main { margin-left: var(--side-w); max-width: none; }
 .dh-air .more .ic { width: 16px; height: 16px; transition: transform var(--t-slow) var(--d-ease); }
 .dh-air:hover .more .ic { transform: translateX(4px); }
 .air-hero h1, .air-h, .air-ksd h2, .air-motto .big, .air-card > b, .air-card div > b { font-family: var(--f-k); }
+
+/* ── Wing 2 Airmanship (#/airmanship) จอคอมฯ · DECISIONS หัวข้อ Airmanship ข้อ 9 ── */
+main > .view.air:not(#_) { max-width: 1240px; }
+/* ฮีโร่: ข้อความชิดซ้ายบน scrim แนวนอน ฮ. สองลำอยู่ด้านขวาของภาพ */
+.air-hero { display: flex; align-items: center; min-height: 420px; padding: 48px 56px; text-align: left; border-color: transparent; box-shadow: var(--d-card-sh);
+  background: var(--air-scrim-x), var(--air-img) 50% 55% / cover no-repeat, var(--bg2); }
+.air-hero-in { max-width: 580px; }
+.air-emb { margin: 0 0 16px; width: 54px; }
+.air-eye { font-size: var(--fs-md); }
+.air-hero h1 { font-size: 60px; }
+.air-sub { font-size: 24px; }
+.air-vals { justify-content: flex-start; margin-top: 22px; }
+.air-vals li { padding: 6px 14px; font-size: var(--fs-md); }
+
+.air-ksd { margin-top: 24px; padding: 24px; border-color: transparent; background: var(--d-card-bg); box-shadow: var(--d-card-sh); }
+.air-ksd h2 { font-size: var(--fs-ui); }
+.air-ksd ul { gap: 16px; margin-top: 16px; }
+.air-ksd li { padding: 20px; }
+.air-ksd li::after { top: -22px; font-size: 136px; }
+.air-ksd li > b { font-size: var(--fs-lg); }
+
+.air-sec { margin-top: 52px; }
+.air-h { gap: 18px; margin-bottom: 18px; font-size: 24px; }
+.air-h .air-n b { font-size: var(--fs-kpi-xl); }
+.air-n { padding-right: 18px; }
+.air-n small { font-size: var(--fs-md); }
+.air-grid { gap: 14px; }
+.air-card { padding: 18px; border-color: transparent; background: var(--d-card-bg); box-shadow: var(--d-card-sh); }
+.air-card.wide { padding: 22px 24px; }
+
+/* เสาหลัก 6 ข้อ: ซ้าย 3 ขวา 3 ต่อเส้นเข้าวงกลางรูปทางแยก (ตกแต่งเท่านั้น ไม่มีข้อความใหม่) */
+.air-grid.g6 { --hub: 176px; grid-template-columns: minmax(0, 1fr) var(--hub) minmax(0, 1fr); grid-template-rows: repeat(3, 1fr); column-gap: 0; row-gap: 14px; }
+.air-grid.g6 > .air-card { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 14px; row-gap: 2px; align-items: center; }
+.air-grid.g6 > .air-card .air-ic { grid-row: 1 / 3; }
+.air-grid.g6 > .air-card > b, .air-grid.g6 > .air-card > span:not(.air-ic) { grid-column: 2; }
+.air-grid.g6 > .air-card .air-go { grid-column: 3; grid-row: 1 / 3; margin: 0; }
+.air-grid.g6 > :nth-child(-n+3) { grid-column: 1; }
+.air-grid.g6 > :is(:nth-child(4), :nth-child(5), :nth-child(6)) { grid-column: 3; }
+.air-grid.g6 > :is(:nth-child(1), :nth-child(4)) { grid-row: 1; }
+.air-grid.g6 > :is(:nth-child(2), :nth-child(5)) { grid-row: 2; }
+.air-grid.g6 > :is(:nth-child(3), :nth-child(6)) { grid-row: 3; }
+.air-grid.g6 > .air-card::after { content: ''; position: absolute; top: calc(50% - 1px); width: calc(var(--hub) / 2); height: 2px; background: color-mix(in srgb, var(--gold) 40%, transparent); pointer-events: none; }
+.air-grid.g6 > :nth-child(-n+3)::after { left: 100%; }
+.air-grid.g6 > :nth-child(n+4)::after { right: 100%; }
+.air-hub { position: relative; display: grid; place-items: center; grid-column: 2; grid-row: 1 / 4; }
+.air-hub::before { content: ''; position: absolute; left: calc(50% - 1px); width: 2px; top: calc(100% / 6 - 14px / 3); bottom: calc(100% / 6 - 14px / 3); background: color-mix(in srgb, var(--gold) 40%, transparent); }
+.air-hub span { position: relative; display: grid; place-items: center; width: 96px; height: 96px; border: 2px solid var(--gold); border-radius: 50%; color: var(--gold); background: var(--d-card-solid);
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 10%, transparent), 0 0 32px hsl(var(--d-glow) / .35); }
+.air-hub .ic { width: 40px; height: 40px; }
+
+/* นำไปใช้: เส้นทางบิน 5 จุดแนวนอน · เส้นเข้าขั้น 5 เป็นเส้นประสีเตือน */
+/* ขั้น 5 กว้าง 1.5 เท่า → เส้นจากขั้น 4 ยาว 125% − 52px (ครึ่งขั้น 4 + ช่องไฟ + ครึ่งขั้น 5 − ขอบวงกลมสองฝั่ง) */
+.air-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.5fr); column-gap: 24px; padding: 32px 28px 28px; border-radius: var(--r-xl); background: var(--d-card-bg); box-shadow: var(--d-card-sh); }
+.air-steps li { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0; text-align: center; }
+.air-steps .air-ic { width: 60px; height: 60px; }
+.air-steps .air-ic .ic { width: 26px; height: 26px; }
+.air-steps .n { padding: 0; font-size: var(--fs-md); }
+.air-steps li:not(:last-child)::before { display: none; }
+.air-steps li:not(:last-child)::after { content: ''; position: absolute; top: 29px; left: calc(50% + 38px); width: calc(100% - 52px); height: 2px; background: color-mix(in srgb, var(--gold) 40%, transparent); }
+.air-steps li:nth-last-child(2)::after { width: calc(125% - 52px); height: 0; border-top: 2px dashed var(--warn); background: none; }
+.air-steps li.hot .air-ic { box-shadow: 0 0 0 8px color-mix(in srgb, var(--warn) 14%, transparent); }
+.air-steps .t { text-wrap: balance; }
+.air-steps li.hot .t { margin-top: 0; }
+
+.air-motto { margin-top: 52px; padding: 48px 32px 28px; border-color: transparent; box-shadow: var(--d-card-sh); }
+.air-motto .big { margin: 20px 0 22px; font-size: clamp(30px, 3vw, 44px); }
+/* จอคอมฯ แคบ (1024–1279): วงกลางเล็กลง ลิงก์ของเสาหลักลงไปอยู่ใต้ข้อความ */
+@media (max-width: 1279px) {
+  .air-grid.g6 { --hub: 120px; }
+  .air-hub span { width: 76px; height: 76px; box-shadow: 0 0 0 8px color-mix(in srgb, var(--gold) 10%, transparent), 0 0 24px hsl(var(--d-glow) / .35); }
+  .air-hub .ic { width: 32px; height: 32px; }
+  .air-grid.g6 > .air-card { grid-template-columns: auto minmax(0, 1fr); }
+  .air-grid.g6 > .air-card .air-ic { grid-row: 1 / 4; }
+  .air-grid.g6 > .air-card .air-go { grid-column: 2; grid-row: 3; justify-self: start; margin-block: -8px; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .air-card:hover, .air-ksd li:hover { box-shadow: var(--d-card-sh-h); }
+}
+/* Airmanship จอคอมฯ · ชั้นความสวยงาม (DECISIONS หัวข้อ Airmanship ข้อ 10) */
+.air-hero::after, .air-motto::after { inset: 18px; --l: 30px; }
+.air-steps { background: radial-gradient(circle, color-mix(in srgb, var(--gold) 16%, transparent) 1px, transparent 1.6px) 0 0 / 24px 24px, var(--d-card-bg); }
+.air-steps li:nth-last-child(2)::after { height: 2px; border-top: 0; background: repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 12px); }
+.air-steps li.hot .air-ic { background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--warn) 30%, var(--d-card-solid)), color-mix(in srgb, var(--warn) 10%, var(--d-card-solid))); }
+/* วงกลางเสาหลัก: วงประหมุนช้า + ลำแสงเรดาร์กวาดในวง */
+.air-hub span::before { content: ''; position: absolute; inset: -16px; border: 1.5px dashed color-mix(in srgb, var(--gold) 50%, transparent); border-radius: 50%; }
+.air-hub span::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: conic-gradient(from 0deg, color-mix(in srgb, var(--gold) 42%, transparent), transparent 28%); }
+.air-hub .ic { position: relative; z-index: 1; }
+@media (max-width: 1279px) { .air-hub span::before { inset: -12px; } .air-ksd li::after { top: -10px; font-size: 96px; } }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .air-card { background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--gold) calc(var(--spot) * 10%), transparent), transparent 70%), var(--d-card-bg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .air-hub span { animation: air-halo 3.4s ease-in-out infinite; }
+  .air-hub span::before { animation: air-spin 50s linear infinite; }
+  .air-hub span::after { animation: air-spin 5s linear infinite; }
+  /* ไฟวิ่งจากการ์ดเข้าหาวงกลาง และตามแกนตั้ง */
+  .air-grid.g6 > .air-card::after { background: linear-gradient(90deg, transparent, var(--gold-hi), transparent) -70% 0 / 40% 100% no-repeat, color-mix(in srgb, var(--gold) 40%, transparent);
+    animation: air-flow 3s linear infinite; animation-delay: calc(var(--i) * .5s); }
+  .air-grid.g6 > :nth-child(n+4)::after { animation-direction: reverse; }
+  .air-hub::before { background: linear-gradient(180deg, transparent, var(--gold-hi), transparent) 0 -70% / 100% 26% no-repeat, color-mix(in srgb, var(--gold) 40%, transparent); animation: air-flow-y 3.6s linear infinite; }
+  /* เส้นทางบิน: ลากเส้นเมื่อเลื่อนถึง แล้วมีไฟวิ่งทีละช่วง · ช่วงเข้าขั้น 5 เป็นเส้นประเดิน */
+  .air-steps li:not(:last-child)::after { background: linear-gradient(90deg, transparent, var(--gold-hi), transparent) -70% 0 / 35% 100% no-repeat, color-mix(in srgb, var(--gold) 40%, transparent);
+    animation: air-flow 4s ease-in-out infinite; animation-delay: calc(var(--i) * .6s); }
+  .air-steps li:nth-last-child(2)::after { background: repeating-linear-gradient(90deg, var(--warn) 0 6px, transparent 6px 12px); animation: air-march .9s linear infinite; }
+  .air.rv .air-sec.in .air-steps li:not(:last-child)::after { transform-origin: left; animation: air-draw .7s var(--ease) backwards, air-flow 4s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 160ms + .3s), calc(var(--i) * .6s + 1.4s); }
+  .air.rv .air-sec.in .air-steps li:nth-last-child(2)::after { animation: air-draw .7s var(--ease) backwards, air-march .9s linear infinite; animation-delay: .78s, 0s; }
+  .air-motto { background-attachment: scroll, fixed; }
+}
+@keyframes air-halo {
+  0%, 100% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--gold) 10%, transparent), 0 0 32px hsl(var(--d-glow) / .35); }
+  50% { box-shadow: 0 0 0 18px color-mix(in srgb, var(--gold) 5%, transparent), 0 0 56px hsl(var(--d-glow) / .55); }
+}
 .side, .hd-side { top: 24px; }
 .side { max-height: calc(100vh - 48px); }
 

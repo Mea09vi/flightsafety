@@ -1336,19 +1336,20 @@ export async function mountOverview(host, { state }) {
   let WMODE = 'type';
   const WQ = new Map(), WST = new Map(), WT = new Map();
   const WX = (y) => 40 + (y - U.Y0) * 21;
+  const WB = 21 * YMAX + 44; // เส้นฐาน: สูงตามปีที่มีเคสมากที่สุด เผื่อที่ป้าย "สูงสุด" ด้านบน
   const WBY = new Map(YRS.map((y) => [y, C.filter((c) => c.year === y)]));
   const WALL = new Set(C);
   const wfKey = (c) => (WMODE === 'type' ? (c.type === 'accident' ? 0 : 1) : c._jp ? 0 : 1);
   const wfSort = (list, on) => [...list].sort((a, b) => (on.has(b) - on.has(a)) || wfKey(a) - wfKey(b) || a.id.localeCompare(b.id));
   const OTH_Y0 = Math.min(...C.filter((c) => !c._jp).map((c) => c.year));
   const wfSvg = () => {
-    let s = '<line class="wf-gr" x1="38" x2="1112" y1="362.5" y2="362.5"/>';
-    for (let n = 5; n <= YMAX; n += 5) s += `<line class="wf-gr" x1="38" x2="1112" y1="${362 - 21 * n}" y2="${362 - 21 * n}"/><text class="wf-gl" x="34" y="${362 - 21 * n + 4.5}">${n}</text>`;
-    s += YRS.filter((y) => y % 5 === 0).map((y) => `<text class="wf-yl" x="${WX(y) + 9.5}" y="384">${y}</text>`).join('');
+    let s = `<line class="wf-gr" x1="38" x2="1112" y1="${WB + 0.5}" y2="${WB + 0.5}"/>`;
+    for (let n = 5; n <= YMAX; n += 5) s += `<line class="wf-gr" x1="38" x2="1112" y1="${WB - 21 * n}" y2="${WB - 21 * n}"/><text class="wf-gl" x="34" y="${WB - 21 * n + 4.5}">${n}</text>`;
+    s += YRS.filter((y) => y % 5 === 0).map((y) => `<text class="wf-yl" x="${WX(y) + 9.5}" y="${WB + 22}">${y}</text>`).join('');
     s += '<g>';
     for (const [y, list] of WBY) {
       wfSort(list, WALL).forEach((c, k) => {
-        const t = `translate(${WX(y)}px,${342 - 21 * k}px)`;
+        const t = `translate(${WX(y)}px,${WB - 20 - 21 * k}px)`;
         WT.set(c.id, t);
         s += `<rect class="wf-sq ${tcls(c.type)} ${c._jp ? 'jp' : 'oth'}" data-id="${c.id}" width="19" height="19" rx="3" style="transform:${t}"/>`;
       });
@@ -1361,7 +1362,7 @@ export async function mountOverview(host, { state }) {
   <div class="wf-card glass rv">
     <div class="wf-top"><div class="wf-lg" id="wf-lg"></div>
       <div class="fb-g"><span class="fb-l" id="wf-ml">สีตาม</span><div class="seg sm" id="wf-mode" role="group" aria-labelledby="wf-ml"><button type="button" data-mode="type" aria-pressed="true">ประเภทเหตุ${ck}</button><button type="button" data-mode="cty" aria-pressed="false">ประเทศ${ck}</button></div></div></div>
-    <div class="wf-w"><svg class="wf" id="wf-svg" data-mode="type" viewBox="0 0 1140 400" role="img" aria-label="หนึ่งช่องต่อหนึ่งเคส เรียงตามปี ${U.Y0}–${U.Y1} รายการเคสด้านล่างมีข้อมูลเดียวกัน">${wfSvg()}</svg></div>
+    <div class="wf-w"><svg class="wf" id="wf-svg" data-mode="type" viewBox="0 0 1140 ${WB + 38}" role="img" aria-label="หนึ่งช่องต่อหนึ่งเคส เรียงตามปี ${U.Y0}–${U.Y1} รายการเคสด้านล่างมีข้อมูลเดียวกัน">${wfSvg()}</svg></div>
     <div class="cav"><span>${ic('info', 'sm')}<span>จำนวนเคสต่อปีในคลัง ไม่ใช่แนวโน้มการเกิดเหตุ</span></span>${Number.isFinite(OTH_Y0) ? `<span>${ic('globe', 'sm')}<span>เคสจากประเทศอื่นนอกจากญี่ปุ่นเริ่มตั้งแต่ปี <span class="mono">${OTH_Y0}</span></span></span>` : ''}</div>
   </div>
   <!-- NEW 04B: Operational Hazard DNA Barcode Matrix -->
@@ -1386,7 +1387,7 @@ export async function mountOverview(host, { state }) {
       WST.set(y, s);
       yc.set(y, fut ? 0 : s.filter((c) => on.has(c)).length);
       s.forEach((c, k) => {
-        const r = WQ.get(c.id), t = `translate(${WX(y)}px,${342 - 21 * k}px)`;
+        const r = WQ.get(c.id), t = `translate(${WX(y)}px,${WB - 20 - 21 * k}px)`;
         if (!r) return;
         if (WT.get(c.id) !== t) { WT.set(c.id, t); r.style.transform = t; }
         r.classList.toggle('off', !on.has(c));
@@ -1396,7 +1397,7 @@ export async function mountOverview(host, { state }) {
     const m = M(), n = m.length, pk = byN(yc)[0], g = $('#wf-pk');
     const ties = pk && pk[1] ? [...yc].filter(([, v]) => v === pk[1]).map(([y]) => y) : [];
     if (ties.length === 1) {
-      const cx = WX(pk[0]) + 9.5, ty = 363 - 21 * WST.get(pk[0]).length, [ln, tx] = g.children;
+      const cx = WX(pk[0]) + 9.5, ty = WB + 1 - 21 * WST.get(pk[0]).length, [ln, tx] = g.children;
       g.style.display = '';
       ln.setAttribute('x1', cx); ln.setAttribute('x2', cx); ln.setAttribute('y1', ty - 4); ln.setAttribute('y2', ty - 14);
       tx.setAttribute('x', Math.min(1050, Math.max(90, cx))); tx.setAttribute('y', ty - 20);
@@ -1456,7 +1457,7 @@ export async function mountOverview(host, { state }) {
       const mx = svg.getScreenCTM();
       if (!mx) return null;
       pt.x = e.clientX; pt.y = e.clientY;
-      const p = pt.matrixTransform(mx.inverse()), col = Math.round((p.x - 49.5) / 21), k = Math.floor((361 - p.y) / 21), y = U.Y0 + col;
+      const p = pt.matrixTransform(mx.inverse()), col = Math.round((p.x - 49.5) / 21), k = Math.floor((WB - 1 - p.y) / 21), y = U.Y0 + col;
       if (col < 0 || y > U.Y1 || k < 0 || (Y && y > Y)) return null;
       return (WST.get(y) || [])[k] || null;
     };

@@ -2,6 +2,8 @@
 // ข้อความในโปสเตอร์คัดมาตามต้นฉบับ ห้ามเรียบเรียงใหม่ · ลิงก์ "ในแอป" (go) เป็นของแอป ไม่ใช่ส่วนของนโยบาย
 // DECISIONS.md หัวข้อ "Wing 2 Airmanship และนโยบาย เสธ.ทอ."
 
+import { countUp } from './countup.js';
+
 export const MOTTO = 'MISSION FIRST. SAFETY ALWAYS.';
 
 // นโยบาย เสธ.ทอ. — แต่ละคำชี้ไปส่วนของแอปที่ใช้ทำตามนโยบายนั้น
@@ -43,23 +45,32 @@ export const STEPS = [
   { t: 'เมื่อความเสี่ยงเกินควบคุม: ชะลอ ยกเลิก หรือ Go-Around ตามความเหมาะสมและ SOP', s: 'เสี่ยงเกินควบคุม: ชะลอ ยกเลิก Go-Around', ic: 'warn', hot: true },
 ];
 
+// หัวข้อแต่ละส่วน: เลขบนโปสเตอร์คือจำนวนข้อ (ผู้ใช้ยืนยัน 22 ต.ค. 2569) · ส่วน "นำไปใช้" เป็น 1 แนวทาง 5 ขั้น
+const UNIT = { 4: 'ข้อ', 6: 'ข้อ', 2: 'ข้อ', 1: 'แนวทาง' };
+
 export function render(main, { esc, icon }) {
   const link = ([href, l]) => `<a class="air-go" href="${href}">${esc(l)}${icon('next')}</a>`;
   const sec = (n, h, id, body, cls = '') => `<section class="air-sec${cls}" aria-labelledby="${id}">
-      <h2 class="air-h" id="${id}"><span class="air-n" aria-hidden="true">${n}</span><span>${h}</span></h2>${body}</section>`;
+      <h2 class="air-h" id="${id}"><span class="air-n"><b data-count="${n}">${n}</b><small>${UNIT[n]}</small></span><span>${h}</span></h2>${body}</section>`;
+  const card = (x, i, more = '') => `<li class="air-card" style="--i:${i}">
+        <span class="air-ic">${icon(x.ic)}</span><b>${x.en}</b><span>${esc(x.th)}</span>${more}</li>`;
+  // เสาหลัก 6 ข้อ: จอคอมฯ แบ่งซ้าย 3 ขวา 3 รอบวงกลางรูปทางแยก (การตัดสินใจ) ที่ใส่เพื่อความสวยงามเท่านั้น
+  const hub = `<li class="air-hub" aria-hidden="true"><span>${icon('fork')}</span></li>`;
 
   main.innerHTML = `<div class="view air">
     <header class="air-hero">
-      <img class="air-emb" src="img/emblem.webp" width="54" height="57" alt="">
-      <p class="air-eye">นโยบายผู้บังคับการกองบิน 2</p>
-      <h1>WING 2 <em>AIRMANSHIP</em></h1>
-      <p class="air-sub">การเป็นนักบินทหารอากาศที่ดี</p>
-      <p class="air-vals">${VALUES.map((v) => `<span>${esc(v)}</span>`).join('')}</p>
+      <div class="air-hero-in">
+        <img class="air-emb" src="img/emblem.webp" width="54" height="57" alt="">
+        <p class="air-eye">นโยบายผู้บังคับการกองบิน 2</p>
+        <h1>WING 2 <em>AIRMANSHIP</em></h1>
+        <p class="air-sub">การเป็นนักบินทหารอากาศที่ดี</p>
+        <ul class="air-vals">${VALUES.map((v, i) => `<li style="--i:${i}">${esc(v)}</li>`).join('')}</ul>
+      </div>
     </header>
 
     <section class="air-ksd" aria-labelledby="air-ksd-h">
-      <h2 id="air-ksd-h"><small>นโยบาย เสธ.ทอ.</small>KNOWLEDGE · STANDARD · DISCIPLINE</h2>
-      <ul>${KSD.map((k) => `<li>
+      <h2 id="air-ksd-h">นโยบาย เสธ.ทอ.</h2>
+      <ul>${KSD.map((k, i) => `<li style="--i:${i}" data-k="${k.en[0]}">
         <span class="air-ic">${icon(k.ic)}</span>
         <b>${k.en}</b><span class="th">${esc(k.th)}</span>
         <p>${esc(k.d)}</p>
@@ -67,17 +78,15 @@ export function render(main, { esc, icon }) {
       </li>`).join('')}</ul>
     </section>
 
-    ${sec(4, 'รากฐานของ <b>AIRMANSHIP</b>', 'air-4', `<ul class="air-grid g4">${FOUNDATIONS.map((f) => `<li class="air-card">
-        <span class="air-ic">${icon(f.ic)}</span><b>${f.en}</b><span>${esc(f.th)}</span></li>`).join('')}</ul>`)}
+    ${sec(4, 'รากฐานของ <b>AIRMANSHIP</b>', 'air-4', `<ul class="air-grid g4">${FOUNDATIONS.map((f, i) => card(f, i)).join('')}</ul>`)}
 
-    ${sec(6, 'เสาหลักในการตัดสินใจ', 'air-6', `<ul class="air-grid g6">${PILLARS.map((p) => `<li class="air-card">
-        <span class="air-ic">${icon(p.ic)}</span><b>${p.en}</b><span>${esc(p.th)}</span>${link(p.go)}</li>`).join('')}</ul>`)}
+    ${sec(6, 'เสาหลักในการตัดสินใจ', 'air-6', `<ul class="air-grid g6">${PILLARS.map((p, i) => card(p, i, link(p.go))).join('')}${hub}</ul>`)}
 
-    ${sec(2, 'สมรรถนะสำคัญ', 'air-2', `<ul class="air-grid g2">${CORE.map((c) => `<li class="air-card wide">
+    ${sec(2, 'สมรรถนะสำคัญ', 'air-2', `<ul class="air-grid g2">${CORE.map((c, i) => `<li class="air-card wide" style="--i:${i}">
         <span class="air-ic big">${icon(c.ic)}</span><div><b>${c.en}</b><span>${esc(c.th)}</span>${link(c.go)}</div></li>`).join('')}</ul>`)}
 
-    ${sec(1, 'นำไปใช้ก่อนและระหว่างบิน', 'air-1', `<ol class="air-steps">${STEPS.map((s, i) => `<li${s.hot ? ' class="hot"' : ''}>
-        <span class="n">${i + 1}</span><span class="air-ic">${icon(s.ic)}</span><span class="t">${esc(s.t)}</span></li>`).join('')}</ol>`)}
+    ${sec(1, 'นำไปใช้ก่อนและระหว่างบิน', 'air-1', `<ol class="air-steps">${STEPS.map((s, i) => `<li${s.hot ? ' class="hot"' : ''} style="--i:${i}">
+        <span class="air-ic">${icon(s.ic)}</span><span class="n">${i + 1}</span><span class="t">${esc(s.t)}</span></li>`).join('')}</ol>`)}
 
     <section class="air-motto" aria-label="คติ">
       <p class="m"><span class="air-ic">${icon('target')}</span><b>MISSION</b><span>ภารกิจสำเร็จ เริ่มจากการตัดสินใจที่ปลอดภัย</span></p>
@@ -86,4 +95,23 @@ export function render(main, { esc, icon }) {
     </section>
     <p class="air-note">ข้อความคัดจากโปสเตอร์นโยบายผู้บังคับการกองบิน 2 และนโยบายเสนาธิการทหารอากาศ · ลิงก์ "ในแอป" เป็นทางลัดของแอปนี้ ไม่ใช่ส่วนของนโยบาย</p>
   </div>`;
+
+  const root = main.querySelector('.air');
+  countUp(root);
+  // การ์ดค่อย ๆ ปรากฏเมื่อเลื่อนถึง · ปิดการเคลื่อนไหวหรือไม่มี IntersectionObserver → แสดงทันที (ไม่ใส่ .rv)
+  if (!window.IntersectionObserver || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.classList.add('rv');
+  const io = new IntersectionObserver((ents) => {
+    for (const e of ents) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }, { threshold: 0.12 });
+  root.querySelectorAll('.air-ksd, .air-sec').forEach((el) => io.observe(el));
+  // แสงตามเมาส์บนการ์ด: บอกตำแหน่งตัวชี้ให้ CSS (--mx/--my) เฉพาะอุปกรณ์ที่มีเมาส์
+  if (!matchMedia('(hover: hover)').matches) return;
+  root.addEventListener('pointermove', (e) => {
+    const c = e.target.closest('.air-card, .air-ksd li');
+    if (!c) return;
+    const r = c.getBoundingClientRect();
+    c.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    c.style.setProperty('--my', `${e.clientY - r.top}px`);
+  });
 }
