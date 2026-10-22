@@ -400,6 +400,25 @@ main {
 .chip[aria-pressed="true"] small { color: inherit; opacity: .7; }
 .chip[disabled] { opacity: .45; cursor: not-allowed; }
 
+/* ขั้นสภาพอากาศ: ปุ่มติ๊กเลือกทุกสภาพ (ครบ = ติ๊ก · บางข้อ = ขีด) */
+.sel-all {
+  display: inline-flex; align-items: center; gap: 10px; min-height: 48px; margin: -2px 0 10px; padding: 6px 14px 6px 10px;
+  border: 1px dashed var(--line2); border-radius: var(--r); background: transparent; color: var(--text2); font-size: var(--fs-ui); line-height: 1.4;
+  transition: border-color var(--t-fast), color var(--t-fast), transform .1s;
+}
+.sel-all:hover { border-color: var(--sky); color: var(--text); }
+.sel-all:active { transform: scale(.98); }
+.sel-all .box {
+  position: relative; flex: none; width: 22px; height: 22px; display: grid; place-items: center;
+  border: 2px solid var(--muted); border-radius: 6px; color: transparent;
+  transition: background-color var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.sel-all .box .ic { width: 14px; height: 14px; stroke-width: 3; }
+.sel-all[aria-pressed="mixed"] .box::after { content: ''; position: absolute; width: 10px; height: 2.5px; border-radius: 2px; background: var(--text2); }
+.sel-all[aria-pressed="true"] { border-style: solid; color: var(--text); font-weight: 600; }
+.sel-all[aria-pressed="true"] .box { background: var(--text); border-color: var(--text); color: var(--bg); }
+.sel-all .cn { font: 600 var(--fs-2xs)/1 var(--f-m); color: var(--muted); font-variant-numeric: tabular-nums; }
+
 details.opt { border: 1px solid var(--line2); border-radius: var(--r-l); background: var(--surface); }
 details.opt > summary {
   list-style: none; cursor: pointer; min-height: 56px; padding: 12px 16px; margin: 0;
@@ -1306,13 +1325,6 @@ html.ov-lock { overflow: hidden; }
   font-size: var(--fs-2xs);
   line-height: var(--kpi-lab-lh);
   color: #94a3b8;
-}
-.th-stat-badge {
-  justify-content: center;
-}
-.th-stat-tag {
-  font: 600 13px/1.4 var(--f-b);
-  color: var(--gold);
 }
 
 :root[data-theme="day"] .th-command-hero {

@@ -117,10 +117,6 @@ function list() {
             <span class="th-stat-val">${left ? `<span data-count="${left}">${left}</span> นาที` : 'ครบสมบูรณ์'}</span>
             <span class="th-stat-lbl">${left ? 'เวลาประเมินที่เหลือ' : 'สำเร็จทุกหลักสูตร'}</span>
           </div>
-          <div class="th-stat-item th-stat-badge">
-            <span class="th-stat-tag">บรรยายสรุป (Command brief)</span>
-            <span class="th-stat-lbl">พร้อมนำเสนอ ผบ. / ผู้การ</span>
-          </div>
         </div>
       </div>
     </section>`;

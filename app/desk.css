@@ -407,6 +407,9 @@ main > .view.dh:not(#_) { max-width: none; }
 .filter .chip { border-radius: var(--r-l); background: var(--d-tile-bg); }
 .filter .chip:hover { border-color: hsl(var(--d-accent-t) / .45); }
 .filter .chip[aria-pressed="true"] { background: var(--d-sel-bg); color: var(--d-sel-fg); border-color: transparent; font-weight: 600; box-shadow: 0 6px 16px -10px hsl(var(--d-accent-t) / .9); }
+.filter .sel-all { border-radius: var(--r-l); margin-bottom: 14px; }
+.filter .sel-all:hover { border-color: hsl(var(--d-accent-t) / .45); }
+.filter .sel-all[aria-pressed="true"] .box { background: var(--d-sel-bg); border-color: transparent; color: var(--d-sel-fg); }
 .side-sum { position: relative; overflow: hidden; padding: 22px; border-color: var(--line2); border-radius: 16px; box-shadow: var(--d-card-sh);
   background: radial-gradient(100% 50% at 100% 0%, hsl(var(--d-accent-t) / .14), transparent 70%), var(--d-card-bg); }
 .side-sum::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--d-flag); }

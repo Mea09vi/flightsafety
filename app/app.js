@@ -486,6 +486,7 @@ function viewFilter() {
 
     <section class="step" id="st-environment">
       <div class="step-h"><span class="num">04</span><h2>อากาศ / สภาพแวดล้อม</h2><span class="hint"></span></div>
+      <button class="sel-all" data-all="environment" aria-pressed="false"><span class="box">${icon('check')}</span>เลือกทุกสภาพ<b class="cn">${nTh(t.environment.length)}</b></button>
       <div class="chips">${t.environment.map((x) => chip('environment', x)).join('')}</div>
     </section>
 
@@ -555,6 +556,11 @@ function syncFilter() {
     $('.cn', b).textContent = nTh(n);
     b.classList.toggle('zero', !n);
   }
+  // ปุ่มเลือกทุกสภาพ: ติ๊กเมื่อครบ · ขีดเมื่อเลือกบางข้อ
+  for (const b of $$('[data-all]', main)) {
+    const n = state.tax[b.dataset.all].filter((x) => s[b.dataset.all].includes(x.code)).length;
+    b.setAttribute('aria-pressed', n === state.tax[b.dataset.all].length ? 'true' : n ? 'mixed' : 'false');
+  }
   const optN = s.phase.length + s.hfacs.length;
   $('#opt-hint').textContent = optN ? `เลือก ${optN} ข้อ` : '';
   $('#side-sum').innerHTML = sideSum(s);
@@ -605,6 +611,16 @@ function toggleSel(k, v) {
       if (r.top > innerHeight * 0.55) scrollToStep(nextStep.k, false);
     }
   }
+}
+
+// ปุ่มเลือกทุกข้อของขั้นที่เลือกได้หลายข้อ: ครบแล้วกดซ้ำ = ล้าง
+function toggleAll(k) {
+  const all = state.tax[k].map((x) => x.code);
+  const s = state.sel;
+  s[k] = all.every((v) => s[k].includes(v)) ? [] : all;
+  LS.set('sel', s);
+  state.open = {};
+  syncFilter();
 }
 
 /* ── หน้ารายการบทเรียน ────────────────────────────────────── */
@@ -2716,6 +2732,7 @@ main.addEventListener('click', (e) => {
   if (!t) return;
   if (t.dataset.step) { scrollToStep(t.dataset.step, false); return; }
   if (t.dataset.k) { toggleSel(t.dataset.k, t.dataset.v); return; }
+  if (t.dataset.all) { toggleAll(t.dataset.all); return; }
   if (t.dataset.pick) { togglePick(t.dataset.pick); return; }
   if (t.dataset.rtab) { state.rtab = t.dataset.rtab; state.open = {}; viewResults(); return; }
   if (t.dataset.mode) { setProjMode(t.dataset.mode); return; }

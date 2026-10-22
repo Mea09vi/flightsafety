@@ -136,6 +136,14 @@ export async function mountOverview(host, { state }) {
     'MOD Japan': { code: 'JMOD', th: 'ญี่ปุ่น', name: 'กระทรวงกลาโหมญี่ปุ่น' },
     'AAIB India': { code: 'AAIB-I', th: 'อินเดีย', name: 'Aircraft Accident Investigation Bureau' },
     'SHK Sweden': { code: 'SHK', th: 'สวีเดน', name: 'Swedish Accident Investigation Authority' },
+    'BFU Germany': { code: 'BFU', th: 'เยอรมนี', name: 'Bundesstelle für Flugunfalluntersuchung' },
+    'SUB Austria': { code: 'SUB', th: 'ออสเตรีย', name: 'Sicherheitsuntersuchungsstelle des Bundes' },
+    'SUST Switzerland': { code: 'SUST', th: 'สวิตเซอร์แลนด์', name: 'Swiss Transportation Safety Investigation Board' },
+    'BEA France': { code: 'BEA', th: 'ฝรั่งเศส', name: "Bureau d'Enquêtes et d'Analyses" },
+    'ATSB Australia': { code: 'ATSB', th: 'ออสเตรเลีย', name: 'Australian Transport Safety Bureau' },
+    'DGAC Chile': { code: 'DGAC', th: 'ชิลี', name: 'Dirección General de Aeronáutica Civil' },
+    'PKBWL Poland': { code: 'PKBWL', th: 'โปแลนด์', name: 'Państwowa Komisja Badania Wypadków Lotniczych' },
+    'AIB Denmark': { code: 'AIB-DK', th: 'เดนมาร์ก', name: 'Havarikommissionen (Danish AIB)' },
   };
   const U = {
     PH: { PREFLIGHT: 'ตรวจก่อนบิน', TAXI: 'ขับเคลื่อน', TAKEOFF: 'วิ่งขึ้น', ENROUTE: 'บินเดินทาง', HOVER: 'ลอยตัว', AUTOROTATION: 'ร่อนลงฉุกเฉิน', APPROACH: 'เข้าสู่สนาม', LANDING: 'ลงสนาม', SHUTDOWN: 'หลังบิน', GROUND: 'ภาคพื้น' },
@@ -1569,6 +1577,13 @@ export async function mountOverview(host, { state }) {
     'นอร์เวย์': '<rect width="30" height="20" fill="#BA0C2F"/><path d="M10.9 0v20M0 10h30" stroke="#fff" stroke-width="5"/><path d="M10.9 0v20M0 10h30" stroke="#00205B" stroke-width="2.6"/>',
     'อินเดีย': '<rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#FF9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" stroke-width=".7"/><circle cx="15" cy="10" r=".6" fill="#000080"/>',
     'สวีเดน': '<rect width="30" height="20" fill="#006AA7"/><path d="M11 0v20M0 10h30" stroke="#FECC00" stroke-width="3.6"/>',
+    'เยอรมนี': '<rect width="30" height="20" fill="#000"/><rect y="6.67" width="30" height="6.66" fill="#DD0000"/><rect y="13.33" width="30" height="6.67" fill="#FFCE00"/>',
+    'ออสเตรีย': '<rect width="30" height="20" fill="#C8102E"/><rect y="6.67" width="30" height="6.66" fill="#fff"/>',
+    'สวิตเซอร์แลนด์': '<rect width="30" height="20" fill="#DA291C"/><path d="M15 4.5v11M9.5 10h11" stroke="#fff" stroke-width="3.4"/>',
+    'ออสเตรเลีย': '<rect width="30" height="20" fill="#012169"/><path d="M0 0l15 10M15 0L0 10" stroke="#fff" stroke-width="2"/><path d="M0 0l15 10M15 0L0 10" stroke="#C8102E" stroke-width=".8"/><path d="M7.5 0v10M0 5h15" stroke="#fff" stroke-width="3"/><path d="M7.5 0v10M0 5h15" stroke="#C8102E" stroke-width="1.7"/><g fill="#fff"><circle cx="7.5" cy="15" r="1.9"/><circle cx="22.5" cy="16.5" r="1"/><circle cx="18.5" cy="9.5" r="1"/><circle cx="22.5" cy="4" r="1"/><circle cx="26" cy="8.5" r="1"/><circle cx="24.2" cy="11" r=".6"/></g>',
+    'ชิลี': '<rect width="30" height="20" fill="#fff"/><rect y="10" width="30" height="10" fill="#D52B1E"/><rect width="10" height="10" fill="#0039A6"/><path d="M5.00 2.00L5.71 4.03L7.85 4.07L6.14 5.37L6.76 7.43L5.00 6.20L3.24 7.43L3.86 5.37L2.15 4.07L4.29 4.03z" fill="#fff"/>',
+    'โปแลนด์': '<rect width="30" height="20" fill="#fff"/><rect y="10" width="30" height="10" fill="#DC143C"/>',
+    'เดนมาร์ก': '<rect width="30" height="20" fill="#C8102E"/><path d="M11 0v20M0 10h30" stroke="#fff" stroke-width="2.8"/>',
   };
   const flag = (th) => (FLAG[th] ? `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" focusable="false">${FLAG[th]}</svg>` : '');
   const bdRow = (code) => {

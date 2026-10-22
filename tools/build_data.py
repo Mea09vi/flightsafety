@@ -45,6 +45,15 @@ REF_HOSTS = {
     "mot.go.th": "AAIC Thailand",
     "aaib.gov.in": "AAIB India",
     "shk.se": "SHK Sweden",
+    "bfu-web.de": "BFU Germany",
+    "bmimi.gv.at": "SUB Austria",
+    "bmk.gv.at": "SUB Austria",
+    "bmvit.gv.at": "SUB Austria",
+    "sust.admin.ch": "SUST Switzerland",
+    "sust-stsb.admin.ch": "SUST Switzerland",
+    "pkbwl.gov.pl": "PKBWL Poland",
+    "havarikommissionen.dk": "AIB Denmark",
+    "dgac.gob.cl": "DGAC Chile",
 }
 
 # คำที่อาจระบุตัวตน — เตือนแต่ไม่บล็อก (ไม่ตรวจช่อง ref)
@@ -83,12 +92,20 @@ def split_lines(value):
 def ref_label(url):
     u = urlparse(url)
     host = u.netloc.lower()
+    # สำเนา Wayback Machine ของรายงานที่ลิงก์เดิมหายไป ให้ใช้หน่วยงานของ URL ต้นฉบับ
+    if host == "web.archive.org":
+        inner = re.search(r"/web/[^/]+/(https?://.+)$", u.path)
+        if inner:
+            return ref_label(inner.group(1))
     # gov.uk มีทั้ง AAIB และ Service Inquiry ของกระทรวงกลาโหม
     if host.endswith("gov.uk") and "/service-inquiry" in u.path:
         return "UK MOD Service Inquiry"
     # Board of Inquiry = รูปแบบการสอบสวนของกระทรวงกลาโหมอังกฤษก่อนมี Service Inquiry (ปี 2008)
     if host.endswith("gov.uk") and "/board-of-inquiry" in u.path:
         return "UK MOD Board of Inquiry"
+    # รายงานของ AIB เดนมาร์กเก็บไว้บน CDN กลางของหน่วยงานรัฐ
+    if host.endswith("gopublic.dk") and "/havarikommissionen/" in u.path:
+        return "AIB Denmark"
     for key, label in REF_HOSTS.items():
         if host.endswith(key):
             return label
