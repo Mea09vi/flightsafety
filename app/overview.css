@@ -1,6 +1,8 @@
 /* หน้าภาพรวม Antigravity Edition (Tableau Public "Viz of the Day" #VOTD Inspired)
    ต่อยอดจาก overview.css เดิมของ Claude · รองรับธีมกลางคืน (Cockpit Avionics) และกระดาษครีม (Paper Chart) ครบถ้วน */
 :host { display: block; --gut: clamp(16px, 4vw, 56px); color: var(--text); font: 400 16px/1.65 var(--f-b); }
+/* หัวเรื่องมือถือใช้ Bai Jamjuree เหมือนหน้าอื่น (เลิก serif 22 ต.ค. 2569) จอคอมฯ ใช้ Kanit ด้านล่าง */
+:host { --f-s: var(--f-d); }
 * { box-sizing: border-box; }
 a { color: inherit; text-decoration: none; }
 button, input { font: inherit; color: inherit; background: none; border: 0; padding: 0; }
@@ -35,7 +37,7 @@ small.en { font-size: max(12px, .78em); font-weight: 400; color: var(--muted); l
 .chip.acc .d { background: var(--bad); }
 .chip.inc .d { background: var(--warn); }
 .chip.draft { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
-.chip.votd { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 45%, transparent); background: color-mix(in srgb, var(--sky) 10%, transparent); font-weight: 500; }
+.chip.votd { color: var(--sky); border-color: color-mix(in srgb, var(--sky) 45%, transparent); background: color-mix(in srgb, var(--sky) 10%, transparent); font-weight: 600; }
 
 /* ── หัวส่วน ── */
 .sec { padding: 96px 0 0; }
