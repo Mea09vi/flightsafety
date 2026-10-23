@@ -730,7 +730,7 @@ export async function mountOverview(host, { state }) {
       s += `<line class="rd-sep" x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}"/>`;
     }
     s += ORDER.map((k) => `<path class="rd-hi" data-ph="${k}" d="${wedgeD(RX, RY, R0, R1, SEC[k][0], SEC[k][1])}"/>`).join('');
-    s += `<g aria-hidden="true">${DOTS.map((c) => `<g class="rd-p" data-id="${c.id}"><circle class="rd-dot ${tcls(c.type)}" cx="${f(c._rd.x)}" cy="${f(c._rd.y)}" r="4" style="animation-delay:${f(c._rd.deg / 90 - 4)}s"/></g>`).join('')}</g>`;
+    s += `<g aria-hidden="true">${DOTS.map((c) => `<g class="rd-p" data-id="${c.id}"><circle class="rd-dot ${tcls(c.type)}" cx="${f(c._rd.x)}" cy="${f(c._rd.y)}" r="4" style="animation-delay:${f(c._rd.deg / 90)}s"/></g>`).join('')}</g>`;
     s += RINGS.map((y) => `<text class="rd-yl" x="${RX}" y="${f(RY - yrR(y) + 5)}">${y}</text>`).join('');
     s += ORDER.map((k) => { const p = labPos(k); return `<text class="rd-lab" data-ph="${k}" x="${f(p.x)}" y="${f(p.y)}" text-anchor="${p.a}" aria-hidden="true">${esc(PH_EN[k])} <tspan class="n">0</tspan></text>`; }).join('');
     s += ORDER.map((k) => `<path class="rd-hit" data-ph="${k}" role="button" tabindex="0" aria-pressed="false" d="${wedgeD(RX, RY, R0, R1 + 40, SEC[k][0] - 1, SEC[k][1] + 1)}"/>`).join('');
@@ -1941,6 +1941,20 @@ export async function mountOverview(host, { state }) {
     $$('.rv:not(.in)').forEach((el) => IO.observe(el));
   } else $$('.rv').forEach((el) => el.classList.add('in'));
   $$('.rv.in').forEach(onReveal);
+  // ภาพเคลื่อนไหวของเรดาร์ เส้นทางบิน และวงชีพจร HFACS ทำงานเฉพาะตอนอยู่บนจอ
+  // เรดาร์กวาดรอบเดียวทุกครั้งที่เลื่อนเข้าจอ (เอา .play ออกตอนพ้นจอเพื่อให้เล่นใหม่ได้)
+  const MOV = [$('#rd-box'), $('#fp-card'), $('.hf-card')].filter(Boolean);
+  let VIS = null;
+  if (window.IntersectionObserver) {
+    VIS = new IntersectionObserver((es) => {
+      for (const x of es) {
+        const el = x.target;
+        if (!x.isIntersecting) el.classList.remove('vis', 'play');
+        else if (el.id !== 'rd-box' || x.intersectionRatio >= 0.29) el.classList.add('vis', 'play');
+      }
+    }, { threshold: [0, 0.3] });
+    MOV.forEach((el) => VIS.observe(el));
+  } else MOV.forEach((el) => el.classList.add('vis', 'play'));
   let dead = false;
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { if (cs0 && !dead) openCase(cs0); });
 
@@ -1950,6 +1964,7 @@ export async function mountOverview(host, { state }) {
     clearInterval(TMR);
     if (RO) RO.disconnect();
     if (IO) IO.disconnect();
+    if (VIS) VIS.disconnect();
     if (MQ) MQ.removeEventListener('change', onMQ);
     document.removeEventListener('keydown', onKey);
     for (const el of document.body.children) el.inert = false;

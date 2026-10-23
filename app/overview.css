@@ -229,8 +229,8 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 @keyframes kb { to { transform: scale(1.08); } }
 @keyframes ping { from { transform: scale(.3); opacity: .85; } to { transform: scale(1.7); opacity: 0; } }
 @keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes blip { 0% { transform: scale(1.9); opacity: 1; } 18% { transform: scale(1); opacity: .95; } 100% { transform: scale(1); opacity: .78; } }
+@keyframes blip { 0% { transform: scale(1.9); opacity: 1; } 60% { transform: scale(1); opacity: .95; } 100% { transform: scale(1); opacity: .78; } }
+@keyframes sweep1 { 0% { transform: rotate(0deg); opacity: 0; } 5% { opacity: 1; } 89% { opacity: 1; } 100% { transform: rotate(405deg); opacity: 0; } }
 @keyframes flp { 50% { transform: scaleY(.1); } }
 @keyframes flowDash { to { stroke-dashoffset: -48; } }
 
@@ -249,7 +249,8 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 .fp-gnd { stroke: var(--line2); stroke-width: 1.5; stroke-dasharray: 3 5; }
 .fp-area { fill: url(#fp-grad); opacity: .35; }
 .fp-curve-bg { fill: none; stroke: color-mix(in srgb, var(--sky) 22%, transparent); stroke-width: 6; stroke-linecap: round; }
-.fp-curve { fill: none; stroke: var(--sky); stroke-width: 2.8; stroke-linecap: round; stroke-dasharray: 8 4; animation: flowDash 3s linear infinite; }
+.fp-curve { fill: none; stroke: var(--sky); stroke-width: 2.8; stroke-linecap: round; stroke-dasharray: 8 4; animation: flowDash 3s linear infinite paused; }
+.vis .fp-curve { animation-play-state: running; }
 .fp-nd { cursor: pointer; outline: none; }
 .fp-nd .halo { fill: color-mix(in srgb, var(--sky) 10%, transparent); stroke: color-mix(in srgb, var(--sky) 30%, transparent); stroke-width: 1; transition: transform var(--t-slow), fill var(--t-slow), stroke var(--t-slow); transform-box: fill-box; transform-origin: center; }
 .fp-nd:hover .halo, .fp-nd:focus-visible .halo { fill: color-mix(in srgb, var(--sky) 22%, transparent); stroke: var(--sky); transform: scale(1.12); }
@@ -271,7 +272,7 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 .rd-fig { min-width: 0; padding: 18px 10px 18px 18px; }
 .rd-box { position: relative; aspect-ratio: 1160 / 900; }
 .rd-box > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; touch-action: manipulation; }
-.rd-sweep { position: absolute; left: 19.83%; top: 11.11%; width: 60.34%; height: 77.78%; border-radius: 50%; pointer-events: none; background: conic-gradient(from 0deg, color-mix(in srgb, var(--sky) 0%, transparent) 0deg, color-mix(in srgb, var(--sky) 0%, transparent) 280deg, color-mix(in srgb, var(--sky) 26%, transparent) 359deg, color-mix(in srgb, var(--sky) 0%, transparent) 360deg); animation: spin 4s linear infinite; }
+.rd-sweep { position: absolute; left: 19.83%; top: 11.11%; width: 60.34%; height: 77.78%; border-radius: 50%; pointer-events: none; background: conic-gradient(from 0deg, color-mix(in srgb, var(--sky) 0%, transparent) 0deg, color-mix(in srgb, var(--sky) 0%, transparent) 280deg, color-mix(in srgb, var(--sky) 26%, transparent) 359deg, color-mix(in srgb, var(--sky) 0%, transparent) 360deg); opacity: 0; }
 .rd-box.tight { aspect-ratio: 1; }
 .rd-box.tight .rd-sweep { left: 0; top: 0; width: 100%; height: 100%; }
 .rd-box.tight .rd-lab { display: none; }
@@ -291,7 +292,12 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 .rd-p { transition: opacity .35s; }
 .rd-p.off { opacity: .12; }
 .rd-p.fut { opacity: 0; }
-.rd-dot { fill: var(--text2); stroke: var(--ov-solid); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: blip 4s linear infinite; }
+.rd-dot { fill: var(--text2); stroke: var(--ov-solid); stroke-width: 2; transform-box: fill-box; transform-origin: center; opacity: .78; }
+/* กวาดรอบเดียวทุกครั้งที่เรดาร์เลื่อนเข้าจอ (JS ใส่ .play) จุดกะพริบตามแนวกวาด แล้วนิ่ง — จุด 411 จุดใน SVG วาดใหม่ทั้งภาพทุกเฟรมถ้าเคลื่อนไหวตลอด */
+@media (prefers-reduced-motion: no-preference) {
+  .rd-box.play .rd-sweep { animation: sweep1 4.5s linear; }
+  .rd-box.play .rd-dot { animation: blip 1.2s linear; }
+}
 .rd-dot.acc { fill: var(--bad); }
 .rd-dot.inc { fill: var(--warn); }
 .rd-dot.hov { stroke: var(--text); stroke-width: 2.5; }
@@ -383,7 +389,8 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 .hf-fc.hov .l { stroke-width: 4; stroke-opacity: 1; }
 .hf-fc.off { opacity: .12; }
 .hf-src { fill: var(--sky); stroke: var(--ov-solid); stroke-width: 2; }
-.hf-ping { fill: none; stroke: var(--sky); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: ping 2.6s ease-out infinite; }
+.hf-ping { fill: none; stroke: var(--sky); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: ping 2.6s ease-out infinite paused; }
+.vis .hf-ping { animation-play-state: running; }
 .hf-out { stroke: var(--ov-solid); stroke-width: 2; }
 .hf-out.acc { fill: var(--bad); }
 .hf-out.inc { fill: var(--warn); }
