@@ -11,6 +11,7 @@
    - กราฟ 04B: ลายเซ็นภัยคุกคามการบินซ้ำซาก 8 หมวด × 46 ปี (Operational Hazard DNA Barcode Matrix)
    - กราฟ 05: การ์ดอากาศยานพร้อมภาพร่าง Blueprint SVG + แถบ DNA ช่วงการบิน
    - รายการเคสแสดงตัวอย่าง "คำถามบรีฟ" ทันที + ปุ่มคัดลอกประเด็นบรีฟในลิ้นชักเคส */
+import { sceneHtml } from './scene.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -1737,11 +1738,21 @@ export async function mountOverview(host, { state }) {
       + `<h2 id="dr-t">${esc(c.title)}</h2>`
       + (c.brief_question ? `<div class="tq glass"><span class="qm" aria-hidden="true">“</span><span class="k">คำถามบรีฟก่อนบิน (PRE-FLIGHT BRIEF QUESTION)</span><blockquote>${esc(c.brief_question)}</blockquote></div>` : '')
       + drSec('ทำอะไรได้วันนี้ (Actionable Takeaways)', drUl(c.actions_today))
+      + `<section class="dr-s scn-slot" data-scn="${esc(c.id)}" hidden></section>`
       + drSec('สรุปเหตุการณ์', paras(c.summary))
       + drSec('ปัจจัยที่เกี่ยวข้อง', drUl(c.factors))
       + drSec('ปัจจัยตาม HFACS <span class="chip draft">ฉบับร่าง</span>', hf.length ? `<div class="dr-hf">${TK.map((t) => hfCell(hf, TIER[t])).join('')}</div>` : '<p>เคสนี้ยังไม่ได้ลงรหัส HFACS</p>')
       + drSec('ช่วงของเที่ยวบิน · สภาพแวดล้อม', `<div class="dr-tags">${c.phase.map((k) => dchip(esc(PH[k] || k))).join('')}${c.environment.map((k) => dchip(esc(envName(k) || k))).join('')}</div>`)
       + (c.ref ? `<div class="dr-ref"><a class="btn btn-line" href="${esc(c.ref)}" target="_blank" rel="noopener"><span>อ่านรายงานต้นฉบับ</span>${ic('ext', 'xs')}</a><span>รายงานจาก ${esc(c._ag.name)}</span></div>` : '');
+  };
+  // ภาพจำลองเหตุการณ์ 2 มิติ (data/scenes.json ~1.4 MB) โหลดครั้งแรกที่เปิดเคส
+  let scenesP = null;
+  const fillScene = async (id) => {
+    scenesP ||= fetch('data/scenes.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
+    const all = await scenesP, slot = $(`.scn-slot[data-scn="${CSS.escape(id)}"]`, D);
+    if (!slot || !all[id]) return;
+    slot.innerHTML = `<h3 class="dr-h">ภาพจำลองเหตุการณ์</h3>${sceneHtml(all[id])}`;
+    slot.hidden = false;
   };
   const seqOf = (id) => { const m = sortCases(M()); return m.some((c) => c.id === id) ? m : sortCases(C); };
   const drShow = (c) => {
@@ -1753,6 +1764,7 @@ export async function mountOverview(host, { state }) {
     nb.dataset.id = i < seq.length - 1 ? seq[i + 1].id : '';
     $('#dr-b', D).innerHTML = drBody(c);
     $('#dr', D).scrollTop = 0;
+    fillScene(c.id);
     if ((fa === pb || fa === nb) && fa.disabled) { const alt = fa === pb ? nb : pb; (alt.disabled ? $('#dr-x', D) : alt).focus(); }
   };
   let OPENER = null;
