@@ -1751,7 +1751,7 @@ export async function mountOverview(host, { state }) {
     scenesP ||= fetch('data/scenes.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
     const all = await scenesP, slot = $(`.scn-slot[data-scn="${CSS.escape(id)}"]`, D);
     if (!slot || !all[id]) return;
-    slot.innerHTML = `<h3 class="dr-h">ภาพจำลองเหตุการณ์</h3>${sceneHtml(all[id])}`;
+    slot.innerHTML = sceneHtml(all[id]);
     slot.hidden = false;
   };
   const seqOf = (id) => { const m = sortCases(M()); return m.some((c) => c.id === id) ? m : sortCases(C); };

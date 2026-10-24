@@ -786,7 +786,7 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 .dr-b { padding: 22px 28px 48px; }
 .dr-b h2 { margin: 16px 0 0; font: 600 25px/1.5 var(--f-s); color: var(--text); }
 .dr-s { margin-top: 26px; }
-.dr-h { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 10px; font: 600 15px/1.4 var(--f-d); color: var(--text); }
+.dr-h { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 12px; font: 600 16px/1.4 var(--f-d); color: var(--sky); padding-bottom: 7px; background: linear-gradient(currentColor, currentColor) left bottom / 40px 2.5px no-repeat, linear-gradient(var(--line2), var(--line2)) left bottom / 100% 1px no-repeat; }
 .dr-b p { margin: 0 0 12px; font-size: 16px; line-height: 1.8; color: var(--text2); }
 .dr-lb { display: inline-block; margin-right: 8px; padding: 0 8px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--sky) 40%, transparent); font-size: 12.5px; line-height: 22px; color: var(--sky); vertical-align: 1px; }
 .dr-ul { margin: 0; padding-left: 20px; font-size: 15.5px; line-height: 1.7; color: var(--text2); }
@@ -889,16 +889,23 @@ h2[tabindex="-1"]:focus-visible { outline: 2px solid var(--sky); outline-offset:
 }
 
 /* ภาพจำลองเหตุการณ์ 2 มิติในลิ้นชักเคส (คัดจาก styles.css — ลิ้นชักอยู่ใน shadow DOM) */
-.scn { max-width: 520px; margin: 0; }
+.scn {
+  max-width: 560px; margin: 0; padding: 14px 14px 12px; border: 1.5px solid color-mix(in srgb, var(--sky) 50%, transparent);
+  border-radius: calc(var(--r-l) + 4px); background: var(--sky-d);
+}
+.scn-hd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid color-mix(in srgb, var(--sky) 30%, transparent); }
+.scn-t { font: 600 16px/1.4 var(--f-d); color: var(--sky); }
+.scn-tag { margin-left: auto; padding: 0 9px; border: 1px dashed color-mix(in srgb, var(--sky) 55%, transparent); border-radius: 999px; font-size: 12px; line-height: 22px; color: var(--sky); }
+.scn-sh { margin: 14px 0 0; font: 600 14.5px/1.4 var(--f-d); color: var(--sky); }
 .scn-pn + .scn-pn { margin-top: 12px; }
 .scn-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 6px; font-size: 13px; line-height: 1.5; color: var(--text2); }
-.scn-cap .vw { font-weight: 600; color: var(--text); }
+.scn-cap .vw { font-weight: 600; color: var(--sky); }
 .scn-svg { display: block; width: 100%; height: auto; border: 1px solid var(--line2); border-radius: var(--r-l); background: #F7FAFD; }
 .scn-svg.night { background: #1A2436; }
 .scn-svg text { font-family: var(--f-b); font-weight: 500; }
 .scn-svg text.mono { font-family: var(--f-m); font-weight: 600; }
 .scn-svg text.hl { stroke-width: 3.5px; stroke-linejoin: round; paint-order: stroke; }
-.scn-steps { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.scn-steps { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
 .scn-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .scn-steps .n {
   flex: none; width: 24px; height: 24px; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center;

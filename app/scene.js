@@ -473,6 +473,8 @@ export function sceneHtml(spec) {
       ${panelSvg(sc, i)}</div>`).join('');
   const steps = (spec.steps || []).length ? `<ol class="scn-steps">${spec.steps.map((s) => `<li>
       <span class="n ph-${esc(s.ph || 'normal')}" title="${PH_TH[s.ph || 'normal']}">${esc(s.n)}</span><span class="t">${esc(s.text)}</span></li>`).join('')}</ol>` : '';
-  return `<figure class="scn">${body}${steps}
-    <figcaption>ภาพจำลองประกอบ ไม่ตามมาตราส่วน${spec.note ? ` · ${esc(spec.note)}` : ''}</figcaption></figure>`;
+  // กรอบภาพจำลองแยกจากเนื้อเรื่อง: หัวกรอบ + ป้าย "ไม่ตามมาตราส่วน" · หัวข้อย่อย "ลำดับเหตุการณ์" ก่อนรายการขั้น
+  return `<figure class="scn"><div class="scn-hd"><span class="scn-t">ภาพจำลองเหตุการณ์</span><span class="scn-tag">ภาพประกอบ · ไม่ตามมาตราส่วน</span></div>
+    ${body}${steps ? `<p class="scn-sh">ลำดับตามหมุดในภาพ</p>${steps}` : ''}
+    ${spec.note ? `<figcaption>${esc(spec.note)}</figcaption>` : ''}</figure>`;
 }
