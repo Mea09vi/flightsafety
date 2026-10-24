@@ -6,6 +6,7 @@ import { mountOverview } from './overview.js';
 import * as AIR from './airmanship.js';
 import * as PAP from './pap.js';
 import { countUp } from './countup.js';
+import { sceneHtml } from './scene.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -947,6 +948,7 @@ function viewCase(id) {
       </div>
       <h1>${esc(c.title)}</h1>
       ${factsHtml(c)}
+      <div class="scn-slot" data-scn="${esc(id)}"></div>
       ${storyHtml(c)}
 
       ${c.factors.length ? `<button class="fac-t" data-act="factors" aria-expanded="${facOpen}" aria-controls="fac">ปัจจัยที่เกี่ยวข้อง
@@ -981,6 +983,16 @@ function viewCase(id) {
   </article>
   ${nav ? `<div class="actbar case-nav"><div class="actbar-in">${nav}</div></div>` : ''}`;
   if (LS.get('histPanel', true) || c.more) fillHistPanel(c, LS.get('histPanel', true));
+  fillScene(id);
+}
+
+// ภาพจำลองเหตุการณ์ โหลด data/scenes.json ครั้งแรกที่เปิดเคส (ไม่มีภาพก็ไม่แสดงอะไร)
+let scenesP = null;
+async function fillScene(id) {
+  scenesP ||= loadJSON('data/scenes.json').catch(() => ({}));
+  const all = await scenesP;
+  const slot = main.querySelector(`.scn-slot[data-scn="${CSS.escape(id)}"]`);
+  if (slot && all[id]) slot.innerHTML = sceneHtml(all[id]);
 }
 
 function toggleTick(id, k) {

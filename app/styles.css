@@ -630,6 +630,27 @@ details.opt .body { padding: 4px 16px 18px; display: grid; gap: 22px; }
 .cf-key .k { margin-right: 2px; }
 .cf-key .cf { margin: 0; font-size: 12.5px; }
 
+/* ภาพจำลองเหตุการณ์ (scene.js) — ตัวภาพใช้จานสีสว่างของตัวเองทั้งสองธีม อยู่ในการ์ดมุมมน */
+.scn { max-width: 520px; margin: 0 0 22px; }
+.scn-pn + .scn-pn { margin-top: 12px; }
+.scn-cap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 6px; font-size: 13px; line-height: 1.5; color: var(--text2); }
+.scn-cap .vw { font-weight: 600; color: var(--text); }
+.scn-svg { display: block; width: 100%; height: auto; border: 1px solid var(--line2); border-radius: var(--r-l); background: #F7FAFD; }
+.scn-svg.night { background: #1A2436; }
+.scn-svg text { font-family: var(--f-b); font-weight: 500; }
+.scn-svg text.mono { font-family: var(--f-m); font-weight: 600; }
+.scn-svg text.hl { stroke-width: 3.5px; stroke-linejoin: round; paint-order: stroke; }
+.scn-steps { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.scn-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.6; color: var(--text); }
+.scn-steps .n {
+  flex: none; width: 24px; height: 24px; margin-top: 1px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: #444441; color: #FFFFFF; font: 600 12.5px/1 var(--f-m);
+}
+.scn-steps .n.ph-warn { background: #EF9F27; color: #2C2C2A; }
+.scn-steps .n.ph-danger { background: #E24B4A; }
+.scn-steps .n.ph-info { background: #185FA5; }
+.scn figcaption { margin-top: 10px; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+
 .fac-t {
   width: 100%; min-height: 52px; padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: none;
@@ -2670,6 +2691,8 @@ html.ov-lock { overflow: hidden; }
   .case-side .ask { margin-bottom: 16px; }
   .side-nav { display: grid; }
   .case-nav { display: none; }
+  /* จอ 1024–1279: แผงขวาแคบลงให้คอลัมน์เรื่อง (และภาพจำลอง) กว้างพอ */
+  @media (max-width: 1279px) { .case { grid-template-columns: minmax(0, 1fr) 300px; column-gap: 32px; } }
 
   /* ประวัติเหตุ: รายปี = เส้นเวลาซ้าย รายการขวา · ตามหัวข้อ = ตารางซ้าย รายการขวา · รายละเอียด = เนื้อหา + แผงขวา */
   .hv-grid { display: grid; gap: 48px; align-items: start; }
