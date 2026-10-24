@@ -24,18 +24,86 @@
 - ครูการบิน → **ครูการบิน (คบ.)** · ศิษย์การบิน → ศิษย์การบิน
 - ลูกเรือที่ทำงานบนเครื่อง (hoist operator, crew chief, flight engineer, aircrewman) → **ช่างอากาศ**
 - ช่างซ่อมบำรุงภาคพื้น → **ช่างอากาศยาน** · หน่วยซ่อมบำรุง → ฝ่ายซ่อมบำรุง
-- นักบินที่ทำหน้าที่บังคับ (PF) / ดูแลระบบ (PM) → คงคำอังกฤษ PF / PM ได้ ครั้งแรกเขียน "นักบินผู้บังคับ (PF)"
+- นักบินที่ทำหน้าที่บังคับ (PF) / ติดตามการบิน (PM) → คงคำอังกฤษ PF / PM ได้ ครั้งแรกเขียน "นักบินผู้บังคับ (PF)" / "นักบินผู้ติดตามการบิน (PM)"
 - ห้ามใส่ชื่อบุคคลทุกกรณี
 
 ## คำศัพท์การบิน
-- คำอังกฤษที่ใช้กันใน ทอ. เขียนตัวพิมพ์ใหญ่ต้นคำ (Title Case): Approach, Final, Short Final, Go Around, Hover,
-  Hover Taxi, Air Taxi, Autorotation, Checklist, Roll On Landing, Run-on Landing, Flare, Downwash, Brownout,
-  Whiteout, Vortex Ring State, Dynamic Rollover, Inadvertent IMC, Pre-flight Check, Post Flight Check
+ผู้ใช้สั่ง 24 ต.ค. 2569 ให้เกลาภาษาทั้งชุดให้อ่านลื่น และวงเล็บอังกฤษหลังศัพท์เฉพาะ (นักบินรู้ศัพท์อังกฤษอยู่แล้ว)
+- **ครั้งแรกที่ศัพท์เฉพาะปรากฏในแต่ละช่อง** (summary, factors, actions_today, brief_question แยกกัน) เขียน **คำไทย (English)**
+  เช่น "ร่อนลงด้วยใบพัดหมุนอิสระ (Autorotation)" ครั้งต่อไปในช่องเดียวกันใช้คำอังกฤษคำเดียวหรือคำไทยสั้น ๆ ตามที่อ่านลื่นกว่า
+- ศัพท์ไทยที่นักบินอาจไม่คุ้น (อัตราจม ความสูงความหนาแน่น เสียภาพอ้างอิง) ก็วงเล็บอังกฤษครั้งแรก
+- อังกฤษเขียน Title Case (Vortex Ring State, Go Around) ตัวย่อคงตามคู่มือ
+- ไม่วงเล็บคำธรรมดา (ลม เมฆ สนามบิน เครื่องยนต์) ประโยคหนึ่งไม่เกิน 2–3 วงเล็บ · หน่วยวัดไม่วงเล็บ
+- title ใส่วงเล็บเฉพาะศัพท์หลัก 1–2 คำ หรือใช้คำอังกฤษที่นักบินคุ้นตรง ๆ ยาวไม่เกินประมาณ 130 ตัวอักษร
 - ชื่อระบบและพารามิเตอร์คงตัวพิมพ์ตามคู่มือ: NR, NG, TGT, TOT, Q, FADEC, AFCS, EGPWS, HTAWS, NVG, SAS
 - เฮลิคอปเตอร์ → **เฮลิคอปเตอร์** ในบทนำ ครั้งต่อไปใช้ **ฮ.** ได้ · เครื่องบิน → อากาศยาน / เครื่อง
 - ลงจอดที่สนามบิน → **ลงสนาม** · ลงนอกสนาม → ลงจอด · ลงฉุกเฉิน → **ลงฉุกเฉิน** (Forced / Precautionary Landing)
 - ขัดข้อง / ใช้การไม่ได้ / ชำรุด (แทน "เสีย", "พัง")
 - หอบังคับการบิน (ไม่ใช่ "หอควบคุม")
+
+### อภิธานศัพท์ (ใช้คำไทยชุดนี้ทุกเคส)
+| English | ไทย |
+|---|---|
+| Hover / Hover Taxi / Air Taxi | บินลอยตัว (Hover) / บินลอยตัวเคลื่อนที่ (Hover Taxi) / บินเคลื่อนที่ระดับต่ำ (Air Taxi) |
+| Autorotation | ร่อนลงด้วยใบพัดหมุนอิสระ (Autorotation) |
+| Flare | เชิดหัวลดความเร็ว (Flare) |
+| Collective / Cyclic / Pedal | คันบังคับกำลัง (Collective) / คันบังคับทิศทาง (Cyclic) / แป้นเท้า (Pedal) |
+| Main Rotor / Tail Rotor / Fenestron | ใบพัดประธาน (Main Rotor) / ใบพัดหาง (Tail Rotor) / ใบพัดหางแบบครอบ (Fenestron) |
+| Rotor Disc / Blade | จานใบพัด (Rotor Disc) / ใบพัด (Blade) |
+| NR / NG / TGT / TOT / Torque | รอบใบพัดประธาน (NR) / รอบเครื่องยนต์ส่วนผลิตก๊าซ (NG) / อุณหภูมิก๊าซไอเสีย (TGT/TOT) / แรงบิด (Torque) |
+| Power Turbine / Gas Generator | กังหันกำลัง (Power Turbine) / ส่วนผลิตก๊าซ (Gas Generator) |
+| Main Gearbox / Tail Rotor Drive Shaft | กล่องเกียร์หลัก (Main Gearbox) / เพลาขับใบพัดหาง (Tail Rotor Drive Shaft) |
+| Swashplate / Pitch Link | จานส่าย (Swashplate) / ก้านปรับมุมใบพัด (Pitch Link) |
+| Chip Light / Chip Detector | ไฟเตือนเศษโลหะ (Chip Light) / ตัวตรวจจับเศษโลหะ (Chip Detector) |
+| Rate of Descent | อัตราจม (Rate of Descent) |
+| Density Altitude | ความสูงความหนาแน่น (Density Altitude) |
+| Vortex Ring State / Settling with Power | **ทับศัพท์ ไม่แปล** ใช้คำตามรายงานต้นฉบับ: Settling with Power / Vortex Ring State (VRS) (ผู้ใช้สั่ง 24 ต.ค. 2569: คำไทย "สภาวะวงแหวนกระแสวน" อ่านแล้วสับสน) |
+| LTE (Loss of Tail Rotor Effectiveness) | ใบพัดหางสูญเสียประสิทธิภาพ (LTE) |
+| Dynamic Rollover | พลิกคว่ำขณะล้อหรือสกิดค้ำพื้น (Dynamic Rollover) |
+| Skid / Skid Gear | สกิด (Skid) — ไม่เขียน "สกี" |
+| Ground Resonance | การสั่นพ้องภาคพื้น (Ground Resonance) |
+| Mast Bumping | ดุมใบพัดกระแทกแกน (Mast Bumping) |
+| Retreating Blade Stall | ใบพัดถอยหลังร่วงหล่น (Retreating Blade Stall) |
+| Downwash / Rotor Wash | แรงลมใต้ใบพัด (Downwash) |
+| Brownout / Whiteout | ฝุ่นฟุ้งจนมองไม่เห็น (Brownout) / หิมะฟุ้งจนมองไม่เห็น (Whiteout) |
+| Loss of Visual References / DVE | เสียภาพอ้างอิงภายนอก (Loss of Visual References) / สภาพทัศนวิสัยเสื่อม (DVE) |
+| Inadvertent IMC / VMC / IMC | หลุดเข้าสภาพอากาศ IMC โดยไม่ตั้งใจ (Inadvertent IMC) · VMC / IMC คงตัวย่อ |
+| Spatial Disorientation | สับสนการรับรู้ทิศทาง (Spatial Disorientation) |
+| CFIT | บินชนพื้นทั้งที่อากาศยานยังควบคุมได้ (CFIT) |
+| Situational Awareness | การรับรู้สถานการณ์ (Situational Awareness) |
+| CRM | การบริหารทรัพยากรลูกเรือ (CRM) |
+| Circuit: Downwind / Base Leg | ขาตามลม (Downwind) / ขาต่อ (Base Leg) — ไม่ใช้ "ขาต้านลม" "ขาลม" |
+| Quick Stop | หยุดเร็ว (Quick Stop) |
+| Approach / Final / Short Final | บินเข้าหาจุดลง (Approach) / ช่วงร่อนลงขั้นสุดท้าย (Final) / Short Final |
+| Go Around / Missed Approach | ยกเลิกการลงและไต่ระดับใหม่ (Go Around) / Missed Approach |
+| Takeoff / Landing / Touchdown | วิ่งขึ้น/ขึ้นบิน · ลงสนาม/ลงจอด · แตะพื้น (Touchdown) |
+| Instrument Takeoff (ITO) | ขึ้นบินด้วยเครื่องวัดประกอบการบิน (ITO) |
+| Forced / Precautionary Landing | ลงฉุกเฉิน (Forced Landing) / ลงเพื่อความปลอดภัย (Precautionary Landing) |
+| Ditching | ลงน้ำฉุกเฉิน (Ditching) |
+| Checklist / Pre-flight Check | รายการตรวจสอบ (Checklist) / การตรวจก่อนบิน (Pre-flight Check) |
+| Hoist / Hoist Operator | รอก (Hoist) / ช่างอากาศผู้ควบคุมรอก (Hoist Operator) — ไม่ใช้ "รอกกว้าน" "รอกกู้ภัย" |
+| Cargo Hook | ตะขอเกี่ยวสินค้า (Cargo Hook) |
+| Sling Load / Long Line | งานยกของใต้ท้อง (Sling Load) / สายยาว (Long Line) |
+| Bambi Bucket / Water Drop | ถังตักน้ำ (Bucket) / การทิ้งน้ำดับไฟ (Water Drop) |
+| NVG | กล้องมองกลางคืน (NVG) |
+| Autopilot / AFCS / SAS | ระบบบินอัตโนมัติ (Autopilot) / ระบบควบคุมการบินอัตโนมัติ (AFCS) / ระบบเพิ่มเสถียรภาพ (SAS) |
+| FADEC | ระบบควบคุมเครื่องยนต์อิเล็กทรอนิกส์ (FADEC) |
+| HUMS | ระบบเฝ้าตรวจสภาพและการใช้งาน (HUMS) |
+| HTAWS / EGPWS / Radar Altimeter | ระบบเตือนภัยใกล้พื้น (HTAWS / EGPWS) / เครื่องวัดความสูงด้วยเรดาร์ (Radar Altimeter) |
+| Wire Strike | ชนสายไฟ (Wire Strike) |
+| Fuel Exhaustion / Fuel Starvation | น้ำมันหมด (Fuel Exhaustion) / น้ำมันไม่ไหลเข้าเครื่องยนต์ (Fuel Starvation) |
+| Overtorque / Overspeed / Overtemp | แรงบิดเกินพิกัด (Overtorque) / รอบเกิน (Overspeed) / อุณหภูมิเกิน (Overtemp) |
+| H-V Diagram | แผนภาพความสูง-ความเร็ว (H-V Diagram) |
+| Performance Planning / OGE / IGE | การคำนวณสมรรถนะ (Performance Planning) / ลอยตัวนอกอิทธิพลพื้น (OGE) / ในอิทธิพลพื้น (IGE) |
+| Confined Area / Pinnacle | พื้นที่จำกัด (Confined Area) / ยอดเขา (Pinnacle) |
+| Fatigue (crew) / Fatigue (metal) | ความล้า (Fatigue) / ความล้าของโลหะ (Fatigue Crack = รอยร้าวจากความล้า) |
+| SMS | ระบบบริหารความปลอดภัย (SMS) |
+| HEMS | การบินส่งกลับสายแพทย์ (HEMS) |
+| FDM / CVR / FDR | ระบบเฝ้าดูข้อมูลการบิน (FDM) / เครื่องบันทึกเสียงห้องนักบิน (CVR) / เครื่องบันทึกข้อมูลการบิน (FDR) |
+คำเดียวกันทั้งชุด (ปรับ 24 ต.ค. 2569 ด้วยสคริปต์): ใบพัดประธาน (ไม่ใช่ ใบพัดหลัก) · แป้นเท้า (ไม่ใช่ คันบังคับเท้า / คันเหยียบ) ·
+คันบังคับทิศทาง (ไม่ใช่ คันบังคับวงรอบ)
+
+ศัพท์ที่ไม่อยู่ในตารางให้ใช้คำไทยที่นักบินไทยใช้จริง ถ้าไม่มีคำไทยที่ดี ให้ใช้คำอังกฤษตรง ๆ พร้อมคำอธิบายไทยสั้น ๆ
 
 ## สำนวน
 - เปิดเรื่องที่ฉาก เช่น "นักบินที่ 1 และนักบินที่ 2 นำ ฮ. … ทำการฝึกบิน…" เวลาเขียน "เวลาประมาณ 10.30 น. (เวลาท้องถิ่น)"
